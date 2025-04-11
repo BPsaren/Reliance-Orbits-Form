@@ -8,13 +8,13 @@ export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
     const [pickup, setPickup] = useState({
         location: '418 Birmingham Rd, The Royal Tr',
-        floor: '1st floor',
+        floor: '',
         liftAvailable: false,
         propertyType:''
     });
     const [delivery, setDelivery] = useState({
         location: 'Bristol, UK',
-        floor: 'Ground floor',
+        floor: '',
         propertyType:''
     });
     const [items, setItems] = useState([
@@ -27,6 +27,13 @@ export const BookingProvider = ({ children }) => {
         price: 179,
         numberOfMovers: 1
     });
+
+    const [vehicle, setVehicle] = useState({
+        brand: '',
+        model: '',
+        operational: true
+    });
+
     const [additionalServices, setAdditionalServices] = useState({
         basicCompensation: true,
         comprehensiveInsurance: false,
@@ -70,6 +77,7 @@ export const BookingProvider = ({ children }) => {
             delivery, setDelivery,
             items, setItems, addItem, updateItemQuantity, removeItem,
             selectedDate, setSelectedDate,
+            vehicle, setVehicle,
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
             journey, totalPrice

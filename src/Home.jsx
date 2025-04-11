@@ -20,6 +20,14 @@ function Home() {
                 >
                   Home Removals
                 </button>
+
+                <button 
+                  type="button"
+                  onClick={() => navigate('/car-loc')} 
+                  className="p-6  bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium m-5"
+                >
+                  Cars
+                </button>
     </div>
   )
 }
