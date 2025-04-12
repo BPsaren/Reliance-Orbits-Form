@@ -15,7 +15,7 @@ import { BookingProvider } from './context/BookingContext';
 import AddressDetailsForm from './pages/AddressDetailsForm';
 import ItemCategoryForm from './pages/ItemCategoryForm';
 import Home from './Home';
-import CarLocationForm from './pages/CarLocationForm';
+import PianoLocationForm from './pages/PianoLocationForm';
 
 
 function App() {
@@ -27,10 +27,10 @@ function App() {
           <Route path="/" element={< Home/>} />
             <Route path="/furniture-loc" element={<LocationForm />} />
             <Route path="/home-loc" element={<AddressDetailsForm />} />
-            <Route path="/car-loc" element={<CarLocationForm />} />
+            <Route path="/piano-loc" element={<PianoLocationForm />} />
             <Route path="/items" element={<ItemsForm />} />
             <Route path="/date" element={<DateSelection />} />
-            <Route path="/items-home" element={<ItemCategoryForm />} />
+            <Route path="/items-home" element={<ItemCategoryForm prepath="/home-loc"/>} />
             <Route path="/additional-services" element={<AdditionalServices />} />
             <Route path="/booking-details" element={<BookingDetails />} />
             <Route path="/confirmation" element={<QuoteConfirmation />} />

@@ -3,7 +3,7 @@ import { useBooking } from '../context/BookingContext';
 import RouteMap from './RouteMap';
 
 const OrderSummary = () => {
-  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, vehicle } = useBooking();
+  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, piano } = useBooking();
   
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-96 flex-shrink-0">
@@ -25,18 +25,11 @@ const OrderSummary = () => {
             </div>
           ))}
 
-          {   vehicle.brand!=''?      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-          <span className="text-gray-600 text-sm font-medium">Vehicle Brand</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{vehicle.brand}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-          </div>
-        </div> : null}
 
-        {   vehicle.model!=''?      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-          <span className="text-gray-600 text-sm font-medium">Vehicle Model</span>
+        {   piano.type!=''?      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+          <span className="text-gray-600 text-sm font-medium">Piano Type</span>
           <div className="flex items-center gap-2">
-            <span className="text-gray-900">{vehicle.model}</span>
+            <span className="text-gray-900">{piano.type}</span>
             <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
           </div>
         </div> : null}

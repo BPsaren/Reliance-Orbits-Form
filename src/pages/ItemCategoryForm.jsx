@@ -6,7 +6,7 @@ import OrderSummary from '../components/OrderSummary';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 
-const ItemCategoryForm = () => {
+const ItemCategoryForm = (props) => {
     const navigate = useNavigate();
     const [useInventory, setUseInventory] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -229,6 +229,7 @@ const ItemCategoryForm = () => {
                             <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
                                 <button
                                     type='button'
+                                    onClick={() => navigate(props.prepath)}
                                     className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center"
                                 >
                                     <ChevronLeft className="h-5 w-5 mr-1" />

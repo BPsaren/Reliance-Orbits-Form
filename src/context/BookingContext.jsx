@@ -28,10 +28,9 @@ export const BookingProvider = ({ children }) => {
         numberOfMovers: 1
     });
 
-    const [vehicle, setVehicle] = useState({
-        brand: '',
-        model: '',
-        operational: true
+    const [piano, setPiano] = useState({
+        type: '',
+        
     });
 
     const [additionalServices, setAdditionalServices] = useState({
@@ -77,7 +76,7 @@ export const BookingProvider = ({ children }) => {
             delivery, setDelivery,
             items, setItems, addItem, updateItemQuantity, removeItem,
             selectedDate, setSelectedDate,
-            vehicle, setVehicle,
+            piano, setPiano,
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
             journey, totalPrice
