@@ -25,8 +25,12 @@ export const BookingProvider = ({ children }) => {
     const [selectedDate, setSelectedDate] = useState({
         date: '18 Apr',
         price: 179,
-        numberOfMovers: 1
+        numberOfMovers: 1,
     });
+
+    const [vans, selectVans] = useState({
+        vancount:1
+    })
 
     const [piano, setPiano] = useState({
         type: '',
@@ -79,7 +83,8 @@ export const BookingProvider = ({ children }) => {
             piano, setPiano,
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
-            journey, totalPrice
+            journey, totalPrice,
+            vans, selectVans,
         }}>
             {children}
         </BookingContext.Provider>

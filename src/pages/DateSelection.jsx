@@ -1,71 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 const DateSelection = () => {
     const navigate = useNavigate();
-    const { selectedDate, setSelectedDate } = useBooking();
+    const { selectedDate, setSelectedDate, vans, selectVans } = useBooking();
+    const [value, setValue] = useState(new Date());
+    const [calendarPrices, setCalendarPrices] = useState({});
+    const [bestPriceDates, setBestPriceDates] = useState([]);
+    const [currentView, setCurrentView] = useState(new Date());
+    const currentMonth = currentView.toLocaleString('default', { month: 'long' });
+    const currentYear = currentView.getFullYear();
 
-    const calendar = [
-        // Week 1
-        [
-            { day: 'Mon', date: 7, price: 169 },
-            { day: 'Tue', date: 8, price: 139, active: true },
-            { day: 'Wed', date: 9, price: 169 },
-            { day: 'Thu', date: 10, price: 139 },
-            { day: 'Fri', date: 11, price: 169 },
-            { day: 'Sat', date: 12, price: 179 },
-            { day: 'Sun', date: 13, price: 179 }
-        ],
-        // Week 2
-        [
-            { day: 'Mon', date: 14, price: 169 },
-            { day: 'Tue', date: 15, price: 139 },
-            { day: 'Wed', date: 16, price: 169 },
-            { day: 'Thu', date: 17, price: 139 },
-            { day: 'Fri', date: 18, price: 179, selected: true },
-            { day: 'Sat', date: 19, price: 189 },
-            { day: 'Sun', date: 20, price: 189 }
-        ],
-        // Week 3
-        [
-            { day: 'Mon', date: 21, price: 179 },
-            { day: 'Tue', date: 22, price: 139 },
-            { day: 'Wed', date: 23, price: 169 },
-            { day: 'Thu', date: 24, price: 139 },
-            { day: 'Fri', date: 25, price: 169 },
-            { day: 'Sat', date: 26, price: 179 },
-            { day: 'Sun', date: 27, price: 179 }
-        ],
-        // Week 4
-        [
-            { day: 'Mon', date: 28, price: 169 },
-            { day: 'Tue', date: 29, price: 139 },
-            { day: 'Wed', date: 30, price: 169 },
-            { day: 'Thu', date: 1, price: 139 },
-            { day: 'Fri', date: 2, price: 169 },
-            { day: 'Sat', date: 3, price: 179 },
-            { day: 'Sun', date: 4, price: 179 }
-        ],
-        // Week 5
-        [
-            { day: 'Mon', date: 5, price: 169 },
-            { day: 'Tue', date: 6, price: 139 },
-            { day: 'Wed', date: 7, price: 169 },
-            { day: 'Thu', date: 8, price: 169 },
-            { day: 'Fri', date: 9, price: 169 },
-            { day: 'Sat', date: 10, price: 179 },
-            { day: 'Sun', date: 11, price: 179 }
-        ]
-    ];
+    // Generate price data for each date when the component mounts
+    useEffect(() => {
+        generatePriceData();
+    }, []);
 
-    const handleSelectDate = (day, date, price) => {
+    // Function to generate price data for dates
+    const generatePriceData = () => {
+        const prices = {};
+        const bestPrices = [];
+
+        // Current date
+        const today = new Date();
+
+        // Generate for 2 months
+        for (let i = 0; i < 60; i++) {
+            const date = new Date();
+            date.setDate(today.getDate() + i);
+
+            // Generate a price based on weekday (higher for weekends)
+            let price;
+            const day = date.getDay(); // 0 = Sunday, 6 = Saturday
+
+            if (day === 0 || day === 6) {
+                price = 179 + Math.floor(Math.random() * 20); // Weekend prices
+            } else if (day === 2 || day === 4) {
+                price = 139 + Math.floor(Math.random() * 10); // Tuesday/Thursday prices
+
+                // Mark some Tuesdays and Thursdays as best price days
+                if (Math.random() > 0.6) {
+                    bestPrices.push(date.toDateString());
+                }
+            } else {
+                price = 169 + Math.floor(Math.random() * 10); // Weekday prices
+            }
+
+            prices[date.toDateString()] = price;
+        }
+
+        setCalendarPrices(prices);
+        setBestPriceDates(bestPrices);
+    };
+
+    // Format the date to match your existing format
+    const formatSelectedDate = (date) => {
+        return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+    };
+
+    const handleSelectDate = (date) => {
+        setValue(date);
+        const formattedDate = formatSelectedDate(date);
+        const datePrice = calendarPrices[date.toDateString()] || 169; // Default price if not found
+
         setSelectedDate({
-            date: `${date} Apr`,
-            price: price,
-            numberOfMovers: selectedDate.numberOfMovers
+            date: formattedDate,
+            price: datePrice,
+            numberOfMovers: selectedDate.numberOfMovers || 1
         });
     };
 
@@ -77,9 +83,80 @@ const DateSelection = () => {
         });
     };
 
+    const handleSelectMoversVans = () => {
+        if (vans.vancount < 3)
+            selectVans({
+                vancount: vans.vancount + 1,
+            });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         navigate('/additional-services');
+    };
+
+    // Custom tile content to display prices and "Best Price" label
+    const tileContent = ({ date, view }) => {
+        if (view !== 'month') return null;
+
+        const dateString = date.toDateString();
+        const price = calendarPrices[dateString];
+        const isBestPrice = bestPriceDates.includes(dateString);
+
+        return (
+            <div className="text-center py-1">
+                {price && <div className="text-sm font-medium text-gray-700">£{price}</div>}
+                {isBestPrice && (
+                    <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 rounded-sm">
+                        Best Price!
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Custom class for tiles
+    const tileClassName = ({ date, view }) => {
+        if (view !== 'month') return '';
+
+        const dateString = date.toDateString();
+        const selectedDateString = value.toDateString();
+        const isBestPrice = bestPriceDates.includes(dateString);
+
+        if (dateString === selectedDateString) {
+            return 'bg-blue-600 text-white rounded-lg';
+        } else if (isBestPrice) {
+            return 'bg-green-50 rounded-lg';
+        }
+        return '';
+    };
+
+    // Function to navigate between months
+    const handlePrevMonth = () => {
+        const newDate = new Date(currentView);
+        newDate.setMonth(newDate.getMonth() - 1);
+        setCurrentView(newDate);
+    };
+
+    const handleNextMonth = () => {
+        const newDate = new Date(currentView);
+        newDate.setMonth(newDate.getMonth() + 1);
+        setCurrentView(newDate);
+    };
+
+    const isCurrentMonth = () => {
+        const today = new Date();
+        return currentView.getMonth() === today.getMonth() && currentView.getFullYear() === today.getFullYear();
+    };
+
+    // Function to check if a date should be disabled
+    const isDateDisabled = ({ date, view }) => {
+        if (view === 'month') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date < today;
+        }
+        return false;
     };
 
     return (
@@ -93,10 +170,10 @@ const DateSelection = () => {
                 <div className="md:w-2/3">
                     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
                         {/* Movers Selection */}
-                        <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="grid grid-cols-3 gap-4 mb-8">
                             <button
                                 type="button"
-                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedDate.numberOfMovers === 1
+                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedDate?.numberOfMovers === 1
                                     ? 'border-blue-600 bg-blue-50 text-blue-700'
                                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
@@ -109,7 +186,7 @@ const DateSelection = () => {
 
                             <button
                                 type="button"
-                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedDate.numberOfMovers === 2
+                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedDate?.numberOfMovers === 2
                                     ? 'border-blue-600 bg-blue-50 text-blue-700'
                                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
@@ -119,63 +196,55 @@ const DateSelection = () => {
                                 <span className="font-medium">2 People</span>
                                 <div className="mt-2 text-lg font-semibold">£189</div>
                             </button>
+                            <button
+                                type="button"
+                                className="flex flex-col items-center justify-center p-4 border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50"
+                                onClick={() => handleSelectMoversVans()}
+                            >
+                                <span className="text-2xl mb-2">🚢</span>
+                                <span className="font-medium">Vans: {vans.vancount}</span>
+                                <div className="mt-2 text-lg font-semibold">£123</div>
+                            </button>
                         </div>
 
                         {/* Calendar */}
                         <div className="mb-8">
                             <div className="flex items-center justify-between mb-4 px-2">
-                                <button type="button" className="p-2 text-gray-600 hover:text-blue-600">
+                                <button
+                                    type="button"
+                                    className={`p-2 ${isCurrentMonth() ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-blue-600'}`}
+                                    onClick={!isCurrentMonth() ? handlePrevMonth : undefined}
+                                    disabled={isCurrentMonth()}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                     </svg>
                                 </button>
-                                <div className="text-lg font-semibold">April 2025</div>
-                                <button type="button" className="p-2 text-gray-600 hover:text-blue-600">
+                                <div className="text-lg font-semibold">{currentMonth} {currentYear}</div>
+                                <button
+                                    type="button"
+                                    className="p-2 text-gray-600 hover:text-blue-600"
+                                    onClick={handleNextMonth}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                     </svg>
                                 </button>
                             </div>
 
-                            <div className="border rounded-lg overflow-hidden">
-                                <div className="grid grid-cols-7 bg-gray-100 text-center text-sm font-medium text-gray-700">
-                                    <div className="py-2">Mon</div>
-                                    <div className="py-2">Tue</div>
-                                    <div className="py-2">Wed</div>
-                                    <div className="py-2">Thu</div>
-                                    <div className="py-2">Fri</div>
-                                    <div className="py-2">Sat</div>
-                                    <div className="py-2">Sun</div>
-                                </div>
-
-                                {calendar.map((week, weekIndex) => (
-                                    <div key={weekIndex} className="grid grid-cols-7 border-t border-gray-200">
-                                        {week.map((day, dayIndex) => (
-                                            <div
-                                                key={dayIndex}
-                                                className={`relative p-2 cursor-pointer border-r border-b ${dayIndex === 6 ? '' : 'border-r' // No right border on last column
-                                                    } ${selectedDate?.date === `${day.date} Apr`
-                                                        ? 'bg-blue-600 text-white'
-                                                        : day.active
-                                                            ? 'bg-green-50'
-                                                            : 'hover:bg-blue-50'
-                                                    }`}
-                                                onClick={() => handleSelectDate(day.day, day.date, day.price)}
-                                            >
-                                                <div className="text-center py-3">
-                                                    <div className={`text-lg ${selectedDate?.date === `${day.date} Apr` ? 'text-white' : ''}`}>{day.date}</div>
-                                                    <div className={`text-sm font-medium ${selectedDate?.date === `${day.date} Apr` ? 'text-white' : 'text-gray-700'}`}>£{day.price}</div>
-
-                                                    {day.active && (
-                                                        <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 rounded-sm">
-                                                            Best Price!
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
+                            <div className="border rounded-lg overflow-hidden calendar-container">
+                                <Calendar
+                                    onChange={handleSelectDate}
+                                    value={value}
+                                    activeStartDate={currentView}
+                                    onActiveStartDateChange={({ activeStartDate }) => setCurrentView(activeStartDate)}
+                                    tileContent={tileContent}
+                                    tileClassName={tileClassName}
+                                    showNavigation={false}
+                                    minDate={new Date()}
+                                    tileDisabled={isDateDisabled}
+                                    className="custom-calendar"
+                                />
                             </div>
                         </div>
 
@@ -211,6 +280,81 @@ const DateSelection = () => {
                     <OrderSummary />
                 </div>
             </div>
+
+            {/* CSS for styling the react-calendar to match your design */}
+            <style jsx>{`
+                /* Override the default react-calendar styles */
+                .custom-calendar {
+                    width: 100%;
+                    border: none;
+                    font-family: inherit;
+                }
+                
+                /* Remove default navigation buttons as we have custom ones */
+                .react-calendar__navigation {
+                    display: none;
+                }
+                
+                /* Style the weekday headers */
+                .react-calendar__month-view__weekdays {
+                    background-color: #f3f4f6;
+                    font-weight: 500;
+                    font-size: 0.875rem;
+                    color: #4b5563;
+                }
+                
+                .react-calendar__month-view__weekdays__weekday {
+                    padding: 0.5rem;
+                    text-align: center;
+                    text-decoration: none;
+                    abbr {
+                        text-decoration: none;
+                    }
+                }
+                
+                /* Style the day tiles */
+                .react-calendar__tile {
+                    position: relative;
+                    height: 80px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: center;
+                    padding: 0.75rem 0.5rem;
+                    border-right: 1px solid #e5e7eb;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+                
+                .react-calendar__month-view__days__day--weekend {
+                    color: inherit;
+                }
+                
+                .react-calendar__tile:enabled:hover {
+                    background-color: #eff6ff;
+                }
+                
+                /* Selected date styling */
+                .react-calendar__tile--active {
+                    background-color: #2563eb;
+                    color: white;
+                }
+                
+                /* Today's date */
+                .react-calendar__tile--now {
+                    background-color: #f3f4f6;
+                }
+                
+                /* Disable past dates */
+                .react-calendar__tile--disabled {
+                    background-color: #f9fafb;
+                    color: #d1d5db;
+                }
+                
+                /* Fix any container issues */
+                .calendar-container {
+                    overflow: hidden;
+                }
+            `}</style>
         </div>
     );
 };
