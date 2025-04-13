@@ -3,7 +3,7 @@ import { useBooking } from '../context/BookingContext';
 import RouteMap from './RouteMap';
 
 const OrderSummary = () => {
-  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, piano, vans } = useBooking();
+  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, piano, van } = useBooking();
   
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-96 flex-shrink-0">
@@ -91,7 +91,7 @@ const OrderSummary = () => {
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Vans</span>
           <div className="flex items-center gap-2">
-            <span className="text-gray-900">{vans.vancount}</span>
+            <span className="text-gray-900">{van.type}</span>
             <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
           </div>
         </div>

@@ -8,7 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 
 const DateSelection = () => {
     const navigate = useNavigate();
-    const { selectedDate, setSelectedDate, vans, selectVans } = useBooking();
+    const { selectedDate, setSelectedDate, van, toggleVanType } = useBooking();
     const [value, setValue] = useState(new Date());
     const [calendarPrices, setCalendarPrices] = useState({});
     const [bestPriceDates, setBestPriceDates] = useState([]);
@@ -83,11 +83,15 @@ const DateSelection = () => {
         });
     };
 
-    const handleSelectMoversVans = () => {
-        if (vans.vancount < 3)
-            selectVans({
-                vancount: vans.vancount + 1,
-            });
+    // Get price based on van type
+    const getVanPrice = (type) => {
+        const prices = {
+            'Small': 109,
+            'Medium': 129,
+            'Large': 149,
+            'Luton Van': 169
+        };
+        return prices[type] || 109;
     };
 
     const handleSubmit = (e) => {
@@ -159,6 +163,17 @@ const DateSelection = () => {
         return false;
     };
 
+    // Function to get van emoji based on type
+    const getVanEmoji = (type) => {
+        const emojis = {
+            'Small': '🚐',
+            'Medium': '🚚',
+            'Large': '🚛',
+            'Luton Van': '📦'
+        };
+        return emojis[type] || '🚐';
+    };
+
     return (
         <div className="bg-gray-50 min-h-screen">
             <Header title="Select a date" />
@@ -199,11 +214,11 @@ const DateSelection = () => {
                             <button
                                 type="button"
                                 className="flex flex-col items-center justify-center p-4 border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50"
-                                onClick={() => handleSelectMoversVans()}
+                                onClick={toggleVanType}
                             >
-                                <span className="text-2xl mb-2">🚢</span>
-                                <span className="font-medium">Vans: {vans.vancount}</span>
-                                <div className="mt-2 text-lg font-semibold">£123</div>
+                                <span className="text-2xl mb-2">{getVanEmoji(van.type)}</span>
+                                <span className="font-medium">{van.type}</span>
+                                <div className="mt-2 text-lg font-semibold">£{getVanPrice(van.type)}</div>
                             </button>
                         </div>
 

@@ -4,6 +4,23 @@ const BookingContext = createContext();
 
 export const useBooking = () => useContext(BookingContext);
 
+const [data, setData] = useState(null); // state to hold API data
+  const [loading, setLoading] = useState(true); // loading state
+  const [error, setError] = useState(null); // error state
+
+//   useEffect(() => {
+//     axios.get('https://api.example.com/data')
+//       .then(response => {
+//         setData(response.data);
+//         setLoading(false);
+//       })
+//       .catch(err => {
+//         setError(err);
+//         setLoading(false);
+//       });
+//   }, []); 
+
+
 export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
     const [pickup, setPickup] = useState({
@@ -28,9 +45,9 @@ export const BookingProvider = ({ children }) => {
         numberOfMovers: 1,
     });
 
-    const [vans, selectVans] = useState({
-        vancount:1
-    })
+    const [van, setVan] = useState({
+        type: 'Small'
+    });
 
     const [piano, setPiano] = useState({
         type: '',
@@ -73,6 +90,13 @@ export const BookingProvider = ({ children }) => {
         setItems(items.filter(item => item.name !== itemName));
     };
 
+    const toggleVanType = () => {
+        const vanTypes = ['Small', 'Medium', 'Large', 'Luton Van'];
+        const currentIndex = vanTypes.indexOf(van.type);
+        const nextIndex = (currentIndex + 1) % vanTypes.length;
+        setVan({ type: vanTypes[nextIndex] });
+    };
+
     return (
         <BookingContext.Provider value={{
             quoteRef,
@@ -84,7 +108,7 @@ export const BookingProvider = ({ children }) => {
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
             journey, totalPrice,
-            vans, selectVans,
+            van, setVan, toggleVanType,
         }}>
             {children}
         </BookingContext.Provider>
