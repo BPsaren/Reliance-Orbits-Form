@@ -9,7 +9,7 @@ import './Date.css';
 
 const DateSelection = () => {
     const navigate = useNavigate();
-    const { selectedDate, setSelectedDate, van, toggleVanType } = useBooking();
+    const { selectedDate, setSelectedDate, van, toggleVanType, totalPrice, setTotalPrice } = useBooking();
     const [value, setValue] = useState(new Date());
     const [calendarPrices, setCalendarPrices] = useState({});
     const [bestPriceDates, setBestPriceDates] = useState([]);
@@ -17,7 +17,8 @@ const DateSelection = () => {
     const currentMonth = currentView.toLocaleString('default', { month: 'long' });
     const currentYear = currentView.getFullYear();
 
-    // Generate price data for each date when the component mounts
+    const [fixedPrice] = useState(totalPrice);
+
     useEffect(() => {
         generatePriceData();
     }, []);
@@ -87,10 +88,10 @@ const DateSelection = () => {
     // Get price based on van type
     const getVanPrice = (type) => {
         const prices = {
-            'Small': 109,
-            'Medium': 129,
-            'Large': 149,
-            'Luton': 169
+            'Small': selectedDate.numberOfMovers===2?(fixedPrice+20).toFixed(2) : fixedPrice.toFixed(2),
+            'Medium': (fixedPrice+30).toFixed(2),
+            'Large': (fixedPrice+40).toFixed(2),
+            'Luton': (fixedPrice+50).toFixed(2),
         };
         return prices[type] || 109;
     };
@@ -197,7 +198,7 @@ const DateSelection = () => {
                             >
                                 <span className="text-2xl mb-2">👤</span>
                                 <span className="font-medium">1 Person</span>
-                                <div className="mt-2 text-lg font-semibold">£139</div>
+                                <div className="mt-2 text-lg font-semibold">£{fixedPrice.toFixed(2)}</div>
                             </button>
 
                             <button
@@ -210,7 +211,7 @@ const DateSelection = () => {
                             >
                                 <span className="text-2xl mb-2">👥</span>
                                 <span className="font-medium">2 People</span>
-                                <div className="mt-2 text-lg font-semibold">£189</div>
+                                <div className="mt-2 text-lg font-semibold">£{(fixedPrice+20).toFixed(2)}</div>
                             </button>
                             <button
                                 type="button"

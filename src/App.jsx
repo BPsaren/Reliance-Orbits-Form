@@ -29,9 +29,9 @@ function App() {
             <Route path="/furniture-loc" element={<LocationForm />} />
             <Route path="/home-loc" element={<AddressDetailsForm />} />
             <Route path="/piano-loc" element={<PianoLocationForm />} />
-            <Route path="/items" element={<ItemsForm />} />
+            <Route path="/items" element={<ItemsForm prepath="/items"/>} />
             <Route path="/date" element={<DateSelection />} />
-            <Route path="/items-home" element={<ItemCategoryForm prepath="/home-loc"/>} />
+            <Route path="/items-home" element={<ItemCategoryForm prepath="/items-home"/>} />
             <Route path="/additional-services" element={<AdditionalServices />} />
             <Route path="/booking-details" element={<BookingDetails />} />
             <Route path="/confirmation" element={<QuoteConfirmation />} />

@@ -4,7 +4,7 @@ import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 
-const ItemsForm = () => {
+const ItemsForm = (props) => {
   const navigate = useNavigate();
   const { items, addItem, updateItemQuantity, removeItem } = useBooking();
   const [newItemText, setNewItemText] = useState('');
@@ -165,7 +165,7 @@ const ItemsForm = () => {
               <div className="p-6 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
                 <button 
                   type="button" 
-                  onClick={() => navigate('/')} 
+                  onClick={() => navigate('/furniture-loc')} 
                   className="px-4 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50"
                 >
                   Edit Job Info

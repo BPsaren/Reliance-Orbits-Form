@@ -9,7 +9,7 @@ const OrderSummary = () => {
 
 
   const [calculatedPrice, setCalculatedPrice] = useState(null);
-  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, piano, van } = useBooking();
+  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, setTotalPrice, piano, van } = useBooking();
 
   const floorToNumber = (floor) => {
     const map = {
@@ -53,9 +53,7 @@ const OrderSummary = () => {
         //   vanType: 'Medium',
         //   extraWorker: 2
         // });
-
-
-        setCalculatedPrice(res.data.price);
+        setTotalPrice(res.data.price);
       } catch (err) {
         console.error("Price fetch error:", err);
       }
@@ -160,7 +158,7 @@ const OrderSummary = () => {
         <div className="flex justify-between items-center">
           <span className="text-gray-700 font-medium">Total price</span>
           <span className="text-2xl font-bold text-blue-900">
-            {calculatedPrice !== null ? `£${calculatedPrice.toFixed(2)}` : 'Calculating...'}
+            {totalPrice !== null ? `£${totalPrice.toFixed(2)}` : 'Calculating...'}
           </span>
 
         </div>

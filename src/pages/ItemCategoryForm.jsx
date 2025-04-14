@@ -229,7 +229,7 @@ const ItemCategoryForm = (props) => {
                             <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
                                 <button
                                     type='button'
-                                    onClick={() => navigate(props.prepath)}
+                                    onClick={() => navigate("/home-loc")}
                                     className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center"
                                 >
                                     <ChevronLeft className="h-5 w-5 mr-1" />

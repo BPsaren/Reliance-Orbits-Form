@@ -58,8 +58,9 @@ export const BookingProvider = ({ children }) => {
         route: ''
     });
 
+    const [totalPrice, setTotalPrice] = useState(0);
     // Calculate total price
-    const totalPrice = 179; // Base price from screenshots
+    
 
     const addItem = (item) => {
         setItems([...items, { name: item, quantity: 1 }]);
@@ -92,7 +93,7 @@ export const BookingProvider = ({ children }) => {
             piano, setPiano,
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
-            journey, totalPrice,
+            journey, totalPrice, setTotalPrice,
             van, setVan, toggleVanType,
         }}>
             {children}

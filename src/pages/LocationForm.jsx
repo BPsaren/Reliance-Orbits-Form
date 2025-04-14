@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
@@ -13,12 +13,19 @@ const LocationForm = () => {
   const [deliverySuggestions, setDeliverySuggestions] = useState([]);
   const [pickupTypingTimeout, setPickupTypingTimeout] = useState(null);
   const [deliveryTypingTimeout, setDeliveryTypingTimeout] = useState(null);
+  const [focusedPickupIndex, setFocusedPickupIndex] = useState(-1);
+  const [focusedDeliveryIndex, setFocusedDeliveryIndex] = useState(-1);
+
+  const pickupSelectedRef = useRef(false);
+  const deliverySelectedRef = useRef(false);
+
   const navigate = useNavigate();
 
   // Pickup location autocomplete
   useEffect(() => {
-    if (pickupQuery.trim() === '') {
+    if (pickupQuery.trim() === '' || pickupSelectedRef.current) {
       setPickupSuggestions([]);
+      pickupSelectedRef.current = false; // Reset flag
       return;
     }
 
@@ -28,14 +35,13 @@ const LocationForm = () => {
       axios.post("https://reliance-orbit.onrender.com/autocomplete", {
         place: pickupQuery
       })
-      .then(res => {
-        console.log("Pickup suggestions:", res.data);
-        setPickupSuggestions(res.data.predictions || []);
-      })
-      .catch(err => {
-        console.error('Pickup autocomplete error:', err);
-        setPickupSuggestions([]);
-      });
+        .then(res => {
+          setPickupSuggestions(res.data.predictions || []);
+          setFocusedPickupIndex(-1); // Reset the focused index when new suggestions arrive
+        })
+        .catch(() => {
+          setPickupSuggestions([]);
+        });
     }, 500);
 
     setPickupTypingTimeout(timeout);
@@ -45,8 +51,9 @@ const LocationForm = () => {
 
   // Delivery location autocomplete
   useEffect(() => {
-    if (deliveryQuery.trim() === '') {
+    if (deliveryQuery.trim() === '' || deliverySelectedRef.current) {
       setDeliverySuggestions([]);
+      deliverySelectedRef.current = false; // Reset the flag after use
       return;
     }
 
@@ -56,14 +63,14 @@ const LocationForm = () => {
       axios.post("https://reliance-orbit.onrender.com/autocomplete", {
         place: deliveryQuery
       })
-      .then(res => {
-        console.log("Delivery suggestions:", res.data);
-        setDeliverySuggestions(res.data.predictions || []);
-      })
-      .catch(err => {
-        console.error('Delivery autocomplete error:', err);
-        setDeliverySuggestions([]);
-      });
+        .then(res => {
+          setDeliverySuggestions(res.data.predictions || []);
+          setFocusedDeliveryIndex(-1); // Reset the focused index when new suggestions arrive
+        })
+        .catch(err => {
+          console.error('Delivery autocomplete error:', err);
+          setDeliverySuggestions([]);
+        });
     }, 500);
 
     setDeliveryTypingTimeout(timeout);
@@ -73,26 +80,88 @@ const LocationForm = () => {
 
   // Handle pickup suggestion selection
   const handlePickupSuggestionSelect = (suggestion) => {
+    pickupSelectedRef.current = true;
     setPickupQuery(suggestion.description);
-    
-    setPickup({
-      ...pickup,
-      location: suggestion.description
-    });
-    
+    setPickup({ ...pickup, location: suggestion.description });
     setPickupSuggestions([]);
+    setFocusedPickupIndex(-1);
   };
 
   // Handle delivery suggestion selection
   const handleDeliverySuggestionSelect = (suggestion) => {
+    deliverySelectedRef.current = true;
     setDeliveryQuery(suggestion.description);
-    
-    setDelivery({
-      ...delivery,
-      location: suggestion.description
-    });
-    
+    setDelivery({ ...delivery, location: suggestion.description });
     setDeliverySuggestions([]);
+    setFocusedDeliveryIndex(-1);
+  };
+
+  // Handle keyboard navigation for pickup suggestions
+  const handlePickupKeyDown = (e) => {
+    if (pickupSuggestions.length === 0) return;
+
+    // Arrow down
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedPickupIndex(prev =>
+        prev < pickupSuggestions.length - 1 ? prev + 1 : 0
+      );
+    }
+    // Arrow up
+    else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedPickupIndex(prev =>
+        prev > 0 ? prev - 1 : pickupSuggestions.length - 1
+      );
+    }
+    // Enter
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (focusedPickupIndex >= 0) {
+        handlePickupSuggestionSelect(pickupSuggestions[focusedPickupIndex]);
+      } else if (pickupSuggestions.length > 0) {
+        handlePickupSuggestionSelect(pickupSuggestions[0]);
+      }
+    }
+    // Escape
+    else if (e.key === 'Escape') {
+      setPickupSuggestions([]);
+      setFocusedPickupIndex(-1);
+    }
+  };
+
+  // Handle keyboard navigation for delivery suggestions
+  const handleDeliveryKeyDown = (e) => {
+    if (deliverySuggestions.length === 0) return;
+
+    // Arrow down
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedDeliveryIndex(prev =>
+        prev < deliverySuggestions.length - 1 ? prev + 1 : 0
+      );
+    }
+    // Arrow up
+    else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedDeliveryIndex(prev =>
+        prev > 0 ? prev - 1 : deliverySuggestions.length - 1
+      );
+    }
+    // Enter
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (focusedDeliveryIndex >= 0) {
+        handleDeliverySuggestionSelect(deliverySuggestions[focusedDeliveryIndex]);
+      } else if (deliverySuggestions.length > 0) {
+        handleDeliverySuggestionSelect(deliverySuggestions[0]);
+      }
+    }
+    // Escape
+    else if (e.key === 'Escape') {
+      setDeliverySuggestions([]);
+      setFocusedDeliveryIndex(-1);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -118,17 +187,19 @@ const LocationForm = () => {
                       type="text"
                       value={pickupQuery}
                       onChange={(e) => setPickupQuery(e.target.value)}
+                      onKeyDown={handlePickupKeyDown}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter pickup address"
                     />
 
                     {pickupSuggestions.length > 0 && (
-                      <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
+                      <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
                         {pickupSuggestions.map((suggestion, idx) => (
                           <li
                             key={idx}
                             onClick={() => handlePickupSuggestionSelect(suggestion)}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            className={`px-4 py-2 cursor-pointer ${idx === focusedPickupIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
+                              }`}
                           >
                             {suggestion.description}
                           </li>
@@ -136,11 +207,13 @@ const LocationForm = () => {
                       </ul>
                     )}
 
-                    <span className="absolute right-3 top-2.5 text-green-600">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </span>
+                    {pickup.location && (
+                      <span className="absolute right-3 top-2.5 text-green-600">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -184,29 +257,33 @@ const LocationForm = () => {
                       type="text"
                       value={deliveryQuery}
                       onChange={(e) => setDeliveryQuery(e.target.value)}
+                      onKeyDown={handleDeliveryKeyDown}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter delivery address"
                     />
-                    
+
                     {deliverySuggestions.length > 0 && (
-                      <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
+                      <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
                         {deliverySuggestions.map((suggestion, idx) => (
                           <li
                             key={idx}
                             onClick={() => handleDeliverySuggestionSelect(suggestion)}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            className={`px-4 py-2 cursor-pointer ${idx === focusedDeliveryIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
+                              }`}
                           >
                             {suggestion.description}
                           </li>
                         ))}
                       </ul>
                     )}
-                    
-                    <span className="absolute right-3 top-2.5 text-green-600">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </span>
+
+                    {delivery.location && (
+                      <span className="absolute right-3 top-2.5 text-green-600">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -224,6 +301,19 @@ const LocationForm = () => {
                     <option value="4th floor">4th floor</option>
                     <option value="5th floor +">5th floor +</option>
                   </select>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="deliveryLiftAvailable"
+                    checked={delivery.liftAvailable}
+                    onChange={(e) => setDelivery({ ...delivery, liftAvailable: e.target.checked })}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="deliveryLiftAvailable" className="ml-2 block text-gray-700">
+                    Lift Available
+                  </label>
                 </div>
               </div>
 
