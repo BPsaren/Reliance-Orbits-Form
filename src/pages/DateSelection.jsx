@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import './Date.css';
 
 const DateSelection = () => {
     const navigate = useNavigate();
@@ -89,7 +90,7 @@ const DateSelection = () => {
             'Small': 109,
             'Medium': 129,
             'Large': 149,
-            'Luton Van': 169
+            'Luton': 169
         };
         return prices[type] || 109;
     };
@@ -169,7 +170,7 @@ const DateSelection = () => {
             'Small': '🚐',
             'Medium': '🚚',
             'Large': '🚛',
-            'Luton Van': '📦'
+            'Luton': '📦'
         };
         return emojis[type] || '🚐';
     };
@@ -297,79 +298,6 @@ const DateSelection = () => {
             </div>
 
             {/* CSS for styling the react-calendar to match your design */}
-            <style jsx>{`
-                /* Override the default react-calendar styles */
-                .custom-calendar {
-                    width: 100%;
-                    border: none;
-                    font-family: inherit;
-                }
-                
-                /* Remove default navigation buttons as we have custom ones */
-                .react-calendar__navigation {
-                    display: none;
-                }
-                
-                /* Style the weekday headers */
-                .react-calendar__month-view__weekdays {
-                    background-color: #f3f4f6;
-                    font-weight: 500;
-                    font-size: 0.875rem;
-                    color: #4b5563;
-                }
-                
-                .react-calendar__month-view__weekdays__weekday {
-                    padding: 0.5rem;
-                    text-align: center;
-                    text-decoration: none;
-                    abbr {
-                        text-decoration: none;
-                    }
-                }
-                
-                /* Style the day tiles */
-                .react-calendar__tile {
-                    position: relative;
-                    height: 80px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-start;
-                    align-items: center;
-                    padding: 0.75rem 0.5rem;
-                    border-right: 1px solid #e5e7eb;
-                    border-bottom: 1px solid #e5e7eb;
-                }
-                
-                .react-calendar__month-view__days__day--weekend {
-                    color: inherit;
-                }
-                
-                .react-calendar__tile:enabled:hover {
-                    background-color: #eff6ff;
-                }
-                
-                /* Selected date styling */
-                .react-calendar__tile--active {
-                    background-color: #2563eb;
-                    color: white;
-                }
-                
-                /* Today's date */
-                .react-calendar__tile--now {
-                    background-color: #f3f4f6;
-                }
-                
-                /* Disable past dates */
-                .react-calendar__tile--disabled {
-                    background-color: #f9fafb;
-                    color: #d1d5db;
-                }
-                
-                /* Fix any container issues */
-                .calendar-container {
-                    overflow: hidden;
-                }
-            `}</style>
         </div>
     );
 };

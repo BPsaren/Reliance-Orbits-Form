@@ -4,34 +4,19 @@ const BookingContext = createContext();
 
 export const useBooking = () => useContext(BookingContext);
 
-const [data, setData] = useState(null); // state to hold API data
-  const [loading, setLoading] = useState(true); // loading state
-  const [error, setError] = useState(null); // error state
-
-//   useEffect(() => {
-//     axios.get('https://api.example.com/data')
-//       .then(response => {
-//         setData(response.data);
-//         setLoading(false);
-//       })
-//       .catch(err => {
-//         setError(err);
-//         setLoading(false);
-//       });
-//   }, []); 
 
 
 export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
     const [pickup, setPickup] = useState({
-        location: '418 Birmingham Rd, The Royal Tr',
-        floor: '',
+        location: '',
+        floor: 0,
         liftAvailable: false,
         propertyType:''
     });
     const [delivery, setDelivery] = useState({
-        location: 'Bristol, UK',
-        floor: '',
+        location: '',
+        floor: 0,
         propertyType:''
     });
     const [items, setItems] = useState([
@@ -70,7 +55,7 @@ export const BookingProvider = ({ children }) => {
     const [journey, setJourney] = useState({
         distance: '97 miles',
         duration: '2h 3min',
-        route: 'B72 to Bristol'
+        route: ''
     });
 
     // Calculate total price
@@ -91,7 +76,7 @@ export const BookingProvider = ({ children }) => {
     };
 
     const toggleVanType = () => {
-        const vanTypes = ['Small', 'Medium', 'Large', 'Luton Van'];
+        const vanTypes = ['Small', 'Medium', 'Large', 'Luton'];
         const currentIndex = vanTypes.indexOf(van.type);
         const nextIndex = (currentIndex + 1) % vanTypes.length;
         setVan({ type: vanTypes[nextIndex] });
