@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
-import axios from "axios"
+import axios from "axios";
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
   const { pickup, setPickup, delivery, setDelivery } = useBooking();
   const [hasSelectedDate, setHasSelectedDate] = useState(true);
-  const [pickupDate, setPickupDate] = useState('27 April 2025');
+  const [pickupDate, setPickupDate] = useState(new Date());
+  const [showCalendar, setShowCalendar] = useState(false);
   const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
   const [deliveryQuery, setDeliveryQuery] = useState(delivery.location || '');
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
@@ -18,15 +21,46 @@ const AddressDetailsForm = () => {
   const [deliveryTypingTimeout, setDeliveryTypingTimeout] = useState(null);
   const [focusedPickupIndex, setFocusedPickupIndex] = useState(-1);
   const [focusedDeliveryIndex, setFocusedDeliveryIndex] = useState(-1);
+  const [errors, setErrors] = useState({
+    pickupLocation: false,
+    deliveryLocation: false
+  });
 
   const pickupSelectedRef = useRef(false);
   const deliverySelectedRef = useRef(false);
+  const calendarRef = useRef(null);
+
+  // Format date for display
+  const formatDate = (date) => {
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('en-GB', options);
+  };
+
+  // Handle date selection from calendar
+  const handleDateChange = (date) => {
+    setPickupDate(date);
+    setShowCalendar(false);
+  };
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+        setShowCalendar(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Pickup location autocomplete
   useEffect(() => {
     if (pickupQuery.trim() === '' || pickupSelectedRef.current) {
       setPickupSuggestions([]);
-      pickupSelectedRef.current = false; // Reset flag
+      pickupSelectedRef.current = false;
       return;
     }
 
@@ -38,7 +72,7 @@ const AddressDetailsForm = () => {
       })
         .then(res => {
           setPickupSuggestions(res.data.predictions || []);
-          setFocusedPickupIndex(-1); // Reset the focused index when new suggestions arrive
+          setFocusedPickupIndex(-1);
         })
         .catch(() => {
           setPickupSuggestions([]);
@@ -54,7 +88,7 @@ const AddressDetailsForm = () => {
   useEffect(() => {
     if (deliveryQuery.trim() === '' || deliverySelectedRef.current) {
       setDeliverySuggestions([]);
-      deliverySelectedRef.current = false; // Reset the flag after use
+      deliverySelectedRef.current = false;
       return;
     }
 
@@ -66,7 +100,7 @@ const AddressDetailsForm = () => {
       })
         .then(res => {
           setDeliverySuggestions(res.data.predictions || []);
-          setFocusedDeliveryIndex(-1); // Reset the focused index when new suggestions arrive
+          setFocusedDeliveryIndex(-1);
         })
         .catch(err => {
           console.error('Delivery autocomplete error:', err);
@@ -86,6 +120,7 @@ const AddressDetailsForm = () => {
     setPickup({ ...pickup, location: suggestion.description });
     setPickupSuggestions([]);
     setFocusedPickupIndex(-1);
+    setErrors(prev => ({ ...prev, pickupLocation: false }));
   };
 
   // Handle delivery suggestion selection
@@ -95,27 +130,25 @@ const AddressDetailsForm = () => {
     setDelivery({ ...delivery, location: suggestion.description });
     setDeliverySuggestions([]);
     setFocusedDeliveryIndex(-1);
+    setErrors(prev => ({ ...prev, deliveryLocation: false }));
   };
 
   // Handle keyboard navigation for pickup suggestions
   const handlePickupKeyDown = (e) => {
     if (pickupSuggestions.length === 0) return;
 
-    // Arrow down
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setFocusedPickupIndex(prev =>
         prev < pickupSuggestions.length - 1 ? prev + 1 : 0
       );
     }
-    // Arrow up
     else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setFocusedPickupIndex(prev =>
         prev > 0 ? prev - 1 : pickupSuggestions.length - 1
       );
     }
-    // Enter
     else if (e.key === 'Enter') {
       e.preventDefault();
       if (focusedPickupIndex >= 0) {
@@ -124,7 +157,6 @@ const AddressDetailsForm = () => {
         handlePickupSuggestionSelect(pickupSuggestions[0]);
       }
     }
-    // Escape
     else if (e.key === 'Escape') {
       setPickupSuggestions([]);
       setFocusedPickupIndex(-1);
@@ -135,21 +167,18 @@ const AddressDetailsForm = () => {
   const handleDeliveryKeyDown = (e) => {
     if (deliverySuggestions.length === 0) return;
 
-    // Arrow down
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setFocusedDeliveryIndex(prev =>
         prev < deliverySuggestions.length - 1 ? prev + 1 : 0
       );
     }
-    // Arrow up
     else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setFocusedDeliveryIndex(prev =>
         prev > 0 ? prev - 1 : deliverySuggestions.length - 1
       );
     }
-    // Enter
     else if (e.key === 'Enter') {
       e.preventDefault();
       if (focusedDeliveryIndex >= 0) {
@@ -158,16 +187,27 @@ const AddressDetailsForm = () => {
         handleDeliverySuggestionSelect(deliverySuggestions[0]);
       }
     }
-    // Escape
     else if (e.key === 'Escape') {
       setDeliverySuggestions([]);
       setFocusedDeliveryIndex(-1);
     }
   };
 
-
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate location form
+    const newErrors = {
+      pickupLocation: !pickupQuery.trim(),
+      deliveryLocation: !deliveryQuery.trim()
+    };
+    
+    setErrors(newErrors);
+    
+    if (newErrors.pickupLocation || newErrors.deliveryLocation) {
+      return;
+    }
+    
     navigate('/items-home');
   };
 
@@ -190,9 +230,12 @@ const AddressDetailsForm = () => {
                       <input
                         type="text"
                         value={pickupQuery}
-                        onChange={(e) => setPickupQuery(e.target.value)}
+                        onChange={(e) => {
+                          setPickupQuery(e.target.value);
+                          setErrors(prev => ({ ...prev, pickupLocation: false }));
+                        }}
                         onKeyDown={handlePickupKeyDown}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className={`w-full px-4 py-2 border ${errors.pickupLocation ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
                         placeholder="Enter pickup address"
                       />
 
@@ -202,8 +245,7 @@ const AddressDetailsForm = () => {
                             <li
                               key={idx}
                               onClick={() => handlePickupSuggestionSelect(suggestion)}
-                              className={`px-4 py-2 cursor-pointer ${idx === focusedPickupIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
-                                }`}
+                              className={`px-4 py-2 cursor-pointer ${idx === focusedPickupIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
                             >
                               {suggestion.description}
                             </li>
@@ -219,6 +261,9 @@ const AddressDetailsForm = () => {
                         </span>
                       )}
                     </div>
+                    {errors.pickupLocation && (
+                      <p className="mt-1 text-sm text-red-600">Please enter your pickup location</p>
+                    )}
                   </div>
 
                   <div className="mb-4">
@@ -251,41 +296,46 @@ const AddressDetailsForm = () => {
                   <h2 className="text-lg font-semibold text-gray-700 mb-4">Delivery Details</h2>
 
                   <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">Location</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={deliveryQuery}
-                      onChange={(e) => setDeliveryQuery(e.target.value)}
-                      onKeyDown={handleDeliveryKeyDown}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter delivery address"
-                    />
+                    <label className="block text-gray-700 text-sm font-medium mb-2">Location</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={deliveryQuery}
+                        onChange={(e) => {
+                          setDeliveryQuery(e.target.value);
+                          setErrors(prev => ({ ...prev, deliveryLocation: false }));
+                        }}
+                        onKeyDown={handleDeliveryKeyDown}
+                        className={`w-full px-4 py-2 border ${errors.deliveryLocation ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
+                        placeholder="Enter delivery address"
+                      />
 
-                    {deliverySuggestions.length > 0 && (
-                      <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
-                        {deliverySuggestions.map((suggestion, idx) => (
-                          <li
-                            key={idx}
-                            onClick={() => handleDeliverySuggestionSelect(suggestion)}
-                            className={`px-4 py-2 cursor-pointer ${idx === focusedDeliveryIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
-                              }`}
-                          >
-                            {suggestion.description}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                      {deliverySuggestions.length > 0 && (
+                        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
+                          {deliverySuggestions.map((suggestion, idx) => (
+                            <li
+                              key={idx}
+                              onClick={() => handleDeliverySuggestionSelect(suggestion)}
+                              className={`px-4 py-2 cursor-pointer ${idx === focusedDeliveryIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+                            >
+                              {suggestion.description}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
 
-                    {delivery.location && (
-                      <span className="absolute right-3 top-2.5 text-green-600">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </span>
+                      {delivery.location && (
+                        <span className="absolute right-3 top-2.5 text-green-600">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
+                    {errors.deliveryLocation && (
+                      <p className="mt-1 text-sm text-red-600">Please enter your delivery location</p>
                     )}
                   </div>
-                </div>
 
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600 mb-1">Select property type</label>
@@ -359,24 +409,39 @@ const AddressDetailsForm = () => {
                   {hasSelectedDate && (
                     <div className="ml-6">
                       <label className="block text-sm font-medium text-gray-600 mb-1">Pickup date</label>
-                      <div className="relative">
+                      <div className="relative" ref={calendarRef}>
                         <input
                           type="text"
-                          value={pickupDate}
-                          onChange={(e) => setPickupDate(e.target.value)}
-                          className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md"
+                          readOnly
+                          value={formatDate(pickupDate)}
+                          onClick={() => setShowCalendar(!showCalendar)}
+                          className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md cursor-pointer"
                         />
-                        <span className="absolute right-3 top-2.5 text-gray-400">
+                        <span 
+                          className="absolute right-3 top-2.5 text-gray-400 cursor-pointer"
+                          onClick={() => setShowCalendar(!showCalendar)}
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </span>
+                        
+                        {showCalendar && (
+                          <div className="absolute z-10 mt-1">
+                            <Calendar
+                              onChange={handleDateChange}
+                              value={pickupDate}
+                              minDate={new Date()}
+                              className="border border-gray-300 rounded-md shadow-lg"
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div className="bg-green-50 border border-green-100 rounded-md p-3 mt-4 flex items-start">
                         <span className="text-green-700 mt-0.5 mr-2">👍</span>
                         <p className="text-sm text-green-800">
-                          Great! We have availability in Birmingham on 27th April
+                          Great! We have availability on {formatDate(pickupDate)}
                         </p>
                       </div>
                     </div>
@@ -404,9 +469,6 @@ const AddressDetailsForm = () => {
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
                 >
                   Next Step
-                  {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg> */}
                 </button>
               </div>
             </form>
