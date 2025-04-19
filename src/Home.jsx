@@ -63,7 +63,7 @@ function Home() {
           </div>
           
           {/* Other Removals Card */}
-          <div className="bg-white p-4 rounded-lg cursor-pointer">
+          <div className="bg-white p-4 rounded-lg cursor-pointer" onClick={() => navigate('/other-removals')}>
             <div className="mb-2">
               <img 
                 src="/api/placeholder/400/300" 

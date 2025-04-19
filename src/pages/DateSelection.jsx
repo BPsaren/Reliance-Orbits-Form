@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
@@ -9,6 +9,8 @@ import './Date.css';
 
 const DateSelection = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const prepath = location.state?.prepath;
     const { selectedDate, setSelectedDate, van, toggleVanType, totalPrice, setTotalPrice } = useBooking();
     const [value, setValue] = useState(new Date());
     const [calendarPrices, setCalendarPrices] = useState({});
@@ -278,7 +280,7 @@ const DateSelection = () => {
                         <div className="flex justify-between">
                             <button
                                 type="button"
-                                onClick={() => navigate('/items')}
+                                onClick={() => navigate(prepath)}
                                 className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
                             >
                                 Edit Job Info

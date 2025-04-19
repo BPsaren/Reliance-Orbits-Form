@@ -6,7 +6,7 @@ import OrderSummary from '../components/OrderSummary';
 import axios from "axios"
 
 
-const PianoLocationForm = () => {
+const PianoLocationForm = (props) => {
     const navigate = useNavigate();
     const { pickup, setPickup, delivery, setDelivery, piano, setPiano } = useBooking();
     const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
@@ -166,7 +166,7 @@ const PianoLocationForm = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        navigate('/date');
+        navigate('/date', { state: { prepath: props.prepath } });
     };
 
     const pianoTypes = [

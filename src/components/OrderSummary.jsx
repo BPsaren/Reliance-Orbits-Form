@@ -5,11 +5,22 @@ import { useBooking } from '../context/BookingContext';
 import RouteMap from './RouteMap';
 
 const OrderSummary = () => {
-
-
-
   const [calculatedPrice, setCalculatedPrice] = useState(null);
-  const { quoteRef, items, pickup, delivery, selectedDate, journey, totalPrice, setTotalPrice, piano, van } = useBooking();
+  const { 
+    quoteRef, 
+    items, 
+    pickup, 
+    delivery, 
+    selectedDate, 
+    journey, 
+    setJourney,
+    totalPrice, 
+    setTotalPrice, 
+    piano, 
+    van,
+    motorBike,
+     // Add motorBike from context
+  } = useBooking();
 
   const floorToNumber = (floor) => {
     const map = {
@@ -22,8 +33,14 @@ const OrderSummary = () => {
     };
     return typeof floor === 'string' ? map[floor] ?? 0 : floor;
   };
-  
 
+  const kmToMiles = (kmString) => {
+    const kmValue = parseFloat(kmString); // Extract numeric part
+    const miles = kmValue * 0.621371;
+    return `${miles.toFixed(2)} miles`; // Rounded to 2 decimal places
+  };
+  
+  
   useEffect(() => {
     const fetchPrice = async () => {
       try {
@@ -38,21 +55,12 @@ const OrderSummary = () => {
               floor: floorToNumber(delivery.floor)
             },
             vanType: van.type,
-            extraWorker: selectedDate.numberOfMovers
-
+            extraWorker: selectedDate.numberOfMovers,
+            // Add motor bike info if available
+            motorBike: motorBike.type ? {
+              type: motorBike.type
+            } : null
           });
-        //   pickupLocation: {
-        //     location: 'London',
-        //     floor: 1,
-        //     lift: true
-        //   },
-        //   dropLocation: {
-        //     location: 'Birmingham',
-        //     floor: 2
-        //   },
-        //   vanType: 'Medium',
-        //   extraWorker: 2
-        // });
         setTotalPrice(res.data.price);
       } catch (err) {
         console.error("Price fetch error:", err);
@@ -60,7 +68,37 @@ const OrderSummary = () => {
     };
 
     fetchPrice();
-  }, [pickup, delivery, van, selectedDate]);
+  }, [pickup, delivery, van, selectedDate, motorBike]); // Add motorBike to dependency array
+
+  useEffect(() => {
+    const fetchDistance = async () => {
+      try {
+        const res = await axios.post('https://reliance-orbit.onrender.com/distance', {
+          origin: pickup.location,
+          destination: delivery.location
+        });
+  
+        const element = res.data.rows[0].elements[0];
+        const distanceText = element.distance.text;
+        const distanceInMiles = kmToMiles(distanceText);
+        const durationText = element.duration.text;
+        
+        setJourney(prev => ({
+          ...prev,
+          distance: distanceInMiles,
+          duration: durationText
+        }));
+  
+        
+        
+      } catch (err) {
+        console.error("Distance fetch error:", err);
+      }
+    };
+  
+    fetchDistance();
+  }, [pickup.location, delivery.location]);
+  
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-96 flex-shrink-0">
@@ -82,15 +120,23 @@ const OrderSummary = () => {
             </div>
           ))}
 
-
-          {piano.type != '' ? <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-            <span className="text-gray-600 text-sm font-medium">Piano Type</span>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-900">{piano.type}</span>
+          {/* Display motor bike if type is set */}
+          {motorBike.type && (
+            <div className="flex justify-between items-center">
+              <div className="text-gray-900">Motor Bike ({motorBike.type})</div>
               <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
             </div>
-          </div> : null}
+          )}
 
+          {piano.type !== '' ? (
+            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+              <span className="text-gray-600 text-sm font-medium">Piano Type</span>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-900">{piano.type}</span>
+                <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
@@ -101,23 +147,36 @@ const OrderSummary = () => {
           </div>
         </div>
 
-
-        {pickup.propertyType != '' ? <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-          <span className="text-gray-600 text-sm font-medium">Pickup Property Type</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{pickup.propertyType}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
+        {pickup.propertyType !== '' ? (
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <span className="text-gray-600 text-sm font-medium">Pickup Property Type</span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-900">{pickup.propertyType}</span>
+              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
+            </div>
           </div>
-        </div> : null}
+        ) : null}
 
-        {delivery.propertyType != '' ? <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-          <span className="text-gray-600 text-sm font-medium">Delivery Property Type</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{delivery.propertyType}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
+        {delivery.propertyType !== '' ? (
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <span className="text-gray-600 text-sm font-medium">Delivery Property Type</span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-900">{delivery.propertyType}</span>
+              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
+            </div>
           </div>
-        </div> : null}
+        ) : null}
 
+        {/* Add motor bike details section if type is provided */}
+        {motorBike.type && (
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <span className="text-gray-600 text-sm font-medium">Motor Bike</span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-900">{motorBike.type}</span>
+              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Loading / Unloading</span>
@@ -126,8 +185,6 @@ const OrderSummary = () => {
             <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
           </div>
         </div>
-
-
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Pickup</span>
@@ -160,7 +217,6 @@ const OrderSummary = () => {
           <span className="text-2xl font-bold text-blue-900">
             {totalPrice !== null ? `£${totalPrice.toFixed(2)}` : 'Calculating...'}
           </span>
-
         </div>
 
         <div className="mt-2">

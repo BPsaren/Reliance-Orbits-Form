@@ -1,17 +1,85 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
+import axios from 'axios';
 
 const BookingDetails = () => {
   const navigate = useNavigate();
-  const { customerDetails, setCustomerDetails, pickup, delivery } = useBooking();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const { 
+    customerDetails, 
+    setCustomerDetails, 
+    pickup, 
+    delivery, 
+    selectedDate,
+    journey,
+    totalPrice,
+    items,
+    motorBike,
+    piano,
+    quoteRef,
+    van
+
+  } = useBooking();
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Would typically send data to server here
-    navigate('/confirmation');
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Construct the request body according to the required format
+      const bookingData = {
+        username: customerDetails.name,
+        email: customerDetails.email,
+        phoneNumber: customerDetails.phone,
+        price: totalPrice,
+        distance: parseInt(journey.distance), // Convert "97 miles" to numeric value
+        route: journey.route || "default route",
+        fromLocation: {
+          location: pickup.location,
+          floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+          lift: pickup.liftAvailable,
+          propertyType: pickup.propertyType || "standard"
+        },
+        toLocation: {
+          location: delivery.location,
+          floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor
+        },
+        pickupdDate: selectedDate.date,
+        pickupdTime: "08:00:00 AM", // Default time if not specified in your context
+        dropDate: selectedDate.date, // Using same date for pickup and drop
+        dropTime: "10:00:00 AM", // Default time if not specified in your context
+        details: {
+          reference: quoteRef,
+          duration: journey.duration,
+          isBusinessCustomer: customerDetails.isBusinessCustomer,
+          van: van.type,
+          itemName: items.name,
+          itemQuantity: items.quantity,
+          motorBike: motorBike.type,
+          piano: piano.type,
+
+          // Add any additional details you want to include
+        }
+      };
+      
+      // Send data to backend
+      const response = await axios.post('https://reliance-orbit.onrender.com/new', bookingData);
+      
+      console.log('Booking successful:', response.data);
+      
+      // Navigate to confirmation page on success
+      navigate('/confirmation');
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      setSubmitError('Failed to submit booking. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -155,20 +223,29 @@ const BookingDetails = () => {
               </div>
             </div>
             
+            {/* Error message if submission fails */}
+            {submitError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
+                {submitError}
+              </div>
+            )}
+            
             {/* Form Actions */}
             <div className="flex justify-between">
               <button 
                 type="button" 
                 onClick={() => navigate('/additional-services')} 
                 className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
+                disabled={isSubmitting}
               >
                 Back
               </button>
               <button 
                 type="submit" 
-                className="px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
+                className={`px-6 py-3 ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md font-medium`}
+                disabled={isSubmitting}
               >
-                Complete Booking
+                {isSubmitting ? 'Processing...' : 'Complete Booking'}
               </button>
             </div>
           </form>

@@ -4,8 +4,6 @@ const BookingContext = createContext();
 
 export const useBooking = () => useContext(BookingContext);
 
-
-
 export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
     const [pickup, setPickup] = useState({
@@ -36,7 +34,15 @@ export const BookingProvider = ({ children }) => {
 
     const [piano, setPiano] = useState({
         type: '',
-        
+    });
+
+    // New state for motor bike
+    const [motorBike, setMotorBike] = useState({
+        type: '',
+        make: '',
+        model: '',
+        year: '',
+        engineSize: ''
     });
 
     const [additionalServices, setAdditionalServices] = useState({
@@ -48,13 +54,13 @@ export const BookingProvider = ({ children }) => {
     });
     const [customerDetails, setCustomerDetails] = useState({
         name: '',
-        email: 'rrg.030303@gmail.com',
+        email: '',
         phone: '',
         isBusinessCustomer: false
     });
     const [journey, setJourney] = useState({
-        distance: '97 miles',
-        duration: '2h 3min',
+        distance: '',
+        duration: '',
         route: ''
     });
 
@@ -91,9 +97,10 @@ export const BookingProvider = ({ children }) => {
             items, setItems, addItem, updateItemQuantity, removeItem,
             selectedDate, setSelectedDate,
             piano, setPiano,
+            motorBike, setMotorBike, // New motor bike state
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
-            journey, totalPrice, setTotalPrice,
+            journey,setJourney, totalPrice, setTotalPrice,
             van, setVan, toggleVanType,
         }}>
             {children}

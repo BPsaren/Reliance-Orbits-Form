@@ -11,7 +11,7 @@ const ItemsForm = (props) => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/date');
+    navigate('/date', { state: { prepath: props.prepath } });
   };
   
   const handleAddItem = () => {

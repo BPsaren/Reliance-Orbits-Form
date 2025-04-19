@@ -14,7 +14,7 @@ const ItemCategoryForm = (props) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        navigate('/date');
+        navigate('/date', { state: { prepath: props.prepath } });
     };
 
     // Get items and setItems from BookingContext
