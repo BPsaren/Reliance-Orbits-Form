@@ -10,13 +10,30 @@ export const BookingProvider = ({ children }) => {
         location: '',
         floor: 0,
         liftAvailable: false,
-        propertyType:''
+        propertyType:'',
+        postcode:'',
+        addressLine1:'',
+        addressLine2:'',
+        city:'',
+        country:'',
+        contactName:'',
+        contactPhone:'',
+
+
+
     });
     const [delivery, setDelivery] = useState({
         location: '',
         floor: 0,
         liftAvailable: false,
-        propertyType:''
+        propertyType:'',
+        postcode:'',
+        addressLine1:'',
+        addressLine2:'',
+        city:'',
+        country:'',
+        contactName:'',
+        contactPhone:'',
     });
     const [items, setItems] = useState([
         // { name: 'Armchair', quantity: 1 },
