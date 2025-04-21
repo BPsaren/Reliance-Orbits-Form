@@ -1,10 +1,14 @@
 import React from 'react';
 import { useBooking } from '../context/BookingContext';
 import { GoogleMap, useLoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+// import dotenv from 'dotenv';
+
+
+const apiKey = import.meta.env.VITE_API_KEY;
 
 const MapWrapper = () => {
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "Enter_API_KEY",
+    googleMapsApiKey: apiKey,
   });
 
   if (!isLoaded) return <div>Loading map...</div>;

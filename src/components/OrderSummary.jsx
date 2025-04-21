@@ -52,14 +52,11 @@ const OrderSummary = () => {
             },
             dropLocation: {
               location: delivery.location,
-              floor: floorToNumber(delivery.floor)
+              floor: floorToNumber(delivery.floor),
+              lift: delivery.liftAvailable
             },
             vanType: van.type,
-            extraWorker: selectedDate.numberOfMovers,
-            // Add motor bike info if available
-            motorBike: motorBike.type ? {
-              type: motorBike.type
-            } : null
+            worker: selectedDate.numberOfMovers,
           });
         setTotalPrice(res.data.price);
       } catch (err) {

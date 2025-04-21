@@ -15,6 +15,7 @@ export const BookingProvider = ({ children }) => {
     const [delivery, setDelivery] = useState({
         location: '',
         floor: 0,
+        liftAvailable: false,
         propertyType:''
     });
     const [items, setItems] = useState([

@@ -9,11 +9,16 @@ const BookingDetails = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [showPickupManualAddress, setShowPickupManualAddress] = useState(false);
+  const [showDeliveryManualAddress, setShowDeliveryManualAddress] = useState(false);
+  
   const { 
     customerDetails, 
     setCustomerDetails, 
     pickup, 
+    setPickup,
     delivery, 
+    setDelivery,
     selectedDate,
     journey,
     totalPrice,
@@ -22,7 +27,6 @@ const BookingDetails = () => {
     piano,
     quoteRef,
     van
-
   } = useBooking();
   
   const handleSubmit = async (e) => {
@@ -81,6 +85,22 @@ const BookingDetails = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Function to handle pickup address updates
+  const handlePickupChange = (field, value) => {
+    setPickup({
+      ...pickup,
+      [field]: value
+    });
+  };
+
+  // Function to handle delivery address updates
+  const handleDeliveryChange = (field, value) => {
+    setDelivery({
+      ...delivery,
+      [field]: value
+    });
+  };
   
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -89,6 +109,244 @@ const BookingDetails = () => {
       <div className="max-w-7xl mx-auto px-4 py-8 md:flex md:gap-8">
         <div className="md:w-2/3">
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
+            {/* Pickup Address Section */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">Pickup Details</h2>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <div className="mb-2">
+                  <div className="flex items-center">
+                    <input 
+                      type="text" 
+                      placeholder="Search Postcode" 
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.postcode || ''}
+                      onChange={(e) => handlePickupChange('postcode', e.target.value)}
+                    />
+                    <button 
+                      type="button"
+                      className="ml-2 p-3 bg-gray-100 border rounded-md"
+                      onClick={() => {/* Search functionality here */}}
+                    >
+                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  {!pickup.postcode && (
+                    <div className="mt-2 p-3 bg-red-100 text-red-600 rounded-md">
+                      <span className="flex items-center">
+                        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        Postcode can't be blank
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <button 
+                  type="button"
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  onClick={() => setShowPickupManualAddress(!showPickupManualAddress)}
+                >
+                  Enter Address Manually
+                </button>
+                
+                {showPickupManualAddress && (
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <input 
+                        type="text" 
+                        placeholder="Address Line 1" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={pickup.addressLine1 || ''}
+                        onChange={(e) => handlePickupChange('addressLine1', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <input 
+                        type="text" 
+                        placeholder="Address Line 2" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={pickup.addressLine2 || ''}
+                        onChange={(e) => handlePickupChange('addressLine2', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">City</label>
+                      <input 
+                        type="text" 
+                        placeholder="City" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={pickup.city || ''}
+                        onChange={(e) => handlePickupChange('city', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">County</label>
+                      <input 
+                        type="text" 
+                        placeholder="County" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={pickup.county || ''}
+                        onChange={(e) => handlePickupChange('county', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Pickup Contact Details */}
+              <div className="mb-4">
+                <h3 className="text-lg font-medium mb-3">Contact Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <input 
+                      type="text" 
+                      placeholder="Contact Name at Pickup" 
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.contactName || ''}
+                      onChange={(e) => handlePickupChange('contactName', e.target.value)}
+                    />
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="tel" 
+                      placeholder="Pickup Contact Number" 
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.contactPhone || ''}
+                      onChange={(e) => handlePickupChange('contactPhone', e.target.value)}
+                    />
+                    <button 
+                      type="button"
+                      className="absolute right-3 top-3 text-blue-600 font-bold text-xl"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  It is your responsibility to make this person aware that AnyVan and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing AnyVan to share essential booking information with this person and a driver.
+                </div>
+              </div>
+            </div>
+            
+            {/* Delivery Address Section */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">Delivery Details</h2>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <div className="mb-2">
+                  <div className="flex items-center">
+                    <input 
+                      type="text" 
+                      placeholder="Search Postcode" 
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.postcode || ''}
+                      onChange={(e) => handleDeliveryChange('postcode', e.target.value)}
+                    />
+                    <button 
+                      type="button"
+                      className="ml-2 p-3 bg-gray-100 border rounded-md"
+                      onClick={() => {/* Search functionality here */}}
+                    >
+                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <button 
+                  type="button"
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  onClick={() => setShowDeliveryManualAddress(!showDeliveryManualAddress)}
+                >
+                  Enter Address Manually
+                </button>
+                
+                {showDeliveryManualAddress && (
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <input 
+                        type="text" 
+                        placeholder="Address Line 1" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={delivery.addressLine1 || ''}
+                        onChange={(e) => handleDeliveryChange('addressLine1', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <input 
+                        type="text" 
+                        placeholder="Address Line 2" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={delivery.addressLine2 || ''}
+                        onChange={(e) => handleDeliveryChange('addressLine2', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">City</label>
+                      <input 
+                        type="text" 
+                        placeholder="City" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={delivery.city || ''}
+                        onChange={(e) => handleDeliveryChange('city', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">County</label>
+                      <input 
+                        type="text" 
+                        placeholder="County" 
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={delivery.county || ''}
+                        onChange={(e) => handleDeliveryChange('county', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Delivery Contact Details */}
+              <div className="mb-4">
+                <h3 className="text-lg font-medium mb-3">Contact Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <input 
+                      type="text" 
+                      placeholder="Contact Name at Delivery" 
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.contactName || ''}
+                      onChange={(e) => handleDeliveryChange('contactName', e.target.value)}
+                    />
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="tel" 
+                      placeholder="Delivery Contact Number" 
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.contactPhone || ''}
+                      onChange={(e) => handleDeliveryChange('contactPhone', e.target.value)}
+                    />
+                    <button 
+                      type="button"
+                      className="absolute right-3 top-3 text-blue-600 font-bold text-xl"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  It is your responsibility to make this person aware that AnyVan and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing AnyVan to share essential booking information with this person and a driver.
+                </div>
+              </div>
+            </div>
+
             {/* Contact Details */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Contact Details</h2>
