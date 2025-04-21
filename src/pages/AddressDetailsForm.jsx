@@ -6,6 +6,7 @@ import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import './CalendarStyles.css'; // Custom styles for the calendar component
 
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const AddressDetailsForm = () => {
     pickupLocation: false,
     deliveryLocation: false
   });
+  const [selectedDate, setSelectedDate] = useState(null); // Track selected date separately
 
   const pickupSelectedRef = useRef(false);
   const deliverySelectedRef = useRef(false);
@@ -32,13 +34,21 @@ const AddressDetailsForm = () => {
 
   // Format date for display
   const formatDate = (date) => {
+    if (!date) return '';
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return date.toLocaleDateString('en-GB', options);
   };
 
   // Handle date selection from calendar
   const handleDateChange = (date) => {
-    setPickupDate(date);
+    setSelectedDate(date); // Store the selected date
+  };
+
+  // Confirm date selection when "Select Date" button is clicked
+  const confirmDateSelection = () => {
+    if (selectedDate) {
+      setPickupDate(selectedDate);
+    }
     setShowCalendar(false);
   };
 
@@ -209,6 +219,12 @@ const AddressDetailsForm = () => {
     }
     
     navigate('/items-home');
+  };
+
+  // Handle month/year change from dropdowns
+  const handleMonthYearChange = (newDate) => {
+    setPickupDate(newDate);
+    setSelectedDate(newDate); // Keep the selected date in sync
   };
 
   return (
@@ -409,33 +425,28 @@ const AddressDetailsForm = () => {
                   {hasSelectedDate && (
                     <div className="ml-6">
                       <label className="block text-sm font-medium text-gray-600 mb-1">Pickup date</label>
-                      <div className="relative" ref={calendarRef}>
+                      <div className="relative">
                         <input
                           type="text"
                           readOnly
                           value={formatDate(pickupDate)}
-                          onClick={() => setShowCalendar(!showCalendar)}
+                          onClick={() => {
+                            setSelectedDate(pickupDate); // Initialize with current pickup date
+                            setShowCalendar(true);
+                          }}
                           className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md cursor-pointer"
                         />
                         <span 
                           className="absolute right-3 top-2.5 text-gray-400 cursor-pointer"
-                          onClick={() => setShowCalendar(!showCalendar)}
+                          onClick={() => {
+                            setSelectedDate(pickupDate); // Initialize with current pickup date
+                            setShowCalendar(true);
+                          }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </span>
-                        
-                        {showCalendar && (
-                          <div className="absolute z-10 mt-1">
-                            <Calendar
-                              onChange={handleDateChange}
-                              value={pickupDate}
-                              minDate={new Date()}
-                              className="border border-gray-300 rounded-md shadow-lg"
-                            />
-                          </div>
-                        )}
                       </div>
 
                       <div className="bg-green-50 border border-green-100 rounded-md p-3 mt-4 flex items-start">
@@ -479,6 +490,75 @@ const AddressDetailsForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Enhanced Calendar Modal - Styled to match reference image */}
+      {showCalendar && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-4 max-w-md w-full" ref={calendarRef}>
+            <Calendar
+              onChange={handleDateChange}
+              value={selectedDate || pickupDate} // Use selectedDate if available, otherwise fallback to pickupDate
+              minDate={new Date()}
+              className="border-0 w-full"
+              view="month"
+              showNavigation={true}
+              prevLabel={<span className="text-gray-600">‹</span>}
+              nextLabel={<span className="text-gray-600">›</span>}
+              next2Label={null} // Hide double arrows
+              prev2Label={null} // Hide double arrows
+              key={`${(selectedDate || pickupDate).getMonth()}-${(selectedDate || pickupDate).getFullYear()}`} // Force re-render when month/year changes
+              formatShortWeekday={(locale, date) => 
+                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][date.getDay()]
+              }
+              navigationLabel={({ date, locale }) => (
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <select
+                    value={date.getMonth()}
+                    onChange={(e) => {
+                      const newDate = new Date(date);
+                      newDate.setMonth(parseInt(e.target.value));
+                      handleMonthYearChange(newDate);
+                    }}
+                    className="border rounded px-2 py-1 text-sm font-medium"
+                  >
+                    {[...Array(12).keys()].map((month) => (
+                      <option key={month} value={month}>
+                        {new Date(date.getFullYear(), month, 1).toLocaleString(locale, { month: 'long' })}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={date.getFullYear()}
+                    onChange={(e) => {
+                      const newDate = new Date(date);
+                      newDate.setFullYear(parseInt(e.target.value));
+                      handleMonthYearChange(newDate);
+                    }}
+                    className="border rounded px-2 py-1 text-sm font-medium"
+                  >
+                    {[...Array(10).keys()].map((yearOffset) => {
+                      const year = new Date().getFullYear() + yearOffset;
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
+            />
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={confirmDateSelection}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Select Date
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
