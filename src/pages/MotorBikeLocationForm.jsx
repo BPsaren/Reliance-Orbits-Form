@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
@@ -15,6 +17,10 @@ const MotorBikeLocationForm = (props) => {
   const [deliveryTypingTimeout, setDeliveryTypingTimeout] = useState(null);
   const [focusedPickupIndex, setFocusedPickupIndex] = useState(-1);
   const [focusedDeliveryIndex, setFocusedDeliveryIndex] = useState(-1);
+  const [errors, setErrors] = useState({
+    pickup: false,
+    delivery: false
+  });
 
   const pickupSelectedRef = useRef(false);
   const deliverySelectedRef = useRef(false);
@@ -85,6 +91,7 @@ const MotorBikeLocationForm = (props) => {
     setPickup({ ...pickup, location: suggestion.description });
     setPickupSuggestions([]);
     setFocusedPickupIndex(-1);
+    setErrors(prev => ({ ...prev, pickup: false }));
   };
 
   // Handle delivery suggestion selection
@@ -94,6 +101,7 @@ const MotorBikeLocationForm = (props) => {
     setDelivery({ ...delivery, location: suggestion.description });
     setDeliverySuggestions([]);
     setFocusedDeliveryIndex(-1);
+    setErrors(prev => ({ ...prev, delivery: false }));
   };
 
   // Handle keyboard navigation for pickup suggestions
@@ -170,6 +178,19 @@ const MotorBikeLocationForm = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate form
+    const newErrors = {
+      pickup: !pickup.location,
+      delivery: !delivery.location
+    };
+    
+    setErrors(newErrors);
+    
+    if (newErrors.pickup || newErrors.delivery) {
+      return;
+    }
+    
     navigate('/date', { state: { prepath: props.prepath } });
   };
 
@@ -212,9 +233,12 @@ const MotorBikeLocationForm = (props) => {
                     <input
                       type="text"
                       value={pickupQuery}
-                      onChange={(e) => setPickupQuery(e.target.value)}
+                      onChange={(e) => {
+                        setPickupQuery(e.target.value);
+                        setErrors(prev => ({ ...prev, pickup: false }));
+                      }}
                       onKeyDown={handlePickupKeyDown}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full px-4 py-2 border ${errors.pickup ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
                       placeholder="Enter pickup address"
                     />
 
@@ -241,6 +265,9 @@ const MotorBikeLocationForm = (props) => {
                       </span>
                     )}
                   </div>
+                  {errors.pickup && (
+                    <p className="mt-1 text-sm text-red-600">Pickup address is required</p>
+                  )}
                 </div>
               </div>
 
@@ -253,9 +280,12 @@ const MotorBikeLocationForm = (props) => {
                     <input
                       type="text"
                       value={deliveryQuery}
-                      onChange={(e) => setDeliveryQuery(e.target.value)}
+                      onChange={(e) => {
+                        setDeliveryQuery(e.target.value);
+                        setErrors(prev => ({ ...prev, delivery: false }));
+                      }}
                       onKeyDown={handleDeliveryKeyDown}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full px-4 py-2 border ${errors.delivery ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
                       placeholder="Enter delivery address"
                     />
 
@@ -282,6 +312,9 @@ const MotorBikeLocationForm = (props) => {
                       </span>
                     )}
                   </div>
+                  {errors.delivery && (
+                    <p className="mt-1 text-sm text-red-600">Delivery address is required</p>
+                  )}
                 </div>
               </div>
 
@@ -295,7 +328,7 @@ const MotorBikeLocationForm = (props) => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 font-medium"
                 >
                   Next Step
                 </button>
