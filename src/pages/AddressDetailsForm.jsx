@@ -68,17 +68,9 @@ const AddressDetailsForm = () => {
   const handleDateChange = (date) => {
     if (!isPastDate(date)) {
       setSelectedDate(date);
+      setPickupDate(date);
+      setShowCalendar(false);
     }
-  };
-
-  /**
-   * Confirms date selection and closes calendar
-   */
-  const confirmDateSelection = () => {
-    if (selectedDate && !isPastDate(selectedDate)) {
-      setPickupDate(selectedDate);
-    }
-    setShowCalendar(false);
   };
 
   // Close calendar when clicking outside
@@ -636,7 +628,7 @@ const AddressDetailsForm = () => {
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" ref={calendarRef}>
             <div className="mb-4">
-              <h3 className="text-lg font-medium text-center">Select a move date</h3>
+              <h3 className="text-lg font-bold text-center">Select a move date</h3>
               
               {/* Month/Year Navigation */}
               <div className="flex justify-between items-center my-4">
@@ -696,22 +688,11 @@ const AddressDetailsForm = () => {
               </div>
               
               {/* Selected Date Display */}
-              {selectedDate && (
+              {/* {selectedDate && (
                 <div className="text-center mb-4">
                   <p className="text-sm text-gray-600">Selected: {formatDate(selectedDate)}</p>
                 </div>
-              )}
-              
-              {/* Select Date Button */}
-              <div className="flex justify-center">
-                <button
-                  onClick={confirmDateSelection}
-                  disabled={!selectedDate || isPastDate(selectedDate)}
-                  className={`px-4 py-2 rounded-md ${!selectedDate || isPastDate(selectedDate) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                >
-                  Select Date
-                </button>
-              </div>
+              )} */}
             </div>
           </div>
         </div>
