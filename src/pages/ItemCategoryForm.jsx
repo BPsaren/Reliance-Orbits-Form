@@ -11,6 +11,7 @@ const ItemCategoryForm = (props) => {
     const [useInventory, setUseInventory] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [activeCategory, setActiveCategory] = useState('boxes');
+    const [searchResults, setSearchResults] = useState([]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -22,6 +23,80 @@ const ItemCategoryForm = (props) => {
 
     // Local state to track items with quantities
     const [localItems, setLocalItems] = useState({});
+
+    // All items for searching
+    const allItems = {
+        living: [
+            { name: 'Two Seater Sofa', description: null },
+            { name: 'Three Seater Sofa', description: null },
+            { name: 'Armchair', description: null },
+            { name: 'Coffee Table', description: null },
+            { name: 'Small Television/TV', description: 'Less than 30"' },
+            { name: 'Large Television/TV', description: 'Greater than 40"' },
+            { name: 'TV Stand', description: null },
+            { name: 'Bookcase', description: null },
+            { name: 'Rug', description: null },
+            { name: 'Desk', description: null },
+            { name: 'Office Chair', description: null },
+            { name: 'Artwork', description: null },
+            { name: 'Floor Lamp', description: null },
+        ],
+        dining: [
+            { name: '4 Seater Dining Table', description: null },
+            { name: '6 Seater Dining Table', description: null },
+            { name: 'Dining Chair', description: null },
+            { name: 'Sideboard', description: null },
+            { name: 'Display Cabinet', description: null },
+            { name: 'Rug', description: null },
+        ],
+        kitchen: [
+            { name: 'Fridge Freezer', description: null },
+            { name: 'Washing Machine', description: null },
+            { name: 'Microwave Oven', description: null },
+            { name: 'Cooker', description: null },
+            { name: 'Dishwasher', description: null },
+            { name: 'Kitchen Table', description: null },
+            { name: 'Dining Chair', description: null },
+            { name: 'Bin', description: null },
+            { name: 'Ironing Board', description: null },
+            { name: 'Tumble Dryer', description: null },
+        ],
+        garden: [
+            { name: 'Garden Table', description: null },
+            { name: 'Garden Chair', description: null },
+            { name: 'Lawn Mower', description: null },
+            { name: 'Tool Box', description: null },
+            { name: 'Bench', description: null },
+            { name: 'Parasol', description: null },
+            { name: 'Bicycle', description: null },
+        ],
+        boxes: [
+            { name: 'Large Box', description: 'Approx. 50×50×50 cm' },
+            { name: 'Medium Box', description: 'Approx. 45×45×35 cm' },
+            { name: 'Small Box', description: 'Approx. 40×30×30 cm' },
+            { name: 'Wardrobe Box', description: null },
+            { name: 'Suitcase', description: null },
+            { name: 'Bag', description: null },
+        ],
+        bedrooms: [
+            { name: 'Single Bed & Mattress', description: null },
+            { name: 'Double Bed & Mattress', description: null },
+            { name: 'Kingsize Bed & Mattress', description: null },
+            { name: 'Single Wardrobe', description: null },
+            { name: 'Double Wardrobe', description: null },
+            { name: 'Chest Of Drawers', description: null },
+            { name: 'Bedside Table', description: null },
+            { name: 'Dressing Table', description: null },
+            { name: 'Television', description: null },
+            { name: 'Side Table', description: null },
+        ],
+        bathroom: [
+            { name: 'Bathroom Cabinet', description: null },
+            { name: 'Towel Rail', description: null },
+            { name: 'Mirror', description: null },
+            { name: 'Shower Rack', description: null },
+        ]
+    };
 
     // Initialize local items from context when component mounts
     useEffect(() => {
@@ -40,6 +115,27 @@ const ItemCategoryForm = (props) => {
         }));
         setContextItems(newContextItems);
     }, [localItems]);
+
+    // Search functionality
+    useEffect(() => {
+        if (searchText.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+
+        const results = [];
+        
+        // Search through all categories
+        Object.values(allItems).forEach(categoryItems => {
+            categoryItems.forEach(item => {
+                if (item.name.toLowerCase().includes(searchText.toLowerCase())) {
+                    results.push(item);
+                }
+            });
+        });
+
+        setSearchResults(results);
+    }, [searchText]);
 
     const handleQuantityChange = (itemName, newQuantity) => {
         if (newQuantity === 0) {
@@ -78,7 +174,7 @@ const ItemCategoryForm = (props) => {
 
     const renderItemRow = (name, description = null, quantity = 0) => {
         return (
-            <div className="flex justify-between items-center py-2">
+            <div className="flex justify-between items-center py-2" key={name}>
                 <div>
                     <div className="font-medium text-gray-700">{name}</div>
                     {description && <div className="text-xs text-gray-500">{description}</div>}
@@ -86,10 +182,11 @@ const ItemCategoryForm = (props) => {
                 <div className="flex items-center">
                     {quantity > 0 ? (
                         <>
-                            <button type="button"  className="text-blue-500 hover:text-blue-700 mr-2">
+                            <button type="button" className="text-blue-500 hover:text-blue-700 mr-2">
                                 <Edit size={18} />
                             </button>
                             <button
+                                type="button"
                                 className="text-blue-500 hover:text-blue-700 mr-2 rounded-full border border-blue-500 w-6 h-6 flex items-center justify-center"
                                 onClick={() => handleQuantityChange(name, quantity - 1)}
                             >
@@ -97,7 +194,7 @@ const ItemCategoryForm = (props) => {
                             </button>
                             <span className="w-8 text-center">{quantity}</span>
                             <button
-                            type="button" 
+                                type="button" 
                                 className="text-blue-500 hover:text-blue-700 ml-2 rounded-full border border-blue-500 w-6 h-6 flex items-center justify-center"
                                 onClick={() => handleQuantityChange(name, quantity + 1)}
                             >
@@ -106,7 +203,7 @@ const ItemCategoryForm = (props) => {
                         </>
                     ) : (
                         <button
-                        type="button" 
+                            type="button" 
                             className="text-blue-500 hover:text-blue-700"
                             onClick={() => addNewItem(name)}
                         >
@@ -119,40 +216,39 @@ const ItemCategoryForm = (props) => {
     };
 
     const renderCategoryItems = () => {
-        switch (activeCategory) {
-            case 'boxes':
-                return (
-                    <div className="space-y-2">
-                        {renderItemRow('Large Box', 'Approx. 50×50×50 cm', localItems['Large Box'] || 0)}
-                        {renderItemRow('Medium Box', 'Approx. 45×45×35 cm', localItems['Medium Box'] || 0)}
-                        {renderItemRow('Small Box', 'Approx. 40×30×30 cm', localItems['Small Box'] || 0)}
-                        {renderItemRow('Wardrobe Box', null, localItems['Wardrobe Box'] || 0)}
-                        {renderItemRow('Suitcase', null, localItems['Suitcase'] || 0)}
-                        {renderItemRow('Bag', null, localItems['Bag'] || 0)}
-                    </div>
-                );
-            case 'bedrooms':
-                return (
-                    <div className="space-y-2">
-                        {renderItemRow('Single Bed & Mattress', null, localItems['Single Bed & Mattress'] || 0)}
-                        {renderItemRow('Double Bed & Mattress', null, localItems['Double Bed & Mattress'] || 0)}
-                        {renderItemRow('Kingsize Bed & Mattress', null, localItems['Kingsize Bed & Mattress'] || 0)}
-                        {renderItemRow('Single Wardrobe', null, localItems['Single Wardrobe'] || 0)}
-                        {renderItemRow('Double Wardrobe', null, localItems['Double Wardrobe'] || 0)}
-                        {renderItemRow('Chest Of Drawers', null, localItems['Chest Of Drawers'] || 0)}
-                        {renderItemRow('Bedside Table', null, localItems['Bedside Table'] || 0)}
-                        {renderItemRow('Dressing Table', null, localItems['Dressing Table'] || 0)}
-                        {renderItemRow('Television', null, localItems['Television'] || 0)}
-                        {renderItemRow('Side Table', null, localItems['Side Table'] || 0)}
-                    </div>
-                );
-            default:
-                return (
-                    <div className="py-8 text-center text-gray-500">
-                        Select a category to see items
-                    </div>
-                );
+        if (searchText.trim() !== '' && searchResults.length > 0) {
+            return (
+                <div className="space-y-2">
+                    {searchResults.map(item => 
+                        renderItemRow(item.name, item.description, localItems[item.name] || 0)
+                    )}
+                </div>
+            );
         }
+
+        if (searchText.trim() !== '' && searchResults.length === 0) {
+            return (
+                <div className="py-8 text-center text-gray-500">
+                    No items found for "{searchText}"
+                </div>
+            );
+        }
+
+        if (allItems[activeCategory]) {
+            return (
+                <div className="space-y-2">
+                    {allItems[activeCategory].map(item => 
+                        renderItemRow(item.name, item.description, localItems[item.name] || 0)
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <div className="py-8 text-center text-gray-500">
+                Select a category to see items
+            </div>
+        );
     };
 
     const totalItems = Object.values(localItems).reduce((sum, quantity) => sum + quantity, 0);
@@ -161,9 +257,6 @@ const ItemCategoryForm = (props) => {
         <div className="min-h-screen bg-gray-50">
             <Header title="What are you moving?" />
             <div className="max-w-7xl mx-auto px-4 py-4">
-
-
-
                 <div className="flex items-center mr-4 mb-2">
                     <input
                         type="checkbox"
@@ -183,9 +276,12 @@ const ItemCategoryForm = (props) => {
                             <div className="grid grid-cols-7">
                                 {categories.map((category) => (
                                     <button
-                                    type="button" 
+                                        type="button" 
                                         key={category.id}
-                                        onClick={() => setActiveCategory(category.id)}
+                                        onClick={() => {
+                                            setActiveCategory(category.id);
+                                            setSearchText('');
+                                        }}
                                         className={`flex flex-col items-center justify-center py-4 ${activeCategory === category.id ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:bg-gray-50'
                                             } border-r border-gray-200`}
                                     >
@@ -259,8 +355,6 @@ const ItemCategoryForm = (props) => {
                             </div>
                         </div>
                         <OrderSummary />
-
-
                     </div>
                 </div>
             </div>
