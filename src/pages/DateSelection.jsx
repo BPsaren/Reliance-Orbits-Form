@@ -11,7 +11,7 @@ const DateSelection = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const prepath = location.state?.prepath;
-    const { selectedDate, setSelectedDate, van, toggleVanType, totalPrice, setTotalPrice } = useBooking();
+    const { selectedDate, setSelectedDate, van, setVan, toggleVanType, totalPrice, setTotalPrice } = useBooking();
     const [value, setValue] = useState(new Date());
     const [calendarPrices, setCalendarPrices] = useState({});
     const [bestPriceDates, setBestPriceDates] = useState([]);
@@ -20,10 +20,35 @@ const DateSelection = () => {
     const currentYear = currentView.getFullYear();
 
     const [fixedPrice] = useState(totalPrice);
-
+    const [selectedMovers, setSelectedMovers] = useState(selectedDate.numberOfMovers || 0);
+    const [selectedVanType, setSelectedVanType] = useState(van.type || '');
+    
     useEffect(() => {
         generatePriceData();
     }, []);
+
+    // Function to calculate the total price based on current selections
+    const calculateTotalPrice = (movers, vanType) => {
+        let price = fixedPrice;
+        
+        // Add price for movers
+        if (movers > 0) {
+            price += movers * 20;
+        }
+        
+        // Add price for van type
+        if (vanType) {
+            const vanPrices = {
+                'Small': 60,
+                'Medium': 70,
+                'Large': 80,
+                'Luton': 90,
+            };
+            price += vanPrices[vanType] || 0;
+        }
+        
+        return price;
+    };
 
     // Function to generate price data for dates
     const generatePriceData = () => {
@@ -75,31 +100,58 @@ const DateSelection = () => {
         setSelectedDate({
             date: formattedDate,
             price: datePrice,
-            numberOfMovers: selectedDate.numberOfMovers || 1
+            numberOfMovers: selectedMovers || 1
         });
     };
 
+    const vanOptions = [
+        { type: 'Small', price: 60, emoji: '🚐' },
+        { type: 'Medium', price: 70, emoji: '🚚' },
+        { type: 'Large', price: 80, emoji: '🚛' },
+        { type: 'Luton', price: 90, emoji: '📦' }
+    ];
+
     const handleSelectMovers = (count, price) => {
+        setSelectedMovers(count);
         setSelectedDate({
             ...selectedDate,
             numberOfMovers: count,
             price: price
         });
+
+        // Update total price based on both movers and van type
+        const newTotalPrice = calculateTotalPrice(count, selectedVanType);
+        setTotalPrice(newTotalPrice);
+    };
+
+    const handleSelectVanType = (type) => {
+        setSelectedVanType(type);
+        setVan({ ...van, type: type });
+        
+        // Update total price based on both movers and van type
+        const newTotalPrice = calculateTotalPrice(selectedMovers, type);
+        setTotalPrice(newTotalPrice);
     };
 
     // Get price based on van type
     const getVanPrice = (type) => {
-        const prices = {
-            'Small': selectedDate.numberOfMovers===2?(fixedPrice+20).toFixed(2) : fixedPrice.toFixed(2),
-            'Medium': (fixedPrice+30).toFixed(2),
-            'Large': (fixedPrice+40).toFixed(2),
-            'Luton': (fixedPrice+50).toFixed(2),
+        const basePrices = {
+            'Small': 60,
+            'Medium': 70,
+            'Large': 80,
+            'Luton': 90,
         };
-        return prices[type] || 109;
+        const base = basePrices[type] || 0;
+
+        return totalPrice + base;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!van.type || !selectedDate.numberOfMovers) {
+            alert("Please select both the van type and number of persons (movers) before continuing.");
+            return;
+        }
         navigate('/additional-services');
     };
 
@@ -192,7 +244,7 @@ const DateSelection = () => {
                         <div className="grid grid-cols-3 gap-4 mb-8">
                             <button
                                 type="button"
-                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedDate?.numberOfMovers === 1
+                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedMovers === 1
                                     ? 'border-blue-600 bg-blue-50 text-blue-700'
                                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
@@ -200,12 +252,12 @@ const DateSelection = () => {
                             >
                                 <span className="text-2xl mb-2">👤</span>
                                 <span className="font-medium">1 Person</span>
-                                <div className="mt-2 text-lg font-semibold">£{fixedPrice.toFixed(2)}</div>
+                                <div className="mt-2 text-lg font-semibold">£{(fixedPrice + 20).toFixed(2)}</div>
                             </button>
 
                             <button
                                 type="button"
-                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedDate?.numberOfMovers === 2
+                                className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedMovers === 2
                                     ? 'border-blue-600 bg-blue-50 text-blue-700'
                                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
@@ -213,17 +265,28 @@ const DateSelection = () => {
                             >
                                 <span className="text-2xl mb-2">👥</span>
                                 <span className="font-medium">2 People</span>
-                                <div className="mt-2 text-lg font-semibold">£{(fixedPrice+20).toFixed(2)}</div>
+                                <div className="mt-2 text-lg font-semibold">£{(fixedPrice + 40).toFixed(2)}</div>
                             </button>
-                            <button
-                                type="button"
-                                className="flex flex-col items-center justify-center p-4 border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50"
-                                onClick={toggleVanType}
-                            >
+                            {/* Van Type Dropdown */}
+                            <div className="flex flex-col items-center justify-center p-4 border rounded-lg border-gray-300">
                                 <span className="text-2xl mb-2">{getVanEmoji(van.type)}</span>
-                                <span className="font-medium">{van.type}</span>
-                                <div className="mt-2 text-lg font-semibold">£{getVanPrice(van.type)}</div>
-                            </button>
+                                <select
+                                    value={van.type || ''}
+                                    onChange={(e) => {
+                                        const selectedType = e.target.value;
+                                        handleSelectVanType(selectedType);
+                                    }}
+                                    className="w-full p-2 border border-gray-300 rounded-md font-medium text-center"
+                                >
+                                    <option value="" disabled>Select Van</option>
+                                    {vanOptions.map((option) => (
+                                        <option key={option.type} value={option.type}>
+                                            {option.emoji} {option.type}
+                                        </option>
+                                    ))}
+                                </select>
+                                
+                            </div>
                         </div>
 
                         {/* Calendar */}
