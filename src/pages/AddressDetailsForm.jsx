@@ -4,16 +4,21 @@ import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import './CalendarStyles.css'; // Custom styles for the calendar component
 
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
   const { pickup, setPickup, delivery, setDelivery } = useBooking();
+  
+  // State for date selection
   const [hasSelectedDate, setHasSelectedDate] = useState(true);
   const [pickupDate, setPickupDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+  // State for address autocomplete
   const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
   const [deliveryQuery, setDeliveryQuery] = useState(delivery.location || '');
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
@@ -22,34 +27,50 @@ const AddressDetailsForm = () => {
   const [deliveryTypingTimeout, setDeliveryTypingTimeout] = useState(null);
   const [focusedPickupIndex, setFocusedPickupIndex] = useState(-1);
   const [focusedDeliveryIndex, setFocusedDeliveryIndex] = useState(-1);
+  
+  // Form validation errors
   const [errors, setErrors] = useState({
     pickupLocation: false,
     deliveryLocation: false
   });
-  const [selectedDate, setSelectedDate] = useState(null); // Track selected date separately
 
+  // Refs for tracking selection and calendar
   const pickupSelectedRef = useRef(false);
   const deliverySelectedRef = useRef(false);
   const calendarRef = useRef(null);
 
-  // Format date for display
+  /**
+   * Formats date for display (e.g., "21 April 2025")
+   * @param {Date} date - The date to format
+   * @returns {string} Formatted date string
+   */
   const formatDate = (date) => {
     if (!date) return '';
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return date.toLocaleDateString('en-GB', options);
   };
 
-  // Handle date selection from calendar
-  const handleDateChange = (date) => {
-    setSelectedDate(date); // Store the selected date
+  /**
+   * Checks if a date is in the past (before today)
+   * @param {Date} date - The date to check
+   * @returns {boolean} True if the date is in the past
+   */
+  const isPastDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
   };
 
-  // Confirm date selection when "Select Date" button is clicked
-  const confirmDateSelection = () => {
-    if (selectedDate) {
-      setPickupDate(selectedDate);
+  /**
+   * Handles date selection from calendar, only allowing future dates
+   * @param {Date} date - The selected date
+   */
+  const handleDateChange = (date) => {
+    if (!isPastDate(date)) {
+      setSelectedDate(date);
+      setPickupDate(date);
+      setShowCalendar(false);
     }
-    setShowCalendar(false);
   };
 
   // Close calendar when clicking outside
@@ -65,6 +86,92 @@ const AddressDetailsForm = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  /**
+   * Generates days array for the current month view including previous/next month days
+   * @returns {Array} Array of day objects with date and status flags
+   */
+  const generateDays = () => {
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+    
+    // Adjust for Monday as first day of week (0=Sunday in JS)
+    const firstDayIndex = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+    
+    const days = [];
+    
+    // Previous month's days (disabled)
+    for (let i = firstDayIndex; i > 0; i--) {
+      days.push({
+        date: new Date(currentYear, currentMonth - 1, daysInPrevMonth - i + 1),
+        isCurrentMonth: false,
+        isDisabled: true,
+        isSelected: false
+      });
+    }
+    
+    // Current month's days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dayDate = new Date(currentYear, currentMonth, i);
+      const isPast = isPastDate(dayDate);
+      days.push({
+        date: dayDate,
+        isCurrentMonth: true,
+        isDisabled: isPast,
+        isSelected: selectedDate && 
+          selectedDate.getDate() === i && 
+          selectedDate.getMonth() === currentMonth &&
+          selectedDate.getFullYear() === currentYear,
+        isToday: dayDate.toDateString() === new Date().toDateString()
+      });
+    }
+    
+    // Next month's days to complete the grid
+    const totalDays = days.length;
+    const remainingDays = 42 - totalDays; // 6 weeks x 7 days
+    for (let i = 1; i <= remainingDays; i++) {
+      const dayDate = new Date(currentYear, currentMonth + 1, i);
+      days.push({
+        date: dayDate,
+        isCurrentMonth: false,
+        isDisabled: false,
+        isSelected: selectedDate && 
+          selectedDate.getDate() === i && 
+          selectedDate.getMonth() === currentMonth + 1 &&
+          selectedDate.getFullYear() === currentYear
+      });
+    }
+    
+    return days;
+  };
+
+  /**
+   * Handles month navigation
+   * @param {number} increment - Number of months to change (+1 or -1)
+   */
+  const handleMonthChange = (increment) => {
+    let newMonth = currentMonth + increment;
+    let newYear = currentYear;
+    
+    if (newMonth > 11) {
+      newMonth = 0;
+      newYear++;
+    } else if (newMonth < 0) {
+      newMonth = 11;
+      newYear--;
+    }
+    
+    // Don't allow navigating to past months
+    const currentDate = new Date();
+    if (newYear < currentDate.getFullYear() || 
+        (newYear === currentDate.getFullYear() && newMonth < currentDate.getMonth())) {
+      return;
+    }
+    
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+  };
 
   // Pickup location autocomplete
   useEffect(() => {
@@ -123,7 +230,10 @@ const AddressDetailsForm = () => {
     return () => clearTimeout(timeout);
   }, [deliveryQuery]);
 
-  // Handle pickup suggestion selection
+  /**
+   * Handles pickup suggestion selection
+   * @param {Object} suggestion - Selected suggestion object
+   */
   const handlePickupSuggestionSelect = (suggestion) => {
     pickupSelectedRef.current = true;
     setPickupQuery(suggestion.description);
@@ -133,7 +243,10 @@ const AddressDetailsForm = () => {
     setErrors(prev => ({ ...prev, pickupLocation: false }));
   };
 
-  // Handle delivery suggestion selection
+  /**
+   * Handles delivery suggestion selection
+   * @param {Object} suggestion - Selected suggestion object
+   */
   const handleDeliverySuggestionSelect = (suggestion) => {
     deliverySelectedRef.current = true;
     setDeliveryQuery(suggestion.description);
@@ -143,7 +256,10 @@ const AddressDetailsForm = () => {
     setErrors(prev => ({ ...prev, deliveryLocation: false }));
   };
 
-  // Handle keyboard navigation for pickup suggestions
+  /**
+   * Handles keyboard navigation for pickup suggestions
+   * @param {Object} e - Keyboard event
+   */
   const handlePickupKeyDown = (e) => {
     if (pickupSuggestions.length === 0) return;
 
@@ -173,7 +289,10 @@ const AddressDetailsForm = () => {
     }
   };
 
-  // Handle keyboard navigation for delivery suggestions
+  /**
+   * Handles keyboard navigation for delivery suggestions
+   * @param {Object} e - Keyboard event
+   */
   const handleDeliveryKeyDown = (e) => {
     if (deliverySuggestions.length === 0) return;
 
@@ -203,6 +322,10 @@ const AddressDetailsForm = () => {
     }
   };
 
+  /**
+   * Handles form submission
+   * @param {Object} e - Form submit event
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -221,25 +344,21 @@ const AddressDetailsForm = () => {
     navigate('/items-home');
   };
 
-  // Handle month/year change from dropdowns
-  const handleMonthYearChange = (newDate) => {
-    setPickupDate(newDate);
-    setSelectedDate(newDate); // Keep the selected date in sync
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header title="Where are you moving from and to?" />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Form Section */}
           <div className="lg:w-2/3">
             <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* Pickup Details */}
+                {/* Pickup Details Column */}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-700 mb-4">Pickup Details</h2>
 
+                  {/* Pickup Location Input */}
                   <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-medium mb-2">Location</label>
                     <div className="relative">
@@ -255,6 +374,7 @@ const AddressDetailsForm = () => {
                         placeholder="Enter pickup address"
                       />
 
+                      {/* Pickup Suggestions Dropdown */}
                       {pickupSuggestions.length > 0 && (
                         <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
                           {pickupSuggestions.map((suggestion, idx) => (
@@ -269,6 +389,7 @@ const AddressDetailsForm = () => {
                         </ul>
                       )}
 
+                      {/* Checkmark for selected pickup location */}
                       {pickup.location && (
                         <span className="absolute right-3 top-2.5 text-green-600">
                           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -282,6 +403,7 @@ const AddressDetailsForm = () => {
                     )}
                   </div>
 
+                  {/* Pickup Property Type Select */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600 mb-1">Select property type</label>
                     <div className="relative">
@@ -307,10 +429,11 @@ const AddressDetailsForm = () => {
                   </div>
                 </div>
 
-                {/* Delivery Details */}
+                {/* Delivery Details Column */}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-700 mb-4">Delivery Details</h2>
 
+                  {/* Delivery Location Input */}
                   <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-medium mb-2">Location</label>
                     <div className="relative">
@@ -326,6 +449,7 @@ const AddressDetailsForm = () => {
                         placeholder="Enter delivery address"
                       />
 
+                      {/* Delivery Suggestions Dropdown */}
                       {deliverySuggestions.length > 0 && (
                         <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
                           {deliverySuggestions.map((suggestion, idx) => (
@@ -340,6 +464,7 @@ const AddressDetailsForm = () => {
                         </ul>
                       )}
 
+                      {/* Checkmark for selected delivery location */}
                       {delivery.location && (
                         <span className="absolute right-3 top-2.5 text-green-600">
                           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -353,6 +478,7 @@ const AddressDetailsForm = () => {
                     )}
                   </div>
 
+                  {/* Delivery Property Type Select */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600 mb-1">Select property type</label>
                     <div className="relative">
@@ -378,6 +504,7 @@ const AddressDetailsForm = () => {
                     </div>
                   </div>
 
+                  {/* Delivery Floor Select */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600 mb-1">Select floor</label>
                     <div className="relative">
@@ -403,11 +530,12 @@ const AddressDetailsForm = () => {
                 </div>
               </div>
 
-              {/* Estimated Move Date */}
+              {/* Estimated Move Date Section */}
               <div className="mb-8">
                 <h2 className="text-lg font-semibold text-gray-700 mb-4">Estimated Move Date</h2>
 
                 <div className="space-y-4">
+                  {/* Date Selection Radio Option */}
                   <div className="flex items-center">
                     <input
                       type="radio"
@@ -431,7 +559,7 @@ const AddressDetailsForm = () => {
                           readOnly
                           value={formatDate(pickupDate)}
                           onClick={() => {
-                            setSelectedDate(pickupDate); // Initialize with current pickup date
+                            setSelectedDate(pickupDate);
                             setShowCalendar(true);
                           }}
                           className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md cursor-pointer"
@@ -439,7 +567,7 @@ const AddressDetailsForm = () => {
                         <span 
                           className="absolute right-3 top-2.5 text-gray-400 cursor-pointer"
                           onClick={() => {
-                            setSelectedDate(pickupDate); // Initialize with current pickup date
+                            setSelectedDate(pickupDate);
                             setShowCalendar(true);
                           }}
                         >
@@ -449,6 +577,7 @@ const AddressDetailsForm = () => {
                         </span>
                       </div>
 
+                      {/* Availability Confirmation */}
                       <div className="bg-green-50 border border-green-100 rounded-md p-3 mt-4 flex items-start">
                         <span className="text-green-700 mt-0.5 mr-2">👍</span>
                         <p className="text-sm text-green-800">
@@ -458,6 +587,7 @@ const AddressDetailsForm = () => {
                     </div>
                   )}
 
+                  {/* No Date Selected Option */}
                   <div className="flex items-center">
                     <input
                       type="radio"
@@ -474,6 +604,7 @@ const AddressDetailsForm = () => {
                 </div>
               </div>
 
+              {/* Form Submit Button */}
               <div className="flex justify-center">
                 <button
                   type="submit"
@@ -485,76 +616,83 @@ const AddressDetailsForm = () => {
             </form>
           </div>
 
+          {/* Order Summary Sidebar */}
           <div className="lg:w-1/3">
             <OrderSummary />
           </div>
         </div>
       </div>
 
-      {/* Enhanced Calendar Modal - Styled to match reference image */}
+      {/* Custom Calendar Modal */}
       {showCalendar && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-4 max-w-md w-full" ref={calendarRef}>
-            <Calendar
-              onChange={handleDateChange}
-              value={selectedDate || pickupDate} // Use selectedDate if available, otherwise fallback to pickupDate
-              minDate={new Date()}
-              className="border-0 w-full"
-              view="month"
-              showNavigation={true}
-              prevLabel={<span className="text-gray-600">‹</span>}
-              nextLabel={<span className="text-gray-600">›</span>}
-              next2Label={null} // Hide double arrows
-              prev2Label={null} // Hide double arrows
-              key={`${(selectedDate || pickupDate).getMonth()}-${(selectedDate || pickupDate).getFullYear()}`} // Force re-render when month/year changes
-              formatShortWeekday={(locale, date) => 
-                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][date.getDay()]
-              }
-              navigationLabel={({ date, locale }) => (
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <select
-                    value={date.getMonth()}
-                    onChange={(e) => {
-                      const newDate = new Date(date);
-                      newDate.setMonth(parseInt(e.target.value));
-                      handleMonthYearChange(newDate);
-                    }}
-                    className="border rounded px-2 py-1 text-sm font-medium"
-                  >
-                    {[...Array(12).keys()].map((month) => (
-                      <option key={month} value={month}>
-                        {new Date(date.getFullYear(), month, 1).toLocaleString(locale, { month: 'long' })}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={date.getFullYear()}
-                    onChange={(e) => {
-                      const newDate = new Date(date);
-                      newDate.setFullYear(parseInt(e.target.value));
-                      handleMonthYearChange(newDate);
-                    }}
-                    className="border rounded px-2 py-1 text-sm font-medium"
-                  >
-                    {[...Array(10).keys()].map((yearOffset) => {
-                      const year = new Date().getFullYear() + yearOffset;
-                      return (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      );
-                    })}
-                  </select>
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" ref={calendarRef}>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-center">Select a move date</h3>
+              
+              {/* Month/Year Navigation */}
+              <div className="flex justify-between items-center my-4">
+                <button 
+                  onClick={() => handleMonthChange(-1)}
+                  disabled={currentMonth <= new Date().getMonth() && currentYear <= new Date().getFullYear()}
+                  className={`p-1 rounded-full ${currentMonth <= new Date().getMonth() && currentYear <= new Date().getFullYear() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <div className="text-lg font-medium">
+                  {new Date(currentYear, currentMonth, 1).toLocaleString('en-US', { month: 'long' })} {currentYear}
                 </div>
-              )}
-            />
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={confirmDateSelection}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Select Date
-              </button>
+                
+                <button 
+                  onClick={() => handleMonthChange(1)}
+                  className="p-1 rounded-full hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Calendar Grid */}
+              <div className="mb-4">
+                {/* Weekday Headers */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                    <div key={day} className="text-center text-sm font-medium text-gray-500">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Days Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {generateDays().map((day, index) => (
+                    <button
+                      key={index}
+                      onClick={() => !day.isDisabled && handleDateChange(day.date)}
+                      className={`h-10 rounded-md flex items-center justify-center text-sm
+                        ${day.isDisabled ? 'text-gray-400 cursor-not-allowed' : day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}
+                        ${day.isSelected ? 'bg-blue-100 text-blue-800 font-medium' : ''}
+                        ${day.isToday ? 'border border-blue-500' : ''}
+                        ${!day.isDisabled && day.isCurrentMonth && !day.isSelected ? 'hover:bg-gray-100' : ''}
+                      `}
+                      disabled={day.isDisabled}
+                    >
+                      {day.date.getDate()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Selected Date Display */}
+              {/* {selectedDate && (
+                <div className="text-center mb-4">
+                  <p className="text-sm text-gray-600">Selected: {formatDate(selectedDate)}</p>
+                </div>
+              )} */}
             </div>
           </div>
         </div>
