@@ -6,6 +6,8 @@ export const useBooking = () => useContext(BookingContext);
 
 export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
+
+    
     const [pickup, setPickup] = useState({
         location: '',
         floor: 0,
