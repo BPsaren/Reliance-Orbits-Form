@@ -6,20 +6,20 @@ import RouteMap from './RouteMap';
 
 const OrderSummary = () => {
   const [calculatedPrice, setCalculatedPrice] = useState(null);
-  const { 
-    quoteRef, 
-    items, 
-    pickup, 
-    delivery, 
-    selectedDate, 
-    journey, 
+  const {
+    quoteRef,
+    items,
+    pickup,
+    delivery,
+    selectedDate,
+    journey,
     setJourney,
-    totalPrice, 
-    setTotalPrice, 
-    piano, 
+    totalPrice,
+    setTotalPrice,
+    piano,
     van,
     motorBike,
-     // Add motorBike from context
+    // Add motorBike from context
   } = useBooking();
 
   const floorToNumber = (floor) => {
@@ -39,33 +39,42 @@ const OrderSummary = () => {
     const miles = kmValue * 0.621371;
     return `${miles.toFixed(2)} miles`; // Rounded to 2 decimal places
   };
-  
-  
+
+
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const res = await axios.post('https://reliance-orbit.onrender.com/price', {
-            pickupLocation: {
-              location: pickup.location,
-              floor: floorToNumber(pickup.floor),
-              lift: pickup.liftAvailable
-            },
-            dropLocation: {
-              location: delivery.location,
-              floor: floorToNumber(delivery.floor),
-              lift: delivery.liftAvailable
-            },
-            vanType: van.type,
-            worker: selectedDate.numberOfMovers,
-          });
+        const payload = {
+          pickupLocation: {
+            location: pickup.location,
+            floor: floorToNumber(pickup.floor),
+            lift: pickup.liftAvailable
+          },
+          dropLocation: {
+            location: delivery.location,
+            floor: floorToNumber(delivery.floor),
+            lift: delivery.liftAvailable
+          },
+          vanType: van.type,
+          worker: selectedDate.numberOfMovers,
+        };
+
+        // console.log("Sending payload to API:", payload);
+
+        const res = await axios.post('https://reliance-orbit.onrender.com/price', payload);
+
+        // console.log("Received response:", res.data);
+
         setTotalPrice(res.data.price);
+        console.log("Price set to:", res.data.price);
       } catch (err) {
         console.error("Price fetch error:", err);
       }
     };
 
     fetchPrice();
-  }, [pickup, delivery, van, selectedDate, motorBike]); // Add motorBike to dependency array
+  }, [pickup, delivery, van, selectedDate]);
+  // Add motorBike to dependency array
 
   useEffect(() => {
     const fetchDistance = async () => {
@@ -74,28 +83,28 @@ const OrderSummary = () => {
           origin: pickup.location,
           destination: delivery.location
         });
-  
+
         const element = res.data.rows[0].elements[0];
         const distanceText = element.distance.text;
         const distanceInMiles = kmToMiles(distanceText);
         const durationText = element.duration.text;
-        
+
         setJourney(prev => ({
           ...prev,
           distance: distanceInMiles,
           duration: durationText
         }));
-  
-        
-        
+
+
+
       } catch (err) {
         console.error("Distance fetch error:", err);
       }
     };
-  
+
     fetchDistance();
   }, [pickup.location, delivery.location]);
-  
+
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-96 flex-shrink-0">

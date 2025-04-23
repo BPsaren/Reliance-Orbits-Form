@@ -42,15 +42,15 @@ const BookingDetails = () => {
         phoneNumber: customerDetails.phone,
         price: totalPrice,
         distance: parseInt(journey.distance) || 0, // Convert "97 miles" to numeric value
-        route: journey.route || "default route",
+        route:"default route",
         fromLocation: {
-          location: pickup.location,
+          location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
           lift: pickup.liftAvailable,
           propertyType: pickup.propertyType || "standard"
         },
         toLocation: {
-          location: delivery.location,
+          location: delivery.location || "N/A",
           floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
           lift: delivery.liftAvailable,
           propertyType: delivery.propertyType || "standard"
@@ -59,10 +59,10 @@ const BookingDetails = () => {
         pickupdTime: "08:00:00 AM", // Default time if not specified in your context
         dropDate: selectedDate.date, // Using same date for pickup and drop
         dropTime: "10:00:00 AM", // Default time if not specified in your context
-        duration: journey.duration,
+        duration: journey.duration || "N/A",
         quotationRef: quoteRef,
-        vanType: van.type,
-        worker: selectedDate.numberOfMovers,
+        vanType: van.type || "N/A",
+        worker: selectedDate.numberOfMovers || 1,
         dropAddress: {
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
@@ -104,7 +104,9 @@ const BookingDetails = () => {
       navigate('/confirmation');
     } catch (error) {
       console.error('Error submitting booking:', error);
-      setSubmitError('Failed to submit booking. Please try again.');
+      setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
+      console.error('Error response data:', error.response?.data);
+
     } finally {
       setIsSubmitting(false);
     }

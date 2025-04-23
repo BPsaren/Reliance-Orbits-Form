@@ -11,7 +11,7 @@ const DateSelection = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const prepath = location.state?.prepath;
-    const { selectedDate, setSelectedDate, van, setVan, toggleVanType, totalPrice, setTotalPrice } = useBooking();
+    const { selectedDate, setSelectedDate, van, setVan } = useBooking();
     const [value, setValue] = useState(new Date());
     const [calendarPrices, setCalendarPrices] = useState({});
     const [bestPriceDates, setBestPriceDates] = useState([]);
@@ -19,36 +19,12 @@ const DateSelection = () => {
     const currentMonth = currentView.toLocaleString('default', { month: 'long' });
     const currentYear = currentView.getFullYear();
 
-    const [fixedPrice] = useState(totalPrice);
     const [selectedMovers, setSelectedMovers] = useState(selectedDate.numberOfMovers || 0);
     const [selectedVanType, setSelectedVanType] = useState(van.type || '');
     
     useEffect(() => {
         generatePriceData();
     }, []);
-
-    // Function to calculate the total price based on current selections
-    const calculateTotalPrice = (movers, vanType) => {
-        let price = fixedPrice;
-        
-        // Add price for movers
-        if (movers > 0) {
-            price += movers * 20;
-        }
-        
-        // Add price for van type
-        if (vanType) {
-            const vanPrices = {
-                'Small': 60,
-                'Medium': 70,
-                'Large': 80,
-                'Luton': 90,
-            };
-            price += vanPrices[vanType] || 0;
-        }
-        
-        return price;
-    };
 
     // Function to generate price data for dates
     const generatePriceData = () => {
@@ -111,39 +87,28 @@ const DateSelection = () => {
         { type: 'Luton', price: 90, emoji: '📦' }
     ];
 
-    const handleSelectMovers = (count, price) => {
+    const handleSelectMovers = (count) => {
         setSelectedMovers(count);
         setSelectedDate({
             ...selectedDate,
-            numberOfMovers: count,
-            price: price
+            numberOfMovers: count
         });
-
-        // Update total price based on both movers and van type
-        const newTotalPrice = calculateTotalPrice(count, selectedVanType);
-        setTotalPrice(newTotalPrice);
     };
 
     const handleSelectVanType = (type) => {
         setSelectedVanType(type);
         setVan({ ...van, type: type });
-        
-        // Update total price based on both movers and van type
-        const newTotalPrice = calculateTotalPrice(selectedMovers, type);
-        setTotalPrice(newTotalPrice);
     };
 
-    // Get price based on van type
-    const getVanPrice = (type) => {
-        const basePrices = {
-            'Small': 60,
-            'Medium': 70,
-            'Large': 80,
-            'Luton': 90,
+    // Function to get van emoji based on type
+    const getVanEmoji = (type) => {
+        const emojis = {
+            'Small': '🚐',
+            'Medium': '🚚',
+            'Large': '🚛',
+            'Luton': '📦'
         };
-        const base = basePrices[type] || 0;
-
-        return totalPrice + base;
+        return emojis[type] || '🚐';
     };
 
     const handleSubmit = (e) => {
@@ -219,17 +184,6 @@ const DateSelection = () => {
         return false;
     };
 
-    // Function to get van emoji based on type
-    const getVanEmoji = (type) => {
-        const emojis = {
-            'Small': '🚐',
-            'Medium': '🚚',
-            'Large': '🚛',
-            'Luton': '📦'
-        };
-        return emojis[type] || '🚐';
-    };
-
     return (
         <div className="bg-gray-50 min-h-screen">
             <Header title="Select a date" />
@@ -248,11 +202,10 @@ const DateSelection = () => {
                                     ? 'border-blue-600 bg-blue-50 text-blue-700'
                                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
-                                onClick={() => handleSelectMovers(1, 139)}
+                                onClick={() => handleSelectMovers(1)}
                             >
                                 <span className="text-2xl mb-2">👤</span>
                                 <span className="font-medium">1 Person</span>
-                                <div className="mt-2 text-lg font-semibold">£{(fixedPrice + 20).toFixed(2)}</div>
                             </button>
 
                             <button
@@ -261,11 +214,10 @@ const DateSelection = () => {
                                     ? 'border-blue-600 bg-blue-50 text-blue-700'
                                     : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
-                                onClick={() => handleSelectMovers(2, 189)}
+                                onClick={() => handleSelectMovers(2)}
                             >
                                 <span className="text-2xl mb-2">👥</span>
                                 <span className="font-medium">2 People</span>
-                                <div className="mt-2 text-lg font-semibold">£{(fixedPrice + 40).toFixed(2)}</div>
                             </button>
                             {/* Van Type Dropdown */}
                             <div className="flex flex-col items-center justify-center p-4 border rounded-lg border-gray-300">
@@ -285,7 +237,6 @@ const DateSelection = () => {
                                         </option>
                                     ))}
                                 </select>
-                                
                             </div>
                         </div>
 
@@ -362,8 +313,6 @@ const DateSelection = () => {
                     <OrderSummary />
                 </div>
             </div>
-
-            {/* CSS for styling the react-calendar to match your design */}
         </div>
     );
 };

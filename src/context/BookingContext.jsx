@@ -43,7 +43,7 @@ export const BookingProvider = ({ children }) => {
     const [selectedDate, setSelectedDate] = useState({
         date: '18 Apr',
         price: 179,
-        numberOfMovers: null,
+        numberOfMovers: 0,
     });
 
     const [van, setVan] = useState({
