@@ -7,7 +7,7 @@ export const useBooking = () => useContext(BookingContext);
 export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
 
-    
+
     const [pickup, setPickup] = useState({
         location: '',
         floor: 0,
@@ -20,7 +20,7 @@ export const BookingProvider = ({ children }) => {
         country:'',
         contactName:'',
         contactPhone:'',
-
+            
 
 
     });
@@ -87,7 +87,8 @@ export const BookingProvider = ({ children }) => {
     const [totalPrice, setTotalPrice] = useState(0);
     // Calculate total price
     
-
+    const [pickupAddressWithPostalCode, setpickupAddressWithPostalCode] = useState('')
+    const [dropAddressWithPostalCode, setdropAddressWithPostalCode] = useState('')
     const addItem = (item) => {
         setItems([...items, { name: item, quantity: 1 }]);
     };
@@ -122,6 +123,8 @@ export const BookingProvider = ({ children }) => {
             customerDetails, setCustomerDetails,
             journey,setJourney, totalPrice, setTotalPrice,
             van, setVan, toggleVanType,
+            pickupAddressWithPostalCode, setpickupAddressWithPostalCode,
+            dropAddressWithPostalCode, setdropAddressWithPostalCode,
         }}>
             {children}
         </BookingContext.Provider>

@@ -8,7 +8,7 @@ import './CalendarStyles.css'; // Custom styles for the calendar component
 
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
-  const { pickup, setPickup, delivery, setDelivery } = useBooking();
+  const { pickup, setPickup, delivery, setDelivery,  } = useBooking();
   
   // State for date selection
   const [hasSelectedDate, setHasSelectedDate] = useState(true);

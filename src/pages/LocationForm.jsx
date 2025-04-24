@@ -6,13 +6,16 @@ import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
 
 const LocationForm = () => {
-  const { pickup, setPickup, delivery, setDelivery } = useBooking();
+  const { pickup, setPickup, delivery, setDelivery, pickupAddressWithPostalCode, setpickupAddressWithPostalCode, dropAddressWithPostalCode, setdropAddressWithPostalCode } = useBooking();
 
   const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
   const [deliveryQuery, setDeliveryQuery] = useState(delivery.location || '');
 
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [deliverySuggestions, setDeliverySuggestions] = useState([]);
+
+  const [pickupPlaceId, setPickupPlaceId] = useState('');
+  const [deliveryPlaceId, setDeliveryPlaceId] = useState('');
 
   const [pickupTypingTimeout, setPickupTypingTimeout] = useState(null);
   const [deliveryTypingTimeout, setDeliveryTypingTimeout] = useState(null);
@@ -23,16 +26,31 @@ const LocationForm = () => {
   const [pickupError, setPickupError] = useState('');
   const [deliveryError, setDeliveryError] = useState('');
 
-  const pickupSelectedRef = useRef(false);
-  const deliverySelectedRef = useRef(false);
+  // Track if user is currently selecting from suggestions
+  const [pickupSelecting, setPickupSelecting] = useState(false);
+  const [deliverySelecting, setDeliverySelecting] = useState(false);
 
   const navigate = useNavigate();
 
+  // Check if a string contains a UK postal code pattern
+  const containsUKPostalCode = (str) => {
+    // Regex for UK postal code pattern - this is a basic version
+    const ukPostcodeRegex = /[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}/i;
+    return ukPostcodeRegex.test(str);
+  };
+
+  // Check if a string contains "UK" at the end
+  const containsUK = (str) => {
+    return str.trim().endsWith("UK") || str.trim().endsWith("UK,");
+  };
+
   // Autocomplete for pickup
   useEffect(() => {
-    if (pickupQuery.trim() === '' || pickupSelectedRef.current) {
+    // Don't show suggestions when:
+    // 1. The query is empty
+    // 2. User just selected an item from suggestions
+    if (pickupQuery.trim() === '' || pickupSelecting) {
       setPickupSuggestions([]);
-      pickupSelectedRef.current = false;
       return;
     }
 
@@ -53,9 +71,11 @@ const LocationForm = () => {
 
   // Autocomplete for delivery
   useEffect(() => {
-    if (deliveryQuery.trim() === '' || deliverySelectedRef.current) {
+    // Don't show suggestions when:
+    // 1. The query is empty
+    // 2. User just selected an item from suggestions
+    if (deliveryQuery.trim() === '' || deliverySelecting) {
       setDeliverySuggestions([]);
-      deliverySelectedRef.current = false;
       return;
     }
 
@@ -74,23 +94,101 @@ const LocationForm = () => {
     return () => clearTimeout(timeout);
   }, [deliveryQuery]);
 
+  // Format the address with postal code and UK
+  const formatAddressWithPostcode = (address, postcode) => {
+    // Remove any trailing UK if present
+    let cleanAddress = address;
+    if (containsUK(cleanAddress)) {
+      cleanAddress = cleanAddress.replace(/,?\s*UK,?$/, '');
+    }
+    
+    // Add postcode if not already present and format with UK
+    if (!containsUKPostalCode(cleanAddress)) {
+      return `${cleanAddress} ${postcode}, UK`;
+    } else {
+      // If it already has a postcode, just ensure it ends with UK
+      return containsUK(cleanAddress) ? cleanAddress : `${cleanAddress}, UK`;
+    }
+  };
+
+  // for address with postal code for pickup
+  useEffect(() => {
+    if (!pickupPlaceId) return;
+    
+    getPostalCode(pickupPlaceId).then((res) => {
+      setPickup(prev => {
+        const newPickup = { ...prev, postcode: res.data.long_name };
+        
+        // Format the address properly
+        const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
+        
+        // Update the query in a way that doesn't trigger suggestions
+        setPickupSelecting(true);
+        setPickupQuery(formattedAddress);
+        setTimeout(() => setPickupSelecting(false), 100);
+        
+        setpickupAddressWithPostalCode(formattedAddress);
+        return { ...newPickup, location: formattedAddress };
+      });
+    });
+  }, [pickupPlaceId]);
+
+  // for address with postal code for delivery
+  useEffect(() => {
+    if (!deliveryPlaceId) return;
+    
+    getPostalCode(deliveryPlaceId).then((res) => {
+      setDelivery(prev => {
+        const newDelivery = { ...prev, postcode: res.data.long_name };
+        
+        // Format the address properly
+        const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
+        
+        // Update the query in a way that doesn't trigger suggestions
+        setDeliverySelecting(true);
+        setDeliveryQuery(formattedAddress);
+        setTimeout(() => setDeliverySelecting(false), 100);
+        
+        setdropAddressWithPostalCode(formattedAddress);
+        return { ...newDelivery, location: formattedAddress };
+      });
+    });
+  }, [deliveryPlaceId]);
+
+  async function getPostalCode(place_id) {
+    const response = await axios.get("https://reliance-orbit.onrender.com/postalcode/" + place_id);
+    return response;
+  }
+
   // Suggestion handlers
   const handlePickupSuggestionSelect = (suggestion) => {
-    pickupSelectedRef.current = true;
+    // Mark that we're selecting something, which will prevent suggestions
+    setPickupSelecting(true);
+    
     setPickupQuery(suggestion.description);
     setPickup({ ...pickup, location: suggestion.description });
+    setPickupPlaceId(suggestion.place_id);
     setPickupSuggestions([]);
     setFocusedPickupIndex(-1);
     setPickupError('');
+    
+    // Reset the selection flag after a short delay to allow state updates
+    setTimeout(() => setPickupSelecting(false), 100);
   };
 
   const handleDeliverySuggestionSelect = (suggestion) => {
-    deliverySelectedRef.current = true;
+    // Mark that we're selecting something, which will prevent suggestions
+    setDeliverySelecting(true);
+    
     setDeliveryQuery(suggestion.description);
     setDelivery({ ...delivery, location: suggestion.description });
+    setDeliveryPlaceId(suggestion.place_id);
     setDeliverySuggestions([]);
     setFocusedDeliveryIndex(-1);
     setDeliveryError('');
+    
+    // Reset the selection flag after a short delay to allow state updates
+    setTimeout(() => setDeliverySelecting(false), 100);
   };
 
   // Keyboard navigation for pickup
@@ -106,7 +204,9 @@ const LocationForm = () => {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const index = focusedPickupIndex >= 0 ? focusedPickupIndex : 0;
-      handlePickupSuggestionSelect(pickupSuggestions[index]);
+      if (pickupSuggestions[index]) {
+        handlePickupSuggestionSelect(pickupSuggestions[index]);
+      }
     } else if (e.key === 'Escape') {
       setPickupSuggestions([]);
     }
@@ -125,10 +225,25 @@ const LocationForm = () => {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const index = focusedDeliveryIndex >= 0 ? focusedDeliveryIndex : 0;
-      handleDeliverySuggestionSelect(deliverySuggestions[index]);
+      if (deliverySuggestions[index]) {
+        handleDeliverySuggestionSelect(deliverySuggestions[index]);
+      }
     } else if (e.key === 'Escape') {
       setDeliverySuggestions([]);
     }
+  };
+
+  // Handle manual input change with focus on input field
+  const handlePickupInputChange = (e) => {
+    setPickupQuery(e.target.value);
+    // If the user is typing manually, they're not selecting from suggestions
+    setPickupSelecting(false);
+  };
+
+  const handleDeliveryInputChange = (e) => {
+    setDeliveryQuery(e.target.value);
+    // If the user is typing manually, they're not selecting from suggestions
+    setDeliverySelecting(false);
   };
 
   const handleSubmit = (e) => {
@@ -174,12 +289,12 @@ const LocationForm = () => {
                     <input
                       type="text"
                       value={pickupQuery}
-                      onChange={(e) => setPickupQuery(e.target.value)}
+                      onChange={handlePickupInputChange}
                       onKeyDown={handlePickupKeyDown}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md"
                       placeholder="Enter pickup address"
                     />
-                    {pickupSuggestions.length > 0 && (
+                    {pickupSuggestions.length > 0 && !pickupSelecting && (
                       <ul className="absolute z-10 bg-white border mt-1 rounded-md w-full shadow max-h-60 overflow-y-auto">
                         {pickupSuggestions.map((s, idx) => (
                           <li
@@ -237,12 +352,12 @@ const LocationForm = () => {
                     <input
                       type="text"
                       value={deliveryQuery}
-                      onChange={(e) => setDeliveryQuery(e.target.value)}
+                      onChange={handleDeliveryInputChange}
                       onKeyDown={handleDeliveryKeyDown}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md"
                       placeholder="Enter delivery address"
                     />
-                    {deliverySuggestions.length > 0 && (
+                    {deliverySuggestions.length > 0 && !deliverySelecting && (
                       <ul className="absolute z-10 bg-white border mt-1 rounded-md w-full shadow max-h-60 overflow-y-auto">
                         {deliverySuggestions.map((s, idx) => (
                           <li
