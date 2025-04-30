@@ -1,6 +1,4 @@
-
-
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
@@ -8,168 +6,244 @@ import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
 
 const MotorBikeLocationForm = (props) => {
-  const { pickup, setPickup, delivery, setDelivery, motorBike, setMotorBike } = useBooking();
+  const { pickup, setPickup, delivery, setDelivery, motorBike, setMotorBike, pickupAddressWithPostalCode, setpickupAddressWithPostalCode, dropAddressWithPostalCode, setdropAddressWithPostalCode } = useBooking();
+
   const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
   const [deliveryQuery, setDeliveryQuery] = useState(delivery.location || '');
+
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [deliverySuggestions, setDeliverySuggestions] = useState([]);
+
+  const [pickupPlaceId, setPickupPlaceId] = useState('');
+  const [deliveryPlaceId, setDeliveryPlaceId] = useState('');
+
   const [pickupTypingTimeout, setPickupTypingTimeout] = useState(null);
   const [deliveryTypingTimeout, setDeliveryTypingTimeout] = useState(null);
+
   const [focusedPickupIndex, setFocusedPickupIndex] = useState(-1);
   const [focusedDeliveryIndex, setFocusedDeliveryIndex] = useState(-1);
-  const [errors, setErrors] = useState({
-    pickup: false,
-    delivery: false
-  });
 
-  const pickupSelectedRef = useRef(false);
-  const deliverySelectedRef = useRef(false);
+  const [pickupError, setPickupError] = useState('');
+  const [deliveryError, setDeliveryError] = useState('');
+
+  // Track if user is currently selecting from suggestions
+  const [pickupSelecting, setPickupSelecting] = useState(false);
+  const [deliverySelecting, setDeliverySelecting] = useState(false);
 
   const navigate = useNavigate();
 
-  // Pickup location autocomplete
+  // Check if a string contains a UK postal code pattern
+  const containsUKPostalCode = (str) => {
+    // Regex for UK postal code pattern - this is a basic version
+    const ukPostcodeRegex = /[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}/i;
+    return ukPostcodeRegex.test(str);
+  };
+
+  // Check if a string contains "UK" at the end
+  const containsUK = (str) => {
+    return str.trim().endsWith("UK") || str.trim().endsWith("UK,");
+  };
+
+  // Autocomplete for pickup
   useEffect(() => {
-    if (pickupQuery.trim() === '' || pickupSelectedRef.current) {
+    // Don't show suggestions when:
+    // 1. The query is empty
+    // 2. User just selected an item from suggestions
+    if (pickupQuery.trim() === '' || pickupSelecting) {
       setPickupSuggestions([]);
-      pickupSelectedRef.current = false; // Reset flag
       return;
     }
 
     if (pickupTypingTimeout) clearTimeout(pickupTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://reliance-orbit.onrender.com/autocomplete", {
-        place: pickupQuery
-      })
+      axios.post("https://reliance-orbit.onrender.com/autocomplete", { place: pickupQuery })
         .then(res => {
           setPickupSuggestions(res.data.predictions || []);
-          setFocusedPickupIndex(-1); // Reset the focused index when new suggestions arrive
+          setFocusedPickupIndex(-1);
         })
-        .catch(() => {
-          setPickupSuggestions([]);
-        });
+        .catch(() => setPickupSuggestions([]));
     }, 500);
 
     setPickupTypingTimeout(timeout);
-
     return () => clearTimeout(timeout);
   }, [pickupQuery]);
 
-  // Delivery location autocomplete
+  // Autocomplete for delivery
   useEffect(() => {
-    if (deliveryQuery.trim() === '' || deliverySelectedRef.current) {
+    // Don't show suggestions when:
+    // 1. The query is empty
+    // 2. User just selected an item from suggestions
+    if (deliveryQuery.trim() === '' || deliverySelecting) {
       setDeliverySuggestions([]);
-      deliverySelectedRef.current = false; // Reset the flag after use
       return;
     }
 
     if (deliveryTypingTimeout) clearTimeout(deliveryTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://reliance-orbit.onrender.com/autocomplete", {
-        place: deliveryQuery
-      })
+      axios.post("https://reliance-orbit.onrender.com/autocomplete", { place: deliveryQuery })
         .then(res => {
           setDeliverySuggestions(res.data.predictions || []);
-          setFocusedDeliveryIndex(-1); // Reset the focused index when new suggestions arrive
+          setFocusedDeliveryIndex(-1);
         })
-        .catch(err => {
-          console.error('Delivery autocomplete error:', err);
-          setDeliverySuggestions([]);
-        });
+        .catch(() => setDeliverySuggestions([]));
     }, 500);
 
     setDeliveryTypingTimeout(timeout);
-
     return () => clearTimeout(timeout);
   }, [deliveryQuery]);
 
-  // Handle pickup suggestion selection
+  // Format the address with postal code and UK
+  const formatAddressWithPostcode = (address, postcode) => {
+    // Remove any trailing UK if present
+    let cleanAddress = address;
+    if (containsUK(cleanAddress)) {
+      cleanAddress = cleanAddress.replace(/,?\s*UK,?$/, '');
+    }
+    
+    // Add postcode if not already present and format with UK
+    if (!containsUKPostalCode(cleanAddress)) {
+      return `${cleanAddress} ${postcode}, UK`;
+    } else {
+      // If it already has a postcode, just ensure it ends with UK
+      return containsUK(cleanAddress) ? cleanAddress : `${cleanAddress}, UK`;
+    }
+  };
+
+  // for address with postal code for pickup
+  useEffect(() => {
+    if (!pickupPlaceId) return;
+    
+    getPostalCode(pickupPlaceId).then((res) => {
+      setPickup(prev => {
+        const newPickup = { ...prev, postcode: res.data.long_name };
+        
+        // Format the address properly
+        const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
+        
+        // Update the query in a way that doesn't trigger suggestions
+        setPickupSelecting(true);
+        setPickupQuery(formattedAddress);
+        setTimeout(() => setPickupSelecting(false), 100);
+        
+        setpickupAddressWithPostalCode(formattedAddress);
+        return { ...newPickup, location: formattedAddress };
+      });
+    });
+  }, [pickupPlaceId]);
+
+  // for address with postal code for delivery
+  useEffect(() => {
+    if (!deliveryPlaceId) return;
+    
+    getPostalCode(deliveryPlaceId).then((res) => {
+      setDelivery(prev => {
+        const newDelivery = { ...prev, postcode: res.data.long_name };
+        
+        // Format the address properly
+        const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
+        
+        // Update the query in a way that doesn't trigger suggestions
+        setDeliverySelecting(true);
+        setDeliveryQuery(formattedAddress);
+        setTimeout(() => setDeliverySelecting(false), 100);
+        
+        setdropAddressWithPostalCode(formattedAddress);
+        return { ...newDelivery, location: formattedAddress };
+      });
+    });
+  }, [deliveryPlaceId]);
+
+  async function getPostalCode(place_id) {
+    const response = await axios.get("https://reliance-orbit.onrender.com/postalcode/" + place_id);
+    return response;
+  }
+
+  // Suggestion handlers
   const handlePickupSuggestionSelect = (suggestion) => {
-    pickupSelectedRef.current = true;
+    // Mark that we're selecting something, which will prevent suggestions
+    setPickupSelecting(true);
+    
     setPickupQuery(suggestion.description);
     setPickup({ ...pickup, location: suggestion.description });
+    setPickupPlaceId(suggestion.place_id);
     setPickupSuggestions([]);
     setFocusedPickupIndex(-1);
-    setErrors(prev => ({ ...prev, pickup: false }));
+    setPickupError('');
+    
+    // Reset the selection flag after a short delay to allow state updates
+    setTimeout(() => setPickupSelecting(false), 100);
   };
 
-  // Handle delivery suggestion selection
   const handleDeliverySuggestionSelect = (suggestion) => {
-    deliverySelectedRef.current = true;
+    // Mark that we're selecting something, which will prevent suggestions
+    setDeliverySelecting(true);
+    
     setDeliveryQuery(suggestion.description);
     setDelivery({ ...delivery, location: suggestion.description });
+    setDeliveryPlaceId(suggestion.place_id);
     setDeliverySuggestions([]);
     setFocusedDeliveryIndex(-1);
-    setErrors(prev => ({ ...prev, delivery: false }));
+    setDeliveryError('');
+    
+    // Reset the selection flag after a short delay to allow state updates
+    setTimeout(() => setDeliverySelecting(false), 100);
   };
 
-  // Handle keyboard navigation for pickup suggestions
+  // Keyboard navigation for pickup
   const handlePickupKeyDown = (e) => {
-    if (pickupSuggestions.length === 0) return;
+    if (!pickupSuggestions.length) return;
 
-    // Arrow down
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setFocusedPickupIndex(prev =>
-        prev < pickupSuggestions.length - 1 ? prev + 1 : 0
-      );
-    }
-    // Arrow up
-    else if (e.key === 'ArrowUp') {
+      setFocusedPickupIndex((prev) => (prev < pickupSuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setFocusedPickupIndex(prev =>
-        prev > 0 ? prev - 1 : pickupSuggestions.length - 1
-      );
-    }
-    // Enter
-    else if (e.key === 'Enter') {
+      setFocusedPickupIndex((prev) => (prev > 0 ? prev - 1 : pickupSuggestions.length - 1));
+    } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (focusedPickupIndex >= 0) {
-        handlePickupSuggestionSelect(pickupSuggestions[focusedPickupIndex]);
-      } else if (pickupSuggestions.length > 0) {
-        handlePickupSuggestionSelect(pickupSuggestions[0]);
+      const index = focusedPickupIndex >= 0 ? focusedPickupIndex : 0;
+      if (pickupSuggestions[index]) {
+        handlePickupSuggestionSelect(pickupSuggestions[index]);
       }
-    }
-    // Escape
-    else if (e.key === 'Escape') {
+    } else if (e.key === 'Escape') {
       setPickupSuggestions([]);
-      setFocusedPickupIndex(-1);
     }
   };
 
-  // Handle keyboard navigation for delivery suggestions
+  // Keyboard navigation for delivery
   const handleDeliveryKeyDown = (e) => {
-    if (deliverySuggestions.length === 0) return;
+    if (!deliverySuggestions.length) return;
 
-    // Arrow down
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setFocusedDeliveryIndex(prev =>
-        prev < deliverySuggestions.length - 1 ? prev + 1 : 0
-      );
-    }
-    // Arrow up
-    else if (e.key === 'ArrowUp') {
+      setFocusedDeliveryIndex((prev) => (prev < deliverySuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setFocusedDeliveryIndex(prev =>
-        prev > 0 ? prev - 1 : deliverySuggestions.length - 1
-      );
-    }
-    // Enter
-    else if (e.key === 'Enter') {
+      setFocusedDeliveryIndex((prev) => (prev > 0 ? prev - 1 : deliverySuggestions.length - 1));
+    } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (focusedDeliveryIndex >= 0) {
-        handleDeliverySuggestionSelect(deliverySuggestions[focusedDeliveryIndex]);
-      } else if (deliverySuggestions.length > 0) {
-        handleDeliverySuggestionSelect(deliverySuggestions[0]);
+      const index = focusedDeliveryIndex >= 0 ? focusedDeliveryIndex : 0;
+      if (deliverySuggestions[index]) {
+        handleDeliverySuggestionSelect(deliverySuggestions[index]);
       }
-    }
-    // Escape
-    else if (e.key === 'Escape') {
+    } else if (e.key === 'Escape') {
       setDeliverySuggestions([]);
-      setFocusedDeliveryIndex(-1);
     }
+  };
+
+  // Handle manual input change with focus on input field
+  const handlePickupInputChange = (e) => {
+    setPickupQuery(e.target.value);
+    // If the user is typing manually, they're not selecting from suggestions
+    setPickupSelecting(false);
+  };
+
+  const handleDeliveryInputChange = (e) => {
+    setDeliveryQuery(e.target.value);
+    // If the user is typing manually, they're not selecting from suggestions
+    setDeliverySelecting(false);
   };
 
   const handleBikeTypeChange = (e) => {
@@ -178,20 +252,26 @@ const MotorBikeLocationForm = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validate form
-    const newErrors = {
-      pickup: !pickup.location,
-      delivery: !delivery.location
-    };
-    
-    setErrors(newErrors);
-    
-    if (newErrors.pickup || newErrors.delivery) {
-      return;
+
+    let valid = true;
+
+    if (!pickupQuery.trim()) {
+      setPickupError('Pickup address is required');
+      valid = false;
+    } else {
+      setPickupError('');
     }
-    
-    navigate('/date', { state: { prepath: props.prepath } });
+
+    if (!deliveryQuery.trim()) {
+      setDeliveryError('Delivery address is required');
+      valid = false;
+    } else {
+      setDeliveryError('');
+    }
+
+    if (valid) {
+      navigate('/date', { state: { prepath: props.prepath } });
+    }
   };
 
   return (
@@ -233,40 +313,28 @@ const MotorBikeLocationForm = (props) => {
                     <input
                       type="text"
                       value={pickupQuery}
-                      onChange={(e) => {
-                        setPickupQuery(e.target.value);
-                        setErrors(prev => ({ ...prev, pickup: false }));
-                      }}
+                      onChange={handlePickupInputChange}
                       onKeyDown={handlePickupKeyDown}
-                      className={`w-full px-4 py-2 border ${errors.pickup ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
+                      className={`w-full px-4 py-2 border ${pickupError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
                       placeholder="Enter pickup address"
                     />
 
-                    {pickupSuggestions.length > 0 && (
+                    {pickupSuggestions.length > 0 && !pickupSelecting && (
                       <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
                         {pickupSuggestions.map((suggestion, idx) => (
                           <li
                             key={idx}
                             onClick={() => handlePickupSuggestionSelect(suggestion)}
-                            className={`px-4 py-2 cursor-pointer ${idx === focusedPickupIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
-                              }`}
+                            className={`px-4 py-2 cursor-pointer ${idx === focusedPickupIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
                           >
                             {suggestion.description}
                           </li>
                         ))}
                       </ul>
                     )}
-
-                    {pickup.location && (
-                      <span className="absolute right-3 top-2.5 text-green-600">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </span>
-                    )}
                   </div>
-                  {errors.pickup && (
-                    <p className="mt-1 text-sm text-red-600">Pickup address is required</p>
+                  {pickupError && (
+                    <p className="mt-1 text-sm text-red-600">{pickupError}</p>
                   )}
                 </div>
               </div>
@@ -280,40 +348,28 @@ const MotorBikeLocationForm = (props) => {
                     <input
                       type="text"
                       value={deliveryQuery}
-                      onChange={(e) => {
-                        setDeliveryQuery(e.target.value);
-                        setErrors(prev => ({ ...prev, delivery: false }));
-                      }}
+                      onChange={handleDeliveryInputChange}
                       onKeyDown={handleDeliveryKeyDown}
-                      className={`w-full px-4 py-2 border ${errors.delivery ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
+                      className={`w-full px-4 py-2 border ${deliveryError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
                       placeholder="Enter delivery address"
                     />
 
-                    {deliverySuggestions.length > 0 && (
+                    {deliverySuggestions.length > 0 && !deliverySelecting && (
                       <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto">
                         {deliverySuggestions.map((suggestion, idx) => (
                           <li
                             key={idx}
                             onClick={() => handleDeliverySuggestionSelect(suggestion)}
-                            className={`px-4 py-2 cursor-pointer ${idx === focusedDeliveryIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
-                              }`}
+                            className={`px-4 py-2 cursor-pointer ${idx === focusedDeliveryIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
                           >
                             {suggestion.description}
                           </li>
                         ))}
                       </ul>
                     )}
-
-                    {delivery.location && (
-                      <span className="absolute right-3 top-2.5 text-green-600">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </span>
-                    )}
                   </div>
-                  {errors.delivery && (
-                    <p className="mt-1 text-sm text-red-600">Delivery address is required</p>
+                  {deliveryError && (
+                    <p className="mt-1 text-sm text-red-600">{deliveryError}</p>
                   )}
                 </div>
               </div>
