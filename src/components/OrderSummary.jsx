@@ -19,7 +19,6 @@ const OrderSummary = () => {
     piano,
     van,
     motorBike,
-    // Add motorBike from context
   } = useBooking();
 
   const floorToNumber = (floor) => {
@@ -35,11 +34,10 @@ const OrderSummary = () => {
   };
 
   const kmToMiles = (kmString) => {
-    const kmValue = parseFloat(kmString); // Extract numeric part
+    const kmValue = parseFloat(kmString);
     const miles = kmValue * 0.621371;
-    return `${miles.toFixed(2)} miles`; // Rounded to 2 decimal places
+    return `${miles.toFixed(2)} miles`;
   };
-
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -59,14 +57,8 @@ const OrderSummary = () => {
           worker: selectedDate.numberOfMovers,
         };
 
-        // console.log("Sending payload to API:", payload);
-
         const res = await axios.post('https://reliance-orbit.onrender.com/price', payload);
-
-        // console.log("Received response:", res.data);
-
         setTotalPrice(res.data.price);
-        console.log("Price set to:", res.data.price);
       } catch (err) {
         console.error("Price fetch error:", err);
       }
@@ -74,7 +66,6 @@ const OrderSummary = () => {
 
     fetchPrice();
   }, [pickup, delivery, van, selectedDate]);
-  // Add motorBike to dependency array
 
   useEffect(() => {
     const fetchDistance = async () => {
@@ -94,9 +85,6 @@ const OrderSummary = () => {
           distance: distanceInMiles,
           duration: durationText
         }));
-
-
-
       } catch (err) {
         console.error("Distance fetch error:", err);
       }
@@ -104,7 +92,6 @@ const OrderSummary = () => {
 
     fetchDistance();
   }, [pickup.location, delivery.location]);
-
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full md:w-96 flex-shrink-0">
@@ -122,98 +109,67 @@ const OrderSummary = () => {
           {items.map((item, index) => (
             <div key={index} className="flex justify-between items-center">
               <div className="text-gray-900">{item.name}</div>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
             </div>
           ))}
 
-          {/* Display motor bike if type is set */}
           {motorBike.type && (
             <div className="flex justify-between items-center">
               <div className="text-gray-900">Motor Bike ({motorBike.type})</div>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
             </div>
           )}
 
-          {piano.type !== '' ? (
+          {piano.type !== '' && (
             <div className="flex justify-between items-center border-b border-gray-100 pb-2">
               <span className="text-gray-600 text-sm font-medium">Piano Type</span>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-900">{piano.type}</span>
-                <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-              </div>
+              <span className="text-gray-900">{piano.type}</span>
             </div>
-          ) : null}
+          )}
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Floors</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{pickup.floor} to {delivery.floor}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-          </div>
+          <span className="text-gray-900">{pickup.floor} to {delivery.floor}</span>
         </div>
 
-        {pickup.propertyType !== '' ? (
+        {pickup.propertyType !== '' && (
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
             <span className="text-gray-600 text-sm font-medium">Pickup Property Type</span>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-900">{pickup.propertyType}</span>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-            </div>
+            <span className="text-gray-900">{pickup.propertyType}</span>
           </div>
-        ) : null}
+        )}
 
-        {delivery.propertyType !== '' ? (
+        {delivery.propertyType !== '' && (
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
             <span className="text-gray-600 text-sm font-medium">Delivery Property Type</span>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-900">{delivery.propertyType}</span>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-            </div>
+            <span className="text-gray-900">{delivery.propertyType}</span>
           </div>
-        ) : null}
+        )}
 
-        {/* Add motor bike details section if type is provided */}
         {motorBike.type && (
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
             <span className="text-gray-600 text-sm font-medium">Motor Bike</span>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-900">{motorBike.type}</span>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-            </div>
+            <span className="text-gray-900">{motorBike.type}</span>
           </div>
         )}
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Loading / Unloading</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{selectedDate.numberOfMovers} Person</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-          </div>
+          <span className="text-gray-900">{selectedDate.numberOfMovers} Person</span>
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Pickup</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{selectedDate.date}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-          </div>
+          <span className="text-gray-900">{selectedDate.date}</span>
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Locations</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{pickup.location} to {delivery.location}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-          </div>
+          <span className="text-gray-900">{pickup.location} to {delivery.location}</span>
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Vans</span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{van.type}</span>
-            <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">edit</button>
-          </div>
+          <span className="text-gray-900">{van.type}</span>
         </div>
       </div>
 
