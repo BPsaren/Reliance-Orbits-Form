@@ -5,6 +5,7 @@
     font-family: inherit;
 }
 
+
 /* Remove default navigation buttons as we have custom ones */
 .react-calendar__navigation {
     display: none;
@@ -68,4 +69,10 @@
 /* Fix any container issues */
 .calendar-container {
     overflow: hidden;
+}
+/* Add this to your Date.css file */
+.blur-sm {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
 }

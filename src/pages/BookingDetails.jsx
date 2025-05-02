@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
@@ -9,8 +9,6 @@ const BookingDetails = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [showPickupManualAddress, setShowPickupManualAddress] = useState(false);
-  const [showDeliveryManualAddress, setShowDeliveryManualAddress] = useState(false);
 
   const {
     customerDetails,
@@ -26,8 +24,58 @@ const BookingDetails = () => {
     motorBike,
     piano,
     quoteRef,
-    van
+    van,
   } = useBooking();
+
+  // Parse location into address fields
+  const parseLocationToAddress = (location) => {
+    if (!location) return {};
+  
+    // Remove postcodes and "UK" (case-insensitive)
+    const cleaned = location
+      .replace(/\bUK\b/i, '')              // Remove "UK"
+      .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '') // Remove postcodes
+      .trim();
+  
+    // Split into non-empty parts
+    const parts = cleaned.split(',')
+      .map(part => part.trim())
+      .filter(part => part !== '');
+  
+    return {
+      addressLine1: parts[0] || "",  // First segment (e.g., "The Bristolian")
+      addressLine2: parts[1] || "",  // Second segment (e.g., "Picton Street")
+      city: parts[2] || "",          // Third segment (e.g., "Montpelier") or empty
+      county: parts[3] || "",        // Fourth segment (e.g., "Bristol") or empty
+    };
+  };
+  // Auto-fill address when location changes
+  useEffect(() => {
+    if (pickup.location) {
+      const address = parseLocationToAddress(pickup.location);
+      setPickup(prev => ({
+        ...prev,
+        addressLine1: address.addressLine1,
+        addressLine2: address.addressLine2,
+        city: address.city,
+        county: address.county,
+      }));
+    }
+  }, [pickup.location]);
+
+  // Auto-fill address when location changes
+  useEffect(() => {
+    if (delivery.location) {
+      const address = parseLocationToAddress(pickup.location);
+      setDelivery(prev => ({
+        ...prev,
+        addressLine1: address.addressLine1,
+        addressLine2: address.addressLine2,
+        city: address.city,
+        county: address.county,
+      }));
+    }
+  }, [pickup.location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,14 +83,13 @@ const BookingDetails = () => {
     setSubmitError(null);
 
     try {
-      // Construct the request body according to the required format
       const bookingData = {
         username: customerDetails.name,
         email: customerDetails.email,
         phoneNumber: customerDetails.phone,
         price: totalPrice,
-        distance: parseInt(journey.distance) || 0, // Convert "97 miles" to numeric value
-        route:"default route",
+        distance: parseInt(journey.distance) || 0,
+        route: "default route",
         fromLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -56,9 +103,9 @@ const BookingDetails = () => {
           propertyType: delivery.propertyType || "standard"
         },
         pickupdDate: selectedDate.date,
-        pickupdTime: "08:00:00 AM", // Default time if not specified in your context
-        dropDate: selectedDate.date, // Using same date for pickup and drop
-        dropTime: "10:00:00 AM", // Default time if not specified in your context
+        pickupdTime: "08:00:00 AM",
+        dropDate: selectedDate.date,
+        dropTime: "10:00:00 AM",
         duration: journey.duration || "N/A",
         quotationRef: quoteRef,
         vanType: van.type || "N/A",
@@ -71,7 +118,6 @@ const BookingDetails = () => {
           country: delivery.country,
           contactName: delivery.contactName,
           contactPhone: delivery.contactPhone,
-
         },
         pickupAddress: {
           postcode: pickup.postcode,
@@ -88,31 +134,23 @@ const BookingDetails = () => {
           itemQuantity: items.quantity,
           motorBike: motorBike.type,
           piano: piano.type,
-
-          // Add any additional details you want to include
         }
       };
 
       console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
 
-      // Send data to backend
       const response = await axios.post('https://reliance-orbit.onrender.com/new', bookingData);
-
       console.log('Booking successful:', response.data);
-
-      // Navigate to confirmation page on success
       navigate('/confirmation');
     } catch (error) {
       console.error('Error submitting booking:', error);
       setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
       console.error('Error response data:', error.response?.data);
-
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Function to handle pickup address updates
   const handlePickupChange = (field, value) => {
     setPickup({
       ...pickup,
@@ -120,7 +158,6 @@ const BookingDetails = () => {
     });
   };
 
-  // Function to handle delivery address updates
   const handleDeliveryChange = (field, value) => {
     setDelivery({
       ...delivery,
@@ -140,12 +177,12 @@ const BookingDetails = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Pickup Details</h2>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
                 <div className="mb-2">
                   <div className="flex items-center">
                     <input
                       type="text"
-                      placeholder="Search Postcode"
+                      placeholder="Enter Postcode"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.postcode || ''}
                       onChange={(e) => handlePickupChange('postcode', e.target.value)}
@@ -172,56 +209,62 @@ const BookingDetails = () => {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  onClick={() => setShowPickupManualAddress(!showPickupManualAddress)}
-                >
-                  Enter Address Manually
-                </button>
-
-                {showPickupManualAddress && (
-                  <div className="mt-3 space-y-3">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Address Line 1"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={pickup.addressLine1 || ''}
-                        onChange={(e) => handlePickupChange('addressLine1', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Address Line 2"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={pickup.addressLine2 || ''}
-                        onChange={(e) => handlePickupChange('addressLine2', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">City</label>
-                      <input
-                        type="text"
-                        placeholder="City"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={pickup.city || ''}
-                        onChange={(e) => handlePickupChange('city', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Country</label>
-                      <input
-                        type="text"
-                        placeholder="Country"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={pickup.country || ''}
-                        onChange={(e) => handlePickupChange('country', e.target.value)}
-                      />
-                    </div>
+                {/* Always show manual address fields for pickup */}
+                <div className="mt-3 space-y-3">
+                 <div>
+                 <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
+                    <input
+                      type="text"
+                      placeholder="Flat No/House No"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.FlatNO || ''}
+                      onChange={(e) => handlePickupChange('FlatNO', e.target.value)}
+                      required
+                    />
                   </div>
-                )}
+                  <div>
+                  <label className="block text-xs text-gray-500 mb-1">Address</label>
+                    <input
+                      type="text"
+                      placeholder="Address Line 1"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.addressLine1 || ''}
+                      onChange={(e) => handlePickupChange('addressLine1', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Address Line 2"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.addressLine2 || ''}
+                      onChange={(e) => handlePickupChange('addressLine2', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">City</label>
+                    <input
+                      type="text"
+                      placeholder="City"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.city || ''}
+                      onChange={(e) => handlePickupChange('city', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">County</label>
+                    <input
+                      type="text"
+                      placeholder="County"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={pickup.county || ''}
+                      onChange={(e) => handlePickupChange('county', e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Pickup Contact Details */}
@@ -235,6 +278,7 @@ const BookingDetails = () => {
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.contactName || ''}
                       onChange={(e) => handlePickupChange('contactName', e.target.value)}
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -244,6 +288,7 @@ const BookingDetails = () => {
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.contactPhone || ''}
                       onChange={(e) => handlePickupChange('contactPhone', e.target.value)}
+                      required
                     />
                     <button
                       type="button"
@@ -264,12 +309,12 @@ const BookingDetails = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Delivery Details</h2>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
                 <div className="mb-2">
                   <div className="flex items-center">
                     <input
                       type="text"
-                      placeholder="Search Postcode"
+                      placeholder="Enter Postcode"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.postcode || ''}
                       onChange={(e) => handleDeliveryChange('postcode', e.target.value)}
@@ -286,56 +331,62 @@ const BookingDetails = () => {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  onClick={() => setShowDeliveryManualAddress(!showDeliveryManualAddress)}
-                >
-                  Enter Address Manually
-                </button>
-
-                {showDeliveryManualAddress && (
-                  <div className="mt-3 space-y-3">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Address Line 1"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={delivery.addressLine1 || ''}
-                        onChange={(e) => handleDeliveryChange('addressLine1', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Address Line 2"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={delivery.addressLine2 || ''}
-                        onChange={(e) => handleDeliveryChange('addressLine2', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">City</label>
-                      <input
-                        type="text"
-                        placeholder="City"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={delivery.city || ''}
-                        onChange={(e) => handleDeliveryChange('city', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Country</label>
-                      <input
-                        type="text"
-                        placeholder="Country"
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={delivery.country || ''}
-                        onChange={(e) => handleDeliveryChange('country', e.target.value)}
-                      />
-                    </div>
+                {/* Always show manual address fields for delivery */}
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
+                    <input
+                      type="text"
+                      placeholder="Flat No/House No"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.flatNO || ''}
+                      onChange={(e) => handleDeliveryChange('flatNO', e.target.value)}
+                      required
+                    />
                   </div>
-                )}
+                  <div>
+                  <label className="block text-xs text-gray-500 mb-1">Address</label>
+                    <input
+                      type="text"
+                      placeholder="Address Line 1"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.addressLine1 || ''}
+                      onChange={(e) => handleDeliveryChange('addressLine1', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Address Line 2"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.addressLine2 || ''}
+                      onChange={(e) => handleDeliveryChange('addressLine2', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">City</label>
+                    <input
+                      type="text"
+                      placeholder="City"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.city || ''}
+                      onChange={(e) => handleDeliveryChange('city', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">County</label>
+                    <input
+                      type="text"
+                      placeholder="County"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={delivery.county || ''}
+                      onChange={(e) => handleDeliveryChange('county', e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Delivery Contact Details */}
@@ -349,6 +400,7 @@ const BookingDetails = () => {
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.contactName || ''}
                       onChange={(e) => handleDeliveryChange('contactName', e.target.value)}
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -358,6 +410,7 @@ const BookingDetails = () => {
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.contactPhone || ''}
                       onChange={(e) => handleDeliveryChange('contactPhone', e.target.value)}
+                      required
                     />
                     <button
                       type="button"
@@ -373,7 +426,8 @@ const BookingDetails = () => {
               </div>
             </div>
 
-            {/* Contact Details */}
+            {/* Rest of the form remains the same */}
+            {/* Contact Details Section */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Contact Details</h2>
 
