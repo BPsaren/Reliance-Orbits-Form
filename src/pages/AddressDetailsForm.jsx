@@ -5,10 +5,10 @@ import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
 import './CalendarStyles.css'; // Custom styles for the calendar component
-
+import ExtraStopModal from '../components/ExtraStopModal';
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
-  const { pickup, setPickup, delivery, setDelivery } = useBooking();
+  const { pickup, setPickup, delivery, setDelivery,extraStops, setExtraStops } = useBooking();
   
   // State for date selection
   const [hasSelectedDate, setHasSelectedDate] = useState(true);
@@ -35,6 +35,8 @@ const AddressDetailsForm = () => {
   // State for place IDs from Google Places API
   const [pickupPlaceId, setPickupPlaceId] = useState('');
   const [deliveryPlaceId, setDeliveryPlaceId] = useState('');
+ //for extraStopmodal
+    const [isExtraStopModalOpen, setIsExtraStopModalOpen] = useState(false);
   
   // Form validation errors
   const [errors, setErrors] = useState({
@@ -656,8 +658,20 @@ const AddressDetailsForm = () => {
                       </div>
                     </div>
                   </div>
+                  {/* Pickup Lift Availability */}
+                  <div className="flex items-center">
+                         <input
+                            type="checkbox"
+                             id="pickupLift"
+                            checked={delivery.liftAvailable}
+                            onChange={(e) => setDelivery({ ...delivery, liftAvailable: e.target.checked })}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                         <label htmlFor="pickupLift" className="ml-2">Lift Available</label>
+                     </div>
                 </div>
-              </div>
+                     
+             </div>
 
               {/* Estimated Move Date Section */}
               <div className="mb-8">
@@ -734,10 +748,18 @@ const AddressDetailsForm = () => {
               </div>
 
               {/* Form Submit Button */}
-              <div className="flex justify-center">
+                           {/* Buttons */}
+              <div className="p-6 flex justify-between items-center">
+                <button
+                      type="button"
+                      onClick={() => setIsExtraStopModalOpen(true)}
+                      className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
+                      >
+                      Add an extra stop
+              </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Next Step
                 </button>
@@ -750,6 +772,13 @@ const AddressDetailsForm = () => {
             <OrderSummary />
           </div>
         </div>
+        < ExtraStopModal
+       isOpen={isExtraStopModalOpen}
+       onClose={() => setIsExtraStopModalOpen(false)}
+       onAddStop={(stop) => setExtraStops([...extraStops, stop])}
+        />
+
+        
       </div>
 
       {/* Custom Calendar Modal */}

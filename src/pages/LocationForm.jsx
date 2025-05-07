@@ -4,9 +4,16 @@ import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
+import ExtraStopModal from '../components/ExtraStopModal';
 
 const LocationForm = () => {
-  const { pickup, setPickup, delivery, setDelivery, pickupAddressWithPostalCode, setpickupAddressWithPostalCode, dropAddressWithPostalCode, setdropAddressWithPostalCode } = useBooking();
+  const { pickup, setPickup,
+     delivery, setDelivery,
+      pickupAddressWithPostalCode, 
+      setpickupAddressWithPostalCode, 
+      dropAddressWithPostalCode, 
+      setdropAddressWithPostalCode, 
+      extraStops, setExtraStops } = useBooking();
 
   const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
   const [deliveryQuery, setDeliveryQuery] = useState(delivery.location || '');
@@ -30,6 +37,11 @@ const LocationForm = () => {
   const [pickupSelecting, setPickupSelecting] = useState(false);
   const [deliverySelecting, setDeliverySelecting] = useState(false);
 
+   //for extraStopmodal
+  const [isExtraStopModalOpen, setIsExtraStopModalOpen] = useState(false);
+  
+  
+
   const navigate = useNavigate();
 
   // Check if a string contains a UK postal code pattern
@@ -44,6 +56,9 @@ const LocationForm = () => {
     return str.trim().endsWith("UK") || str.trim().endsWith("UK,");
   };
 
+
+
+ 
   // Autocomplete for pickup
   useEffect(() => {
     // Don't show suggestions when:
@@ -406,12 +421,13 @@ const LocationForm = () => {
 
               {/* Buttons */}
               <div className="p-6 flex justify-between items-center">
-                <button
-                  type="button"
-                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
-                >
-                  Add an extra stop
-                </button>
+              <button
+                      type="button"
+                      onClick={() => setIsExtraStopModalOpen(true)}
+                      className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
+                      >
+                      Add an extra stop
+              </button>
                 <button
                   type="submit"
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -425,6 +441,11 @@ const LocationForm = () => {
           <OrderSummary />
         </div>
       </div>
+      < ExtraStopModal
+  isOpen={isExtraStopModalOpen}
+  onClose={() => setIsExtraStopModalOpen(false)}
+  onAddStop={(stop) => setExtraStops([...extraStops, stop])}
+/>
     </div>
   );
 };

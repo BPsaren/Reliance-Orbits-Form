@@ -7,41 +7,38 @@ export const useBooking = () => useContext(BookingContext);
 export const BookingProvider = ({ children }) => {
     const [quoteRef] = useState('21631573');
 
+    // Enhanced extra stops state with proper structure
+    const [extraStops, setExtraStops] = useState([]);
 
     const [pickup, setPickup] = useState({
         location: '',
         floor: 0,
         liftAvailable: false,
-        propertyType:'',
-        postcode:'',
-        addressLine1:'',
-        addressLine2:'',
-        city:'',
-        country:'',
-        contactName:'',
-        contactPhone:'',
-            
-
-
+        propertyType: '',
+        postcode: '',
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        country: '',
+        contactName: '',
+        contactPhone: '',
     });
+
     const [delivery, setDelivery] = useState({
         location: '',
         floor: 0,
         liftAvailable: false,
-        propertyType:'',
-        postcode:'',
-        addressLine1:'',
-        addressLine2:'',
-        city:'',
-        country:'',
-        contactName:'',
-        contactPhone:'',
+        propertyType: '',
+        postcode: '',
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        country: '',
+        contactName: '',
+        contactPhone: '',
     });
-    const [items, setItems] = useState([
-        // { name: 'Armchair', quantity: 1 },
-        // { name: 'Large Box', quantity: 1 },
-        // { name: 'Double Wardrobe', quantity: 1 }
-    ]);
+
+    const [items, setItems] = useState([]);
     const [selectedDate, setSelectedDate] = useState({
         date: '18 Apr',
         price: 179,
@@ -56,7 +53,6 @@ export const BookingProvider = ({ children }) => {
         type: '',
     });
 
-    // New state for motor bike
     const [motorBike, setMotorBike] = useState({
         type: '',
         make: '',
@@ -72,12 +68,14 @@ export const BookingProvider = ({ children }) => {
         reassembly: [],
         specialRequirements: ''
     });
+
     const [customerDetails, setCustomerDetails] = useState({
         name: '',
         email: '',
         phone: '',
         isBusinessCustomer: false
     });
+
     const [journey, setJourney] = useState({
         distance: '',
         duration: '',
@@ -85,10 +83,10 @@ export const BookingProvider = ({ children }) => {
     });
 
     const [totalPrice, setTotalPrice] = useState(0);
-    // Calculate total price
-    
-    const [pickupAddressWithPostalCode, setpickupAddressWithPostalCode] = useState('')
-    const [dropAddressWithPostalCode, setdropAddressWithPostalCode] = useState('')
+    const [pickupAddressWithPostalCode, setpickupAddressWithPostalCode] = useState('');
+    const [dropAddressWithPostalCode, setdropAddressWithPostalCode] = useState('');
+
+    // Item management functions
     const addItem = (item) => {
         setItems([...items, { name: item, quantity: 1 }]);
     };
@@ -110,6 +108,33 @@ export const BookingProvider = ({ children }) => {
         setVan({ type: vanTypes[nextIndex] });
     };
 
+    // Enhanced extra stop management functions
+    const addExtraStop = (stop) => {
+        setExtraStops([...extraStops, {
+            address: stop.address,
+            propertyType: stop.propertyType || '2 Bed House',
+            floor: stop.floor || 'Ground floor',
+            liftAvailable: stop.liftAvailable || false,
+            
+        }]);
+    };
+
+    const updateExtraStop = (index, updatedStop) => {
+        setExtraStops(extraStops.map((stop, i) => 
+            i === index ? { 
+                ...stop,
+                ...updatedStop,
+                propertyType: updatedStop.propertyType !== undefined ? updatedStop.propertyType : stop.propertyType,
+                floor: updatedStop.floor !== undefined ? updatedStop.floor : stop.floor,
+                liftAvailable: updatedStop.liftAvailable !== undefined ? updatedStop.liftAvailable : stop.liftAvailable
+            } : stop
+        ));
+    };
+
+    const removeExtraStop = (index) => {
+        setExtraStops(extraStops.filter((_, i) => i !== index));
+    };
+
     return (
         <BookingContext.Provider value={{
             quoteRef,
@@ -118,13 +143,20 @@ export const BookingProvider = ({ children }) => {
             items, setItems, addItem, updateItemQuantity, removeItem,
             selectedDate, setSelectedDate,
             piano, setPiano,
-            motorBike, setMotorBike, // New motor bike state
+            motorBike, setMotorBike,
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
-            journey,setJourney, totalPrice, setTotalPrice,
+            journey, setJourney, 
+            totalPrice, setTotalPrice,
             van, setVan, toggleVanType,
             pickupAddressWithPostalCode, setpickupAddressWithPostalCode,
             dropAddressWithPostalCode, setdropAddressWithPostalCode,
+            // Enhanced extra stops management
+            extraStops,
+            setExtraStops,
+            addExtraStop,
+            updateExtraStop,
+            removeExtraStop
         }}>
             {children}
         </BookingContext.Provider>

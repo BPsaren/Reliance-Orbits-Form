@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const EmailPopup = ({ onContinue }) => {
     const [email, setEmail] = useState('');
@@ -7,6 +7,12 @@ const EmailPopup = ({ onContinue }) => {
         booking: true,
         aboutUs: true
     });
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        // Trigger the animation when component mounts
+        setIsVisible(true);
+    }, []);
 
     const handleCheckboxChange = (item) => {
         setCheckedItems(prev => ({
@@ -18,13 +24,23 @@ const EmailPopup = ({ onContinue }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (email) {
-            onContinue(email);
+            // Add fade-out animation before continuing
+            setIsVisible(false);
+            setTimeout(() => onContinue(email), 300); // Match the animation duration
         }
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 mx-4 border border-gray-300"> {/* Added border here */}
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+            <div className={`
+                bg-white rounded-lg shadow-xl max-w-md w-full p-6 mx-4 border border-gray-300
+                transition-all duration-300 ease-out
+                ${isVisible ? 
+                    'opacity-100 scale-100' : 
+                    'opacity-0 scale-95'
+                }
+                transform-gpu
+            `}>
                 <h2 className="text-2xl font-bold text-center mb-4">RELIANCE</h2>
                 <p className="text-center mb-6">Please enter email for instant prices</p>
                 
@@ -72,7 +88,7 @@ const EmailPopup = ({ onContinue }) => {
                     />
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700"
+                        className="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
                     >
                         View Prices Now
                     </button>

@@ -6,26 +6,27 @@ import OrderSummary from '../components/OrderSummary';
 
 const AdditionalServices = () => {
   const navigate = useNavigate();
-  const {  additionalServices, setAdditionalServices, selectedDate } = useBooking();
+  const { additionalServices, setAdditionalServices, selectedDate } = useBooking();
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [collectionTime, setCollectionTime] = useState({ start: 8, end: 18 });
   const [deliveryTime, setDeliveryTime] = useState('Same day');
+  const [dismantleCount, setDismantleCount] = useState(0);
+  const [assemblyCount, setAssemblyCount] = useState(0);
+  const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
 
- 
-// Format the date for display
-const formatDisplayDate = (date) => {
-  if (!date) return 'Select date';
-  try {
+  // Format the date for display
+  const formatDisplayDate = (date) => {
+    if (!date) return 'Select date';
+    try {
       const dateObj = new Date(date);
       if (isNaN(dateObj.getTime())) return 'Invalid date';
       const options = { weekday: 'long', day: 'numeric', month: 'long' };
       return dateObj.toLocaleDateString('en-GB', options);
-  } catch (error) {
+    } catch (error) {
       console.error('Error formatting date:', error);
       return 'Invalid date';
-  }
-};
-
+    }
+  };
 
   // Format time in 12-hour format (e.g. 8 -> "8am", 14 -> "2pm")
   const formatTime = (hour) => {
@@ -38,6 +39,19 @@ const formatDisplayDate = (date) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate('/booking-details');
+  };
+
+  const handleAddServices = () => {
+    // Create arrays with the correct number of items
+    const dismantlingItems = Array(dismantleCount).fill({ service: 'dismantling', price: 20 });
+    const reassemblyItems = Array(assemblyCount).fill({ service: 'reassembly', price: 30 });
+    
+    setAdditionalServices({
+      ...additionalServices,
+      dismantling: dismantlingItems,
+      reassembly: reassemblyItems
+    });
+    setShowAssemblyOptions(false);
   };
 
   const handleTimeSlotChange = () => {
@@ -76,7 +90,7 @@ const formatDisplayDate = (date) => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Collection & delivery</h3>
                 <span className="text-sm text-gray-500">
-                {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
+                  {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
                 </span>
               </div>
               
@@ -121,18 +135,97 @@ const formatDisplayDate = (date) => {
                 </div>
               </div>
               
-              <div className="flex gap-4">
-                <button type="button" className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50">
-                  Learn more
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => console.log("Add dismantling/reassembly service")}
-                  className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
-                >
-                  Add to your move
-                </button>
-              </div>
+              {showAssemblyOptions ? (
+                // In your Assembly Options section, update the buttons to prevent default behavior:
+<div className="space-y-4">
+  <div className="flex items-center justify-between">
+    <span>Items to dismantle: £20 per item</span>
+    <div className="flex items-center gap-2">
+      <button 
+        type="button" // Add type="button" to prevent form submission
+        onClick={(e) => {
+          e.preventDefault();
+          setDismantleCount(Math.max(0, dismantleCount - 1));
+        }}
+        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+      >
+        -
+      </button>
+      <span>{dismantleCount}</span>
+      <button 
+        type="button" // Add type="button" to prevent form submission
+        onClick={(e) => {
+          e.preventDefault();
+          setDismantleCount(dismantleCount + 1);
+        }}
+        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+      >
+        +
+      </button>
+    </div>
+  </div>
+  
+  <div className="flex items-center justify-between">
+    <span>Items to assemble: £30 per item</span>
+    <div className="flex items-center gap-2">
+      <button 
+        type="button" // Add type="button" to prevent form submission
+        onClick={(e) => {
+          e.preventDefault();
+          setAssemblyCount(Math.max(0, assemblyCount - 1));
+        }}
+        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+      >
+        -
+      </button>
+      <span>{assemblyCount}</span>
+      <button 
+        type="button" // Add type="button" to prevent form submission
+        onClick={(e) => {
+          e.preventDefault();
+          setAssemblyCount(assemblyCount + 1);
+        }}
+        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+      >
+        +
+      </button>
+    </div>
+  </div>
+
+  <div className="flex gap-4 pt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAssemblyOptions(false)}
+                      className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleAddServices}
+                      className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+</div>
+              ) : (
+                <div className="flex gap-4">
+                  <button 
+                    type="button" 
+                    className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
+                  >
+                    Learn more
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAssemblyOptions(true)}
+                    className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
+                  >
+                    Add to your move
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Special Requirements */}
@@ -196,7 +289,7 @@ const formatDisplayDate = (date) => {
               <div className="mb-6">
                 <div className="mb-4 text-center">
                   <div className="text-lg font-medium text-gray-700">
-                  {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
+                    {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
                   </div>
                 </div>
                 
@@ -211,52 +304,47 @@ const formatDisplayDate = (date) => {
                   </div>
                   
                   <div className="space-y-6">
-  <div>
-    {/* <div className="text-sm font-medium text-gray-700 mb-2">
-      Collection window
-    </div> */}
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-gray-600">Start: {formatTime(collectionTime.start)}</span>
-        <span className="text-sm text-gray-600">End: {formatTime(collectionTime.end)}</span>
-      </div>
-      <div className="space-y-4">
-        <div className="flex items-center">
-          <label className="mr-4 text-sm text-gray-500">Start time</label>
-          <input
-            type="range"
-            min="0"
-            max="24"
-            value={collectionTime.start}
-            onChange={(e) => handleCollectionTimeChange(e, 'start')}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
-          />
-        </div>
-        <div className="flex items-center">
-          <label className="mr-4 text-sm text-gray-500">End time</label>
-          <input
-            type="range"
-            min="0"
-            max="24"
-            value={collectionTime.end}
-            onChange={(e) => handleCollectionTimeChange(e, 'end')}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-  <div className="flex justify-between text-sm text-gray-600">
-    <div className="flex items-center gap-2">
-      <span>AM</span>
-      <div className="w-8 h-[2px] bg-blue-500"></div>
-    </div>
-    <div className="flex items-center gap-2">
-      <div className="w-8 h-[2px] bg-blue-500"></div>
-      <span>PM</span>
-    </div>
-  </div>
-</div>
+                    <div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Start: {formatTime(collectionTime.start)}</span>
+                        <span className="text-sm text-gray-600">End: {formatTime(collectionTime.end)}</span>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center">
+                          <label className="mr-4 text-sm text-gray-500">Start time</label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="24"
+                            value={collectionTime.start}
+                            onChange={(e) => handleCollectionTimeChange(e, 'start')}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
+                          />
+                        </div>
+                        <div className="flex items-center">
+                          <label className="mr-4 text-sm text-gray-500">End time</label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="24"
+                            value={collectionTime.end}
+                            onChange={(e) => handleCollectionTimeChange(e, 'end')}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <span>AM</span>
+                        <div className="w-8 h-[2px] bg-blue-500"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-[2px] bg-blue-500"></div>
+                        <span>PM</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="flex justify-between">
