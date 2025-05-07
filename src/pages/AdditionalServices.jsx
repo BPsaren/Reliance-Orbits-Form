@@ -6,7 +6,7 @@ import OrderSummary from '../components/OrderSummary';
 
 const AdditionalServices = () => {
   const navigate = useNavigate();
-  const {  additionalServices, setAdditionalServices, selectedDate } = useBooking();
+  const {  additionalServices, setAdditionalServices, selectedDate, setSelectedDate } = useBooking();
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [collectionTime, setCollectionTime] = useState({ start: 8, end: 18 });
   const [deliveryTime, setDeliveryTime] = useState('Same day');
@@ -48,8 +48,10 @@ const formatDisplayDate = (date) => {
     const value = parseInt(e.target.value);
     if (type === 'start') {
       setCollectionTime(prev => ({ ...prev, start: value }));
+      setSelectedDate(prev=>({...prev, pickupTime:value}));
     } else {
       setCollectionTime(prev => ({ ...prev, end: value }));
+      setSelectedDate(prev=>({...prev, dropTime:value}));
     }
   };
 

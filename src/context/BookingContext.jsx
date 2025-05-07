@@ -44,6 +44,8 @@ export const BookingProvider = ({ children }) => {
     ]);
     const [selectedDate, setSelectedDate] = useState({
         date: '18 Apr',
+        pickupTime:'',
+        dropTime:'',
         price: 179,
         numberOfMovers: 0,
     });
