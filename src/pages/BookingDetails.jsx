@@ -164,6 +164,13 @@ const BookingDetails = () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    function hourToTime(hour) {
+      const hrs = hour.toString().padStart(2, '0');
+      return `${hrs}:00:00`;
+    }
+    
+    
+
     try {
       const bookingData = {
         username: customerDetails.name,
@@ -185,11 +192,11 @@ const BookingDetails = () => {
           propertyType: delivery.propertyType || "standard"
         },
         pickupdDate: selectedDate.date,
-        pickupdTime: "08:00:00 AM",
+        pickupdTime: hourToTime(selectedDate.pickupTime),
         dropDate: selectedDate.date,
-        dropTime: "10:00:00 AM",
+        dropTime: hourToTime(selectedDate.dropTime),
         duration: journey.duration || "N/A",
-        quotationRef: quoteRef,
+        quotationRef: parseInt(quoteRef),
         vanType: van.type || "N/A",
         worker: selectedDate.numberOfMovers || 1,
         dropAddress: {
@@ -210,13 +217,16 @@ const BookingDetails = () => {
           contactName: pickup.contactName,
           contactPhone: pickup.contactPhone,
         },
+        itemsToDismantle:0,
+        itemsToAssemble:0,
         details: {
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           itemName: items.name,
           itemQuantity: items.quantity,
           motorBike: motorBike.type,
           piano: piano.type,
-        }
+        },
+        stoppage:[]
       };
 
       console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));

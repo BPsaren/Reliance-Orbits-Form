@@ -56,6 +56,9 @@ const OrderSummary = () => {
           },
           vanType: van.type,
           worker: selectedDate.numberOfMovers,
+          itemsToDismantle:0,
+          itemsToAssemble:0,
+          stoppage:[]
         };
 
         const res = await axios.post('https://reliance-orbit.onrender.com/price', payload);
