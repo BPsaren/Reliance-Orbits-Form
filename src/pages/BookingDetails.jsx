@@ -5,10 +5,44 @@ import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from 'axios';
 
+// List of UK cities for validation
+const UK_CITIES = [
+ "London", "Birmingham", "Manchester", "Leeds", "Sheffield",
+  "Bradford", "Liverpool", "Bristol", "Coventry", "Leicester",
+  "Nottingham", "Newcastle upon Tyne", "Sunderland", "Derby", "Plymouth",
+  "Wolverhampton", "Southampton", "Stoke-on-Trent", "Reading", "Brighton & Hove",
+  "Milton Keynes", "Northampton", "Luton", "Exeter", "York",
+  "Cambridge", "Oxford", "Norwich", "Bournemouth", "Poole",
+  "Swindon", "Peterborough", "Southend-on-Sea", "Bath", "Ipswich",
+  "Blackpool", "Middlesbrough", "Huddersfield", "Hull", "Preston",
+  "Portsmouth", "Slough", "Warrington", "Cheltenham", "Gloucester",
+  "Worthing", "Doncaster", "Rotherham", "Colchester", "Crawley",
+  "Lincoln", "Chester", "Canterbury", "Lancaster", "Wakefield",
+  "Barnsley", "Stockport", "Wigan", "Oldham", "Bolton",
+  "Rochdale", "Salford", "Telford", "Blackburn", "Burnley",
+  "Grimsby", "Mansfield", "Bedford", "Hastings", "Chelmsford",
+  "Dudley", "Weston-super-Mare", "Salisbury", "Worcester", "Hereford",
+  "St Albans", "Winchester", "Chichester", "Durham", "Carlisle",
+  "Edinburgh", "Glasgow", "Aberdeen", "Dundee", "Inverness",
+  "Stirling", "Perth", "Dunfermline", "Ayr", "Kilmarnock",
+  "Paisley", "Greenock", "Livingston", "Falkirk", "Motherwell",
+  "Hamilton", "Cumbernauld", "Kirkcaldy", "Glenrothes", "Dumfries",
+  "Cardiff", "Swansea", "Newport", "Wrexham", "Bangor",
+  "St Asaph", "St Davids", "Aberystwyth", "Carmarthen", "Caernarfon",
+  "Llandudno", "Bridgend", "Merthyr Tydfil", "Rhyl", "Barry",
+  "Belfast", "Derry", "Lisburn", "Newry", "Armagh",
+  "Bangor", "Craigavon", "Ballymena", "Omagh", "Enniskillen"
+];
+
 const BookingDetails = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [phoneErrors, setPhoneErrors] = useState({
+    customer: '',
+    pickup: '',
+    delivery: ''
+  });
 
   const {
     customerDetails,
@@ -25,31 +59,53 @@ const BookingDetails = () => {
     piano,
     quoteRef,
     van,
+    extraStops,
   } = useBooking();
 
-  // Parse location into address fields
+  // Validate UK mobile number
+  const validateUKPhoneNumber = (phone) => {
+    // UK mobile numbers start with 07 and are 11 digits long
+    // Also accept +447 format
+    const regex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
+    return regex.test(phone);
+  };
+
   const parseLocationToAddress = (location) => {
     if (!location) return {};
-  
-    // Remove postcodes and "UK" (case-insensitive)
+    
+    // Clean the input
     const cleaned = location
-      .replace(/\bUK\b/i, '')              // Remove "UK"
-      .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '') // Remove postcodes
+      .replace(/\bUK\b/i, '')
+      .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '')
       .trim();
   
-    // Split into non-empty parts
+    // Split into parts
     const parts = cleaned.split(',')
       .map(part => part.trim())
       .filter(part => part !== '');
   
+    // Find city (exact match only)
+    let city = '';
+    let cityFoundInPart1 = false;
+    
+    parts.forEach((part, index) => {
+      const matchedCity = UK_CITIES.find(c => 
+        c.toLowerCase() === part.toLowerCase()
+      );
+      if (matchedCity) {
+        city = matchedCity;
+        cityFoundInPart1 = (index === 1);
+      }
+    });
+  
     return {
-      addressLine1: parts[0] || "",  // First segment (e.g., "The Bristolian")
-      addressLine2: parts[1] || "",  // Second segment (e.g., "Picton Street")
-      city: parts[2] || "",          // Third segment (e.g., "Montpelier") or empty
-      county: parts[3] || "",        // Fourth segment (e.g., "Bristol") or empty
+      addressLine1: parts[0] || "",
+      addressLine2: cityFoundInPart1 ? "" : (parts[1] || ""),
+      city: city,
+      county: ""
     };
   };
-  // Auto-fill address when location changes
+  // Auto-fill address when location changes for pickup
   useEffect(() => {
     if (pickup.location) {
       const address = parseLocationToAddress(pickup.location);
@@ -63,10 +119,10 @@ const BookingDetails = () => {
     }
   }, [pickup.location]);
 
-  // Auto-fill address when location changes
+  // Auto-fill address when location changes for delivery
   useEffect(() => {
     if (delivery.location) {
-      const address = parseLocationToAddress(pickup.location);
+      const address = parseLocationToAddress(delivery.location);
       setDelivery(prev => ({
         ...prev,
         addressLine1: address.addressLine1,
@@ -75,10 +131,36 @@ const BookingDetails = () => {
         county: address.county,
       }));
     }
-  }, [pickup.location]);
+  }, [delivery.location]);
+
+
+   //for add extra stop
+    useEffect(() => {
+      console.log('Current extraStops:', extraStops);
+    }, [extraStops]);
+
+  // Validate all phone numbers before submission
+  const validateAllPhones = () => {
+    const errors = {
+      customer: validateUKPhoneNumber(customerDetails.phone) ? '' : 'Enter a valid UK mobile number: 07 (11 digits) or +447 format',
+      pickup: validateUKPhoneNumber(pickup.contactPhone) ? '' : 'Enter a valid UK mobile number: 07 (11 digits) or +447 format',
+      delivery: validateUKPhoneNumber(delivery.contactPhone) ? '' : 'Enter a valid UK mobile number: 07 (11 digits) or +447 format'
+    };
+    
+    setPhoneErrors(errors);
+    
+    return !errors.customer && !errors.pickup && !errors.delivery;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate phone numbers first
+    if (!validateAllPhones()) {
+      setSubmitError('Please correct the phone number errors');
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -219,21 +301,21 @@ const BookingDetails = () => {
                   )}
                 </div>
 
-                {/* Always show manual address fields for pickup */}
+                {/* Manual address fields for pickup */}
                 <div className="mt-3 space-y-3">
-                 <div>
-                 <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
                     <input
                       type="text"
-                      placeholder="Flat No/House No"
+                      placeholder="Flat No/Door No"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={pickup.FlatNO || ''}
-                      onChange={(e) => handlePickupChange('FlatNO', e.target.value)}
+                      value={pickup.flatNo || ''}
+                      onChange={(e) => handlePickupChange('flatNo', e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                  <label className="block text-xs text-gray-500 mb-1">Address</label>
+                    <label className="block text-xs text-gray-500 mb-1">Address</label>
                     <input
                       type="text"
                       placeholder="Address Line 1"
@@ -263,17 +345,6 @@ const BookingDetails = () => {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">County</label>
-                    <input
-                      type="text"
-                      placeholder="County"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={pickup.county || ''}
-                      onChange={(e) => handlePickupChange('county', e.target.value)}
-                      required
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -294,12 +365,15 @@ const BookingDetails = () => {
                   <div className="relative">
                     <input
                       type="tel"
-                      placeholder="Pickup Contact Number"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Pickup Contact Number (UK mobile)"
+                      className={`w-full p-3 border rounded-md focus:ring-2 ${phoneErrors.pickup ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
                       value={pickup.contactPhone || ''}
                       onChange={(e) => handlePickupChange('contactPhone', e.target.value)}
                       required
                     />
+                    {phoneErrors.pickup && (
+                      <div className="text-red-500 text-xs mt-1">{phoneErrors.pickup}</div>
+                    )}
                     <button
                       type="button"
                       className="absolute right-3 top-3 text-blue-600 font-bold text-xl"
@@ -309,7 +383,7 @@ const BookingDetails = () => {
                   </div>
                 </div>
                 <div className="text-xs text-gray-500 mt-2">
-                  It is your responsibility to make this person aware that Relaince and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing AnyVan to share essential booking information with this person and a driver.
+                  It is your responsibility to make this person aware that Relaince and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing Relaince to share essential booking information with this person and a driver.
                 </div>
               </div>
             </div>
@@ -341,21 +415,21 @@ const BookingDetails = () => {
                   </div>
                 </div>
 
-                {/* Always show manual address fields for delivery */}
+                {/* Manual address fields for delivery */}
                 <div className="mt-3 space-y-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
                     <input
                       type="text"
-                      placeholder="Flat No/House No"
+                      placeholder="Flat No/Door No"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={delivery.flatNO || ''}
-                      onChange={(e) => handleDeliveryChange('flatNO', e.target.value)}
+                      value={delivery.flatNo || ''}
+                      onChange={(e) => handleDeliveryChange('flatNo', e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                  <label className="block text-xs text-gray-500 mb-1">Address</label>
+                    <label className="block text-xs text-gray-500 mb-1">Address</label>
                     <input
                       type="text"
                       placeholder="Address Line 1"
@@ -384,18 +458,7 @@ const BookingDetails = () => {
                       onChange={(e) => handleDeliveryChange('city', e.target.value)}
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">County</label>
-                    <input
-                      type="text"
-                      placeholder="County"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={delivery.county || ''}
-                      onChange={(e) => handleDeliveryChange('county', e.target.value)}
-                      required
-                    />
-                  </div>
+                  </div>                
                 </div>
               </div>
 
@@ -416,12 +479,15 @@ const BookingDetails = () => {
                   <div className="relative">
                     <input
                       type="tel"
-                      placeholder="Delivery Contact Number"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Delivery Contact Number (UK mobile)"
+                      className={`w-full p-3 border rounded-md focus:ring-2 ${phoneErrors.delivery ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
                       value={delivery.contactPhone || ''}
                       onChange={(e) => handleDeliveryChange('contactPhone', e.target.value)}
                       required
                     />
+                    {phoneErrors.delivery && (
+                      <div className="text-red-500 text-xs mt-1">{phoneErrors.delivery}</div>
+                    )}
                     <button
                       type="button"
                       className="absolute right-3 top-3 text-blue-600 font-bold text-xl"
@@ -431,12 +497,11 @@ const BookingDetails = () => {
                   </div>
                 </div>
                 <div className="text-xs text-gray-500 mt-2">
-                  It is your responsibility to make this person aware that Relaince and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing AnyVan to share essential booking information with this person and a driver.
+                  It is your responsibility to make this person aware that Relaince and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing Relaince to share essential booking information with this person and a driver.
                 </div>
               </div>
             </div>
 
-            {/* Rest of the form remains the same */}
             {/* Contact Details Section */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Contact Details</h2>
@@ -469,16 +534,19 @@ const BookingDetails = () => {
               </div>
 
               <div className="mb-4">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number (UK mobile)</label>
                 <input
                   type="tel"
                   id="phone"
                   value={customerDetails.phone}
                   onChange={(e) => setCustomerDetails({ ...customerDetails, phone: e.target.value })}
-                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your phone number"
+                  className={`w-full p-3 border rounded-md focus:ring-2 ${phoneErrors.customer ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
+                  placeholder="Enter your UK mobile number"
                   required
                 />
+                {phoneErrors.customer && (
+                  <div className="text-red-500 text-xs mt-1">{phoneErrors.customer}</div>
+                )}
                 <div className="text-xs text-gray-500 mt-1">We'll use this to contact you about your move</div>
               </div>
 
@@ -508,7 +576,16 @@ const BookingDetails = () => {
                   <div className="text-gray-600">Moving to:</div>
                   <div className="font-medium">{delivery.location}</div>
                 </div>
-              </div>
+
+                {extraStops.map((stop, index) => (
+                      <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
+                <div className="text-gray-600"> Extra Stops: </div> 
+                
+                 <div className="font-medium">{stop.address}</div>
+      
+               </div>
+                          ))}
+            </div>
 
               {/* Payment Options */}
               <div className="mb-6">

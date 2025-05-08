@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
 import { useBooking } from '../context/BookingContext';
 import RouteMap from './RouteMap';
 
@@ -19,6 +18,8 @@ const OrderSummary = () => {
     piano,
     van,
     motorBike,
+    extraStops,
+    removeExtraStop
   } = useBooking();
 
   const floorToNumber = (floor) => {
@@ -124,50 +125,105 @@ const OrderSummary = () => {
           {piano.type !== '' && (
             <div className="flex justify-between items-center border-b border-gray-100 pb-2">
               <span className="text-gray-600 text-sm font-medium">Piano Type</span>
-              <span className="text-gray-900">{piano.type}</span>
+              <span className="text-gray-600">{piano.type}</span>
             </div>
           )}
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Floors</span>
-          <span className="text-gray-900">{pickup.floor} to {delivery.floor}</span>
+          <span className="text-gray-600 text-xs">{pickup.floor} to {delivery.floor}</span>
         </div>
 
         {pickup.propertyType !== '' && (
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
             <span className="text-gray-600 text-sm font-medium">Pickup Property Type</span>
-            <span className="text-gray-900">{pickup.propertyType}</span>
+            <span className="text-gray-600">{pickup.propertyType}</span>
           </div>
         )}
 
         {delivery.propertyType !== '' && (
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
             <span className="text-gray-600 text-sm font-medium">Delivery Property Type</span>
-            <span className="text-gray-900">{delivery.propertyType}</span>
+            <span className="text-gray-600">{delivery.propertyType}</span>
           </div>
         )}
 
         {motorBike.type && (
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
             <span className="text-gray-600 text-sm font-medium">Motor Bike</span>
-            <span className="text-gray-900">{motorBike.type}</span>
+            <span className="text-gray-600 text-xs">{motorBike.type}</span>
           </div>
         )}
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Loading / Unloading</span>
-          <span className="text-gray-900">{selectedDate.numberOfMovers} Person</span>
+          <span className="text-gray-600 text-xs">{selectedDate.numberOfMovers} Person</span>
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
           <span className="text-gray-600 text-sm font-medium">Pickup</span>
-          <span className="text-gray-900">{selectedDate.date}</span>
+          <span className="text-gray-600 text-xs">{selectedDate.date}</span>
         </div>
 
-        <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-          <span className="text-gray-600 text-sm font-medium">Locations</span>
-          <span className="text-gray-900">{pickup.location} to {delivery.location}</span>
+        <div className="border-b border-gray-100 pb-2">
+          <div className="flex flex-col">
+            <span className="text-gray-600 text-sm font-medium">Locations</span>
+            <span className="text-gray-600 text-xs mt-1">{pickup.location}</span>
+          </div>
+        </div>
+
+        <div className="border-b border-gray-100 pb-2">
+          <div className="flex flex-col">
+            <span className="text-gray-600 text-sm font-medium">To</span>
+            <span className="text-gray-600 text-xs mt-1">{delivery.location}</span>
+          </div>
+        </div>
+
+        {/* Enhanced Extra Stops Section */}
+        <div className="space-y-2 border-b border-gray-100 pb-2">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 text-sm font-medium">Extra Stops</span>
+            <span className="text-gray-600 text-xs">
+              
+            </span>
+          </div>
+          
+          {extraStops.map((stop, index) => (
+            <div key={index} className="group hover:bg-gray-50 rounded -mx-2 px-2 py-2 border-b border-gray-100 last:border-0">
+              <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-600 text-xs font-medium truncate">
+                    Stop {index + 1}: {stop.address}
+                  </p>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                    <span>Property: {stop.propertyType}</span>
+                    <span>Floor: {stop.floor}</span>
+                    <span>Lift: {stop.liftAvailable ? 'Available' : 'Not available'}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => removeExtraStop(index)}
+                  className="text-gray-400 hover:text-red-500 transition-colors ml-2"
+                  aria-label="Remove stop"
+                  title="Remove stop"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-4 w-4" 
+                    viewBox="0 0 20 20" 
+                    fill="currentColor"
+                  >
+                    <path 
+                      fillRule="evenodd" 
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" 
+                      clipRule="evenodd" 
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
