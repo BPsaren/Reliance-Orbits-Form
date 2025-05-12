@@ -10,8 +10,8 @@ const Header = ({ title }) => {
         <h1 className="text-2xl font-bold text-blue-900">{title}</h1>
       </div>
       <div className="flex flex-col items-end">
-        <div className="text-sm text-gray-600 font-medium">Quote ref: <span className="text-blue-600">{quoteRef}</span></div>
-        <div className="text-lg font-bold text-blue-700">0121 269 7956</div>
+        {/* <div className="text-sm text-gray-600 font-medium">Quote ref: <span className="text-blue-600">{quoteRef}</span></div> */}
+        {/* <div className="text-lg font-bold text-blue-700">0121 269 7956</div> */}
       </div>
     </div>
   );

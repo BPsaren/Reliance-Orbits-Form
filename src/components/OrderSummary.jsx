@@ -19,7 +19,9 @@ const OrderSummary = () => {
     van,
     motorBike,
     extraStops,
-    removeExtraStop
+    removeExtraStop,
+    itemsToAssemble,
+    itemsToDismantle,
   } = useBooking();
 
   const floorToNumber = (floor) => {
@@ -56,25 +58,26 @@ const OrderSummary = () => {
           },
           vanType: van.type,
           worker: selectedDate.numberOfMovers,
-          itemsToDismantle:0,
-          itemsToAssemble:0,
-          stoppage:[]
+          itemsToDismantle:itemsToDismantle,
+          itemsToAssemble:itemsToAssemble,
+          stoppage:extraStops.map(item => item.address)
         };
 
-        const res = await axios.post('https://reliance-orbit.onrender.com/price', payload);
+        const res = await axios.post('https://orbit-0pxd.onrender.com/price', payload);
         setTotalPrice(res.data.price);
+        console.log(payload);
       } catch (err) {
         console.error("Price fetch error:", err);
       }
     };
 
     fetchPrice();
-  }, [pickup, delivery, van, selectedDate]);
+  }, [pickup, delivery, van, selectedDate, itemsToDismantle,itemsToAssemble, extraStops]);
 
   useEffect(() => {
     const fetchDistance = async () => {
       try {
-        const res = await axios.post('https://reliance-orbit.onrender.com/distance', {
+        const res = await axios.post('https://orbit-0pxd.onrender.com/distance', {
           origin: pickup.location,
           destination: delivery.location
         });

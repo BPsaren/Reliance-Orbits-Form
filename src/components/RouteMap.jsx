@@ -1,8 +1,6 @@
 import React from 'react';
 import { useBooking } from '../context/BookingContext';
-import { GoogleMap, useLoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-// import dotenv from 'dotenv';
-
+import { GoogleMap, useLoadScript, DirectionsService, DirectionsRenderer, Marker } from '@react-google-maps/api';
 
 const apiKey = import.meta.env.VITE_API_KEY;
 
@@ -16,7 +14,7 @@ const MapWrapper = () => {
 };
 
 const RouteMap = () => {
-  const { pickup, delivery, journey, setJourney } = useBooking();
+  const { pickup, delivery, extraStops, journey, setJourney } = useBooking();
   const [directions, setDirections] = React.useState(null);
   const [directionsRequested, setDirectionsRequested] = React.useState(false);
 
@@ -25,18 +23,47 @@ const RouteMap = () => {
       setDirections(response);
       setDirectionsRequested(true);
       
+      // Calculate total distance and duration from all legs
+      let totalDistance = 0;
+      let totalDurationValue = 0;
+      let totalDistanceText = '';
+      let totalDurationText = '';
+      
+      if (response.routes[0] && response.routes[0].legs) {
+        response.routes[0].legs.forEach(leg => {
+          totalDistance += leg.distance.value;
+          totalDurationValue += leg.duration.value;
+        });
+        
+        // Convert to readable format
+        totalDistanceText = `${(totalDistance / 1609.34).toFixed(1)} mi`;
+        
+        // Convert seconds to hours and minutes
+        const hours = Math.floor(totalDurationValue / 3600);
+        const minutes = Math.floor((totalDurationValue % 3600) / 60);
+        totalDurationText = hours > 0 ? 
+          `${hours} hr ${minutes} min` : 
+          `${minutes} min`;
+      }
+      
       // Update journey context with actual distance/duration
-      const leg = response.routes[0].legs[0];
       setJourney(prev => ({
         ...prev,
-        distance: leg.distance.text,
-        duration: leg.duration.text,
+        distance: totalDistanceText,
+        duration: totalDurationText,
         route: response.request
       }));
     }
   }, [directionsRequested, setJourney]);
 
-//51.50600956680368, -0.12844391891946902
+  // Create waypoints from extra stops
+  const waypoints = React.useMemo(() => {
+    return extraStops.map(stop => ({
+      location: stop.address,
+      stopover: true
+    }));
+  }, [extraStops]);
+
   return (
     <div className="relative rounded-lg overflow-hidden shadow-md bg-white">
       <div className="bg-gray-100 w-full">
@@ -44,15 +71,15 @@ const RouteMap = () => {
           <GoogleMap
             zoom={12}
             mapContainerStyle={{ width: '100%', height: '100%' }}
-            //kolkata alt and lang center={{ lat: 22.5726, lng: 88.3639 }}
             center={{ lat: 51.50600, lng: -0.12844}}
-            
           >
             {pickup.location && delivery.location && (
               <DirectionsService
                 options={{
                   destination: delivery.location,
                   origin: pickup.location,
+                  waypoints: waypoints,
+                  optimizeWaypoints: true,
                   travelMode: 'DRIVING',
                 }}
                 callback={directionsCallback}
@@ -63,14 +90,49 @@ const RouteMap = () => {
               <DirectionsRenderer
                 options={{
                   directions: directions,
+                  suppressMarkers: false,
                 }}
               />
             )}
-          </GoogleMap>
-          
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             
-          </div>
+            {/* Display markers for pickup and delivery if directions aren't loaded yet */}
+            {!directions && pickup.location && (
+              <Marker
+                position={pickup.location}
+                icon={{
+                  url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                  labelOrigin: { x: 15, y: -10 }
+                }}
+                label={{ text: "Pickup", color: "green", fontWeight: "bold" }}
+              />
+            )}
+            
+            {!directions && delivery.location && (
+              <Marker
+                position={delivery.location}
+                icon={{
+                  url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                  labelOrigin: { x: 15, y: -10 }
+                }}
+                label={{ text: "Delivery", color: "red", fontWeight: "bold" }}
+              />
+            )}
+            
+            {/* Display markers for extra stops if directions aren't loaded yet */}
+            {!directions && extraStops.map((stop, index) => (
+              stop.address && (
+                <Marker
+                  key={`stop-${index}`}
+                  position={stop.address}
+                  icon={{
+                    url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                    labelOrigin: { x: 15, y: -10 }
+                  }}
+                  label={{ text: `Stop ${index + 1}`, color: "blue", fontWeight: "bold" }}
+                />
+              )
+            ))}
+          </GoogleMap>
         </div>
       </div>
       

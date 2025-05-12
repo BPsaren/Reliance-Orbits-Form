@@ -7,7 +7,7 @@ import axios from 'axios';
 
 // List of UK cities for validation
 const UK_CITIES = [
- "London", "Birmingham", "Manchester", "Leeds", "Sheffield",
+  "London", "Birmingham", "Manchester", "Leeds", "Sheffield",
   "Bradford", "Liverpool", "Bristol", "Coventry", "Leicester",
   "Nottingham", "Newcastle upon Tyne", "Sunderland", "Derby", "Plymouth",
   "Wolverhampton", "Southampton", "Stoke-on-Trent", "Reading", "Brighton & Hove",
@@ -72,24 +72,24 @@ const BookingDetails = () => {
 
   const parseLocationToAddress = (location) => {
     if (!location) return {};
-    
+
     // Clean the input
     const cleaned = location
       .replace(/\bUK\b/i, '')
       .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '')
       .trim();
-  
+
     // Split into parts
     const parts = cleaned.split(',')
       .map(part => part.trim())
       .filter(part => part !== '');
-  
+
     // Find city (exact match only)
     let city = '';
     let cityFoundInPart1 = false;
-    
+
     parts.forEach((part, index) => {
-      const matchedCity = UK_CITIES.find(c => 
+      const matchedCity = UK_CITIES.find(c =>
         c.toLowerCase() === part.toLowerCase()
       );
       if (matchedCity) {
@@ -97,7 +97,7 @@ const BookingDetails = () => {
         cityFoundInPart1 = (index === 1);
       }
     });
-  
+
     return {
       addressLine1: parts[0] || "",
       addressLine2: cityFoundInPart1 ? "" : (parts[1] || ""),
@@ -134,10 +134,10 @@ const BookingDetails = () => {
   }, [delivery.location]);
 
 
-   //for add extra stop
-    useEffect(() => {
-      console.log('Current extraStops:', extraStops);
-    }, [extraStops]);
+  //for add extra stop
+  useEffect(() => {
+    console.log('Current extraStops:', extraStops);
+  }, [extraStops]);
 
   // Validate all phone numbers before submission
   const validateAllPhones = () => {
@@ -146,21 +146,21 @@ const BookingDetails = () => {
       pickup: validateUKPhoneNumber(pickup.contactPhone) ? '' : 'Enter a valid UK mobile number: 07 (11 digits) or +447 format',
       delivery: validateUKPhoneNumber(delivery.contactPhone) ? '' : 'Enter a valid UK mobile number: 07 (11 digits) or +447 format'
     };
-    
+
     setPhoneErrors(errors);
-    
+
     return !errors.customer && !errors.pickup && !errors.delivery;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate phone numbers first
     if (!validateAllPhones()) {
       setSubmitError('Please correct the phone number errors');
       return;
     }
-    
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -168,8 +168,8 @@ const BookingDetails = () => {
       const hrs = hour.toString().padStart(2, '0');
       return `${hrs}:00:00`;
     }
-    
-    
+
+
 
     try {
       const bookingData = {
@@ -179,26 +179,30 @@ const BookingDetails = () => {
         price: totalPrice,
         distance: parseInt(journey.distance) || 0,
         route: "default route",
-        fromLocation: {
+        pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
           lift: pickup.liftAvailable,
           propertyType: pickup.propertyType || "standard"
         },
-        toLocation: {
+        dropLocation: {
           location: delivery.location || "N/A",
           floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
           lift: delivery.liftAvailable,
           propertyType: delivery.propertyType || "standard"
         },
-        pickupdDate: selectedDate.date,
-        pickupdTime: hourToTime(selectedDate.pickupTime),
+        vanType: van.type || "N/A",
+        worker: selectedDate.numberOfMovers || 1,
+        itemsToDismantle: 0,
+        itemsToAssemble: 0,
+        stoppage: [],
+        
+        pickupTime: hourToTime(selectedDate.pickupTime),
+        pickupDate: selectedDate.date,
         dropDate: selectedDate.date,
         dropTime: hourToTime(selectedDate.dropTime),
         duration: journey.duration || "N/A",
         quotationRef: parseInt(quoteRef),
-        vanType: van.type || "N/A",
-        worker: selectedDate.numberOfMovers || 1,
         dropAddress: {
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
@@ -217,27 +221,56 @@ const BookingDetails = () => {
           contactName: pickup.contactName,
           contactPhone: pickup.contactPhone,
         },
-        itemsToDismantle:0,
-        itemsToAssemble:0,
         details: {
+          items:{
+            name:items.map(item => item.name),
+            quantity:items.map(item => item.quantity),
+          },
           isBusinessCustomer: customerDetails.isBusinessCustomer,
-          itemName: items.name,
-          itemQuantity: items.quantity,
+          // itemName: items.name,
+          // itemQuantity: items.quantity,
           motorBike: motorBike.type,
           piano: piano.type,
         },
-        stoppage:[]
+      };
+
+      const quoteData = {
+        email: customerDetails.email,
+        price: totalPrice,
+        distance: parseInt(journey.distance) || 0,
+        route: "default route",
+        pickupLocation: {
+          location: pickup.location || "N/A",
+          floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+          lift: pickup.liftAvailable,
+          propertyType: pickup.propertyType || "standard"
+        },
+        dropLocation: {
+          location: delivery.location || "N/A",
+          floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+          lift: delivery.liftAvailable,
+          propertyType: delivery.propertyType || "standard"
+        },
+        vanType: van.type || "N/A",
+        worker: selectedDate.numberOfMovers || 1,
+        itemsToDismantle: 0,
+        itemsToAssemble: 0,
+        stoppage: [],
+        pickupDate: selectedDate.date,
       };
 
       console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
 
-      const response = await axios.post('https://reliance-orbit.onrender.com/new', bookingData);
+      const response = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
+      const res = await axios.post('https://orbit-0pxd.onrender.com/quote', quoteData);
       console.log('Booking successful:', response.data);
+      console.log('Quote created successful:', res.data);
       navigate('/confirmation');
     } catch (error) {
       console.error('Error submitting booking:', error);
       setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
       console.error('Error response data:', error.response?.data);
+      // console.error('Error response data in Quote:', error.res?.data);
     } finally {
       setIsSubmitting(false);
     }
@@ -458,7 +491,7 @@ const BookingDetails = () => {
                       onChange={(e) => handleDeliveryChange('city', e.target.value)}
                       required
                     />
-                  </div>                
+                  </div>
                 </div>
               </div>
 
@@ -578,14 +611,14 @@ const BookingDetails = () => {
                 </div>
 
                 {extraStops.map((stop, index) => (
-                      <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
-                <div className="text-gray-600"> Extra Stops: </div> 
-                
-                 <div className="font-medium">{stop.address}</div>
-      
-               </div>
-                          ))}
-            </div>
+                  <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
+                    <div className="text-gray-600"> Extra Stops: </div>
+
+                    <div className="font-medium">{stop.address}</div>
+
+                  </div>
+                ))}
+              </div>
 
               {/* Payment Options */}
               <div className="mb-6">

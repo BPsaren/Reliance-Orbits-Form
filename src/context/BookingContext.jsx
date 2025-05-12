@@ -84,6 +84,9 @@ export const BookingProvider = ({ children }) => {
         route: ''
     });
 
+    const [itemsToAssemble, setItemsToAssemble] = useState(0);
+    const [itemsToDismantle, setItemsToDismantle] = useState(0);
+
     const [totalPrice, setTotalPrice] = useState(0);
     const [pickupAddressWithPostalCode, setpickupAddressWithPostalCode] = useState('');
     const [dropAddressWithPostalCode, setdropAddressWithPostalCode] = useState('');
@@ -153,6 +156,8 @@ export const BookingProvider = ({ children }) => {
             van, setVan, toggleVanType,
             pickupAddressWithPostalCode, setpickupAddressWithPostalCode,
             dropAddressWithPostalCode, setdropAddressWithPostalCode,
+            itemsToAssemble, setItemsToAssemble,
+            itemsToDismantle, setItemsToDismantle,
             // Enhanced extra stops management
             extraStops,
             setExtraStops,

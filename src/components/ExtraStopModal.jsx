@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useBooking } from '../context/BookingContext';
 
+
+  
+
 const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
   const [address, setAddress] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -41,7 +44,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     if (typingTimeout) clearTimeout(typingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://reliance-orbit.onrender.com/autocomplete", { place: address })
+      axios.post("https://orbit-0pxd.onrender.com/autocomplete", { place: address })
         .then(res => {
           setSuggestions(res.data.predictions || []);
           setFocusedIndex(-1);
@@ -59,7 +62,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     
     const getPostalCode = async () => {
       try {
-        const response = await axios.get(`https://reliance-orbit.onrender.com/postalcode/${placeId}`);
+        const response = await axios.get(`https://orbit-0pxd.onrender.com/postalcode/${placeId}`);
         const formattedAddress = formatAddressWithPostcode(address, response.data.long_name);
         
         setSelecting(true);
@@ -141,6 +144,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     };
 
     setExtraStops([...extraStops, newStop]);
+    console.log(extraStops);
     onClose();
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
@@ -7,13 +7,31 @@ import OrderSummary from '../components/OrderSummary';
 const AdditionalServices = () => {
   const navigate = useNavigate();
 
-  const {  additionalServices, setAdditionalServices, selectedDate, setSelectedDate } = useBooking();
+  const { 
+    additionalServices, 
+    setAdditionalServices, 
+    selectedDate, 
+    setSelectedDate, 
+    itemsToDismantle, 
+    itemsToAssemble, 
+    setItemsToAssemble, 
+    setItemsToDismantle 
+  } = useBooking();
+
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [collectionTime, setCollectionTime] = useState({ start: 8, end: 18 });
   const [deliveryTime, setDeliveryTime] = useState('Same day');
-  const [dismantleCount, setDismantleCount] = useState(0);
-  const [assemblyCount, setAssemblyCount] = useState(0);
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
+
+  // Initialize the local state variables with context values
+  // This ensures we're using the values from context
+  useEffect(() => {
+    setDismantleCount(itemsToDismantle);
+    setAssemblyCount(itemsToAssemble);
+  }, [itemsToDismantle, itemsToAssemble]);
+
+  const [dismantleCount, setDismantleCount] = useState(itemsToDismantle || 0);
+  const [assemblyCount, setAssemblyCount] = useState(itemsToAssemble || 0);
 
   // Format the date for display
   const formatDisplayDate = (date) => {
@@ -42,16 +60,24 @@ const AdditionalServices = () => {
     navigate('/booking-details');
   };
 
+  
   const handleAddServices = () => {
-    // Create arrays with the correct number of items
-    const dismantlingItems = Array(dismantleCount).fill({ service: 'dismantling', price: 20 });
-    const reassemblyItems = Array(assemblyCount).fill({ service: 'reassembly', price: 30 });
+   
+    // const dismantlingItems = Array(dismantleCount).fill({ service: 'dismantling', price: 20 });
+    // const reassemblyItems = Array(assemblyCount).fill({ service: 'reassembly', price: 30 });
     
-    setAdditionalServices({
-      ...additionalServices,
-      dismantling: dismantlingItems,
-      reassembly: reassemblyItems
-    });
+    // Update the context with the counts
+    setItemsToDismantle(dismantleCount);
+    setItemsToAssemble(assemblyCount);
+    console.log(itemsToAssemble);
+    console.log(itemsToDismantle);
+    // Update the additional services
+    // setAdditionalServices({
+    //   ...additionalServices,
+    //   dismantling: dismantlingItems,
+    //   reassembly: reassemblyItems
+    // });
+    
     setShowAssemblyOptions(false);
   };
 
@@ -63,10 +89,10 @@ const AdditionalServices = () => {
     const value = parseInt(e.target.value);
     if (type === 'start') {
       setCollectionTime(prev => ({ ...prev, start: value }));
-      setSelectedDate(prev=>({...prev, pickupTime:value}));
+      setSelectedDate(prev => ({...prev, pickupTime: value}));
     } else {
       setCollectionTime(prev => ({ ...prev, end: value }));
-      setSelectedDate(prev=>({...prev, dropTime:value}));
+      setSelectedDate(prev => ({...prev, dropTime: value}));
     }
   };
 
@@ -139,63 +165,62 @@ const AdditionalServices = () => {
               </div>
               
               {showAssemblyOptions ? (
-                // In your Assembly Options section, update the buttons to prevent default behavior:
-<div className="space-y-4">
-  <div className="flex items-center justify-between">
-    <span>Items to dismantle: £20 per item</span>
-    <div className="flex items-center gap-2">
-      <button 
-        type="button" // Add type="button" to prevent form submission
-        onClick={(e) => {
-          e.preventDefault();
-          setDismantleCount(Math.max(0, dismantleCount - 1));
-        }}
-        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-      >
-        -
-      </button>
-      <span>{dismantleCount}</span>
-      <button 
-        type="button" // Add type="button" to prevent form submission
-        onClick={(e) => {
-          e.preventDefault();
-          setDismantleCount(dismantleCount + 1);
-        }}
-        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-      >
-        +
-      </button>
-    </div>
-  </div>
-  
-  <div className="flex items-center justify-between">
-    <span>Items to assemble: £30 per item</span>
-    <div className="flex items-center gap-2">
-      <button 
-        type="button" // Add type="button" to prevent form submission
-        onClick={(e) => {
-          e.preventDefault();
-          setAssemblyCount(Math.max(0, assemblyCount - 1));
-        }}
-        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-      >
-        -
-      </button>
-      <span>{assemblyCount}</span>
-      <button 
-        type="button" // Add type="button" to prevent form submission
-        onClick={(e) => {
-          e.preventDefault();
-          setAssemblyCount(assemblyCount + 1);
-        }}
-        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-      >
-        +
-      </button>
-    </div>
-  </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span>Items to dismantle: £20 per item</span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDismantleCount(Math.max(0, dismantleCount - 1));
+                        }}
+                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+                      >
+                        -
+                      </button>
+                      <span>{dismantleCount}</span>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDismantleCount(dismantleCount + 1);
+                        }}
+                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span>Items to assemble: £30 per item</span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setAssemblyCount(Math.max(0, assemblyCount - 1));
+                        }}
+                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+                      >
+                        -
+                      </button>
+                      <span>{assemblyCount}</span>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setAssemblyCount(assemblyCount + 1);
+                        }}
+                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
 
-  <div className="flex gap-4 pt-2">
+                  <div className="flex gap-4 pt-2">
                     <button 
                       type="button" 
                       onClick={() => setShowAssemblyOptions(false)}
@@ -211,7 +236,7 @@ const AdditionalServices = () => {
                       Confirm
                     </button>
                   </div>
-</div>
+                </div>
               ) : (
                 <div className="flex gap-4">
                   <button 
