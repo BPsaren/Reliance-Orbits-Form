@@ -7,7 +7,6 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import EmailPopup from '../components/EmailPopup';
 import './Date.css';
-import axios from 'axios';
 
 const DateSelection = () => {
     // Navigation and routing
@@ -72,21 +71,9 @@ const DateSelection = () => {
         setBestPriceDates(bestPrices);
     };
 
-    const handleEmailSubmit = async (email) => {
+    const handleEmailSubmit = (email) => {
         setUserEmail(email);
-
-        const data = {
-            email: email
-        };
-        try {
-            const response = await axios.post('https://orbit-0pxd.onrender.com/user/create', data);
-            console.log('Success:', response.data);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-        finally{
         setShowEmailPopup(false);
-        }
     };
 
     const formatSelectedDate = (date) => {
@@ -101,7 +88,7 @@ const DateSelection = () => {
         setSelectedDate({
             date: formattedDate,
             price: datePrice,
-            numberOfMovers: selectedMovers || 1
+            numberOfMovers: selectedMovers || 0
         });
     };
 
@@ -130,7 +117,7 @@ const DateSelection = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!van.type || !selectedDate.numberOfMovers) {
+        if (!van.type || selectedDate.numberOfMovers === undefined) {
             setShowAlert(true);
             return;
         }
@@ -198,7 +185,7 @@ const DateSelection = () => {
     return (
         <>
             {showEmailPopup && <EmailPopup onContinue={handleEmailSubmit} />}
-
+            
             <div className={`bg-gray-50 min-h-screen ${showEmailPopup ? 'blur-sm' : ''}`}>
                 <Header title="Select a date" />
                 <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">
@@ -209,13 +196,27 @@ const DateSelection = () => {
                     <div className="md:w-2/3">
                         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
                             <div className="grid grid-cols-3 gap-4 mb-8">
-
                                 <button
                                     type="button"
-                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedMovers === 1
+                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${
+                                        selectedMovers === 0
                                             ? 'border-blue-600 bg-blue-50 text-blue-700'
                                             : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                                        }`}
+                                    }`}
+                                    onClick={() => handleSelectMovers(0)}
+                                >
+                                    <span className="text-2xl mb-2">🚚</span>
+                                    <span className="font-medium">0 Person</span>
+                                    <span className="text-xs">(Only Driver)</span>
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${
+                                        selectedMovers === 1
+                                            ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                            : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
+                                    }`}
                                     onClick={() => handleSelectMovers(1)}
                                 >
                                     <span className="text-2xl mb-2">👤</span>
@@ -224,17 +225,18 @@ const DateSelection = () => {
 
                                 <button
                                     type="button"
-                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${selectedMovers === 2
+                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${
+                                        selectedMovers === 2
                                             ? 'border-blue-600 bg-blue-50 text-blue-700'
                                             : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                                        }`}
+                                    }`}
                                     onClick={() => handleSelectMovers(2)}
                                 >
                                     <span className="text-2xl mb-2">👥</span>
                                     <span className="font-medium">2 People</span>
                                 </button>
-
-                                <div className="flex flex-col items-center justify-center p-4 border rounded-lg border-gray-300">
+                                
+                                <div className="flex flex-col items-center justify-center p-4 border rounded-lg border-gray-300 col-span-3">
                                     <span className="text-2xl mb-2">{getVanEmoji(van.type)}</span>
                                     <select
                                         value={van.type || ''}
@@ -255,8 +257,9 @@ const DateSelection = () => {
                                 <div className="flex items-center justify-between mb-4 px-2">
                                     <button
                                         type="button"
-                                        className={`p-2 ${isCurrentMonth() ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-blue-600'
-                                            }`}
+                                        className={`p-2 ${
+                                            isCurrentMonth() ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-blue-600'
+                                        }`}
                                         onClick={!isCurrentMonth() ? handlePrevMonth : undefined}
                                         disabled={isCurrentMonth()}
                                     >
@@ -325,37 +328,37 @@ const DateSelection = () => {
             </div>
 
             {showAlert && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className={`
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className={`
             bg-white rounded-lg shadow-xl max-w-md w-full p-6
             transition-all duration-300 ease-out transform-gpu
             ${showAlert ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
         `}>
-                        <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                                <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <h3 className="text-lg font-medium text-gray-900">Selection Required</h3>
-                                <div className="mt-2 text-sm text-gray-500">
-                                    <p>Please select both the van type and number of persons (movers) before continuing.</p>
-                                </div>
-                                <div className="mt-4">
-                                    <button
-                                        type="button"
-                                        className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
-                                        onClick={() => setShowAlert(false)}
-                                    >
-                                        Got it
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+            <div className="flex items-start">
+                <div className="flex-shrink-0">
+                    <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div className="ml-4">
+                    <h3 className="text-lg font-medium text-gray-900">Selection Required</h3>
+                    <div className="mt-2 text-sm text-gray-500">
+                        <p>Please select both the van type and number of persons (movers) before continuing.</p>
+                    </div>
+                    <div className="mt-4">
+                        <button
+                            type="button"
+                            className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                            onClick={() => setShowAlert(false)}
+                        >
+                            Got it
+                        </button>
                     </div>
                 </div>
-            )}
+            </div>
+        </div>
+    </div>
+)}
         </>
     );
 };

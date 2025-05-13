@@ -5,7 +5,7 @@ const BookingContext = createContext();
 export const useBooking = () => useContext(BookingContext);
 
 export const BookingProvider = ({ children }) => {
-    const [quoteRef] = useState('21631573');
+    const [quoteRef, setQuoteRef] = useState('');
 
     // Enhanced extra stops state with proper structure
     const [extraStops, setExtraStops] = useState([]);
@@ -142,7 +142,7 @@ export const BookingProvider = ({ children }) => {
 
     return (
         <BookingContext.Provider value={{
-            quoteRef,
+            quoteRef,setQuoteRef,
             pickup, setPickup,
             delivery, setDelivery,
             items, setItems, addItem, updateItemQuantity, removeItem,
