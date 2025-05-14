@@ -116,6 +116,7 @@ const OrderSummary = () => {
           {items.map((item, index) => (
             <div key={index} className="flex justify-between items-center">
               <div className="text-gray-900">{item.name}</div>
+              <div className="text-gray-900">{item.quantity}</div>
             </div>
           ))}
 
@@ -165,21 +166,26 @@ const OrderSummary = () => {
         </div>
 
         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-          <span className="text-gray-600 text-sm font-medium">Pickup</span>
+          <span className="text-gray-600 text-sm font-medium">Date</span>
           <span className="text-gray-600 text-xs">{selectedDate.date}</span>
         </div>
 
         <div className="border-b border-gray-100 pb-2">
           <div className="flex flex-col">
-            <span className="text-gray-600 text-sm font-medium">Locations</span>
+            <span className="text-gray-600 text-sm font-medium">Pickup Location</span>
             <span className="text-gray-600 text-xs mt-1">{pickup.location}</span>
+            <span className="text-gray-600 text-xs mt-1 font-medium">Door No/flat No: {pickup.flatNo}</span>
+        
+            <span className="text-gray-600 text-xs mt-1">Lift: {pickup.liftAvailable ? 'Available' : 'Not Available'}</span>
           </div>
         </div>
 
         <div className="border-b border-gray-100 pb-2">
           <div className="flex flex-col">
-            <span className="text-gray-600 text-sm font-medium">To</span>
+            <span className="text-gray-600 text-sm font-medium">Delivery Location</span>
             <span className="text-gray-600 text-xs mt-1">{delivery.location}</span>
+            <span className="text-gray-600 text-xs mt-1 font-medium">Door No/flat No: {delivery.flatNo}</span>
+            <span className="text-gray-600 text-xs mt-1">Lift: {delivery.liftAvailable ? 'Available' : 'Not Available'}</span>
           </div>
         </div>
 

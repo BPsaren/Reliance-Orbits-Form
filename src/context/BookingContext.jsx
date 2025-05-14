@@ -22,6 +22,7 @@ export const BookingProvider = ({ children }) => {
         country: '',
         contactName: '',
         contactPhone: '',
+        flatNo:''
     });
 
     const [delivery, setDelivery] = useState({
@@ -36,6 +37,7 @@ export const BookingProvider = ({ children }) => {
         country: '',
         contactName: '',
         contactPhone: '',
+        flatNo:''
     });
 
     const [items, setItems] = useState([]);
@@ -117,7 +119,7 @@ export const BookingProvider = ({ children }) => {
     const addExtraStop = (stop) => {
         setExtraStops([...extraStops, {
             address: stop.address,
-            propertyType: stop.propertyType || '2 Bed House',
+            propertyType: stop.propertyType || 'Studio',
             floor: stop.floor || 'Ground floor',
             liftAvailable: stop.liftAvailable || false,
             doorFlatNo: stop.doorFlatNo || '' 

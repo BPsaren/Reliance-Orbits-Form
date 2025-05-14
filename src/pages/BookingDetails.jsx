@@ -117,7 +117,7 @@ const BookingDetails = () => {
         addressLine1: address.addressLine1,
         addressLine2: address.addressLine2,
         city: address.city,
-        county: address.county,
+        //county: address.county,
       }));
     }
   }, [pickup.location]);
@@ -131,7 +131,7 @@ const BookingDetails = () => {
         addressLine1: address.addressLine1,
         addressLine2: address.addressLine2,
         city: address.city,
-        county: address.county,
+        //county: address.county,
       }));
     }
   }, [delivery.location]);
@@ -610,20 +610,26 @@ const handleSubmit = async (e) => {
 
               <div className="bg-gray-50 p-4 rounded-md mb-6">
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <div className="text-gray-600">Moving from:</div>
-                  <div className="font-medium">{pickup.location}</div>
+                  <div className="font-medium">Moving from:</div>
+                  <div className="text-gray-600">{pickup.location}</div>
+                  <div className="font-medium">Door No/flat No:</div>
+                   <div className="text-gray-600">{pickup.flatNo}</div>
+                  
                 </div>
 
                 <div className="flex justify-between py-2">
-                  <div className="text-gray-600">Moving to:</div>
-                  <div className="font-medium">{delivery.location}</div>
+                  <div className=" font-medium">Moving to:</div>
+                  <div className="text-gray-600">{delivery.location}</div>
+                  <div className="font-medium">Door No/flat No:</div>
+                   <div className=" text-gray-600">{delivery.flatNo}</div>
                 </div>
 
                 {extraStops.map((stop, index) => (
                   <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
-                    <div className="text-gray-600"> Extra Stops: </div>
-
-                    <div className="font-medium">{stop.address}</div>
+                    <div className="font-medium"> Extra Stops: </div>
+                    <div className="text-gray-600">{stop.address}</div>
+                    <div className="font-medium"> Door No/flat No: </div>
+                    <div className="text-gray-600">{stop.doorFlatNo}</div>
 
                   </div>
                 ))}
