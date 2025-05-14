@@ -198,6 +198,10 @@ const OrderSummary = () => {
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-600 text-xs font-medium truncate">
                     Stop {index + 1}: {stop.address}
+                    
+                  </p>
+                  <p className="text-gray-600 text-xs font-medium truncate">
+                    Door No/flat No:{stop.doorFlatNo}
                   </p>
                   <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                     <span>Property: {stop.propertyType}</span>

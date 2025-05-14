@@ -24,7 +24,6 @@ const AdditionalServices = () => {
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
 
   // Initialize the local state variables with context values
-  // This ensures we're using the values from context
   useEffect(() => {
     setDismantleCount(itemsToDismantle);
     setAssemblyCount(itemsToAssemble);
@@ -47,12 +46,25 @@ const AdditionalServices = () => {
     }
   };
 
-  // Format time in 12-hour format (e.g. 8 -> "8am", 14 -> "2pm")
-  const formatTime = (hour) => {
-    if (hour === 0) return '12am';
-    if (hour < 12) return `${hour}am`;
-    if (hour === 12) return '12pm';
-    return `${hour - 12}pm`;
+  // Format time in 12-hour format with 30-minute increments (e.g. 8 -> "8:00am", 8.5 -> "8:30am")
+  const formatTimeWithMinutes = (time) => {
+    const hour = Math.floor(time);
+    const minute = time % 1 === 0.5 ? 30 : 0;
+    let period = 'am';
+    let displayHour = hour;
+    
+    if (hour >= 12) {
+      period = 'pm';
+      if (hour > 12) {
+        displayHour = hour - 12;
+      }
+    }
+    
+    if (hour === 0) {
+      displayHour = 12; // midnight
+    }
+    
+    return `${displayHour}:${minute === 0 ? '00' : minute}${period}`;
   };
 
   const handleSubmit = (e) => {
@@ -60,24 +72,11 @@ const AdditionalServices = () => {
     navigate('/booking-details');
   };
 
-  
   const handleAddServices = () => {
-   
-    // const dismantlingItems = Array(dismantleCount).fill({ service: 'dismantling', price: 20 });
-    // const reassemblyItems = Array(assemblyCount).fill({ service: 'reassembly', price: 30 });
-    
-    // Update the context with the counts
     setItemsToDismantle(dismantleCount);
     setItemsToAssemble(assemblyCount);
     console.log(itemsToAssemble);
     console.log(itemsToDismantle);
-    // Update the additional services
-    // setAdditionalServices({
-    //   ...additionalServices,
-    //   dismantling: dismantlingItems,
-    //   reassembly: reassemblyItems
-    // });
-    
     setShowAssemblyOptions(false);
   };
 
@@ -86,7 +85,7 @@ const AdditionalServices = () => {
   };
 
   const handleCollectionTimeChange = (e, type) => {
-    const value = parseInt(e.target.value);
+    const value = parseFloat(e.target.value);
     if (type === 'start') {
       setCollectionTime(prev => ({ ...prev, start: value }));
       setSelectedDate(prev => ({...prev, pickupTime: value}));
@@ -125,7 +124,7 @@ const AdditionalServices = () => {
               
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4">
                 <div>
-                  <div className="font-medium">Between {formatTime(collectionTime.start)} - {formatTime(collectionTime.end)}</div>
+                  <div className="font-medium">Between {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}</div>
                   <div className="text-sm text-gray-600">{deliveryTime} delivery</div>
                 </div>
                 <button 
@@ -324,7 +323,7 @@ const AdditionalServices = () => {
                 <div className="mb-6">
                   <div className="flex justify-between mb-4">
                     <div className="font-medium">
-                      Collection: {formatTime(collectionTime.start)} - {formatTime(collectionTime.end)}
+                      Collection: {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}
                     </div>
                     <div className="font-medium">
                       Delivery: {deliveryTime}
@@ -334,8 +333,8 @@ const AdditionalServices = () => {
                   <div className="space-y-6">
                     <div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Start: {formatTime(collectionTime.start)}</span>
-                        <span className="text-sm text-gray-600">End: {formatTime(collectionTime.end)}</span>
+                        <span className="text-sm text-gray-600">Start: {formatTimeWithMinutes(collectionTime.start)}</span>
+                        <span className="text-sm text-gray-600">End: {formatTimeWithMinutes(collectionTime.end)}</span>
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center">
@@ -344,6 +343,7 @@ const AdditionalServices = () => {
                             type="range"
                             min="0"
                             max="24"
+                            step="0.5"
                             value={collectionTime.start}
                             onChange={(e) => handleCollectionTimeChange(e, 'start')}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
@@ -355,6 +355,7 @@ const AdditionalServices = () => {
                             type="range"
                             min="0"
                             max="24"
+                            step="0.5"
                             value={collectionTime.end}
                             onChange={(e) => handleCollectionTimeChange(e, 'end')}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
@@ -364,12 +365,12 @@ const AdditionalServices = () => {
                     </div>
                     <div className="flex justify-between text-sm text-gray-600">
                       <div className="flex items-center gap-2">
-                        <span>AM</span>
+                        <span>12am</span>
                         <div className="w-8 h-[2px] bg-blue-500"></div>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-[2px] bg-blue-500"></div>
-                        <span>PM</span>
+                        <span>12pm</span>
                       </div>
                     </div>
                   </div>

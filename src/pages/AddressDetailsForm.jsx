@@ -514,6 +514,7 @@ const AddressDetailsForm = () => {
                         <option value="Studio">Studio</option>
                         <option value="1 Bed Flat">1 Bed Flat</option>
                         <option value="2 Bed Flat">2 Bed Flat</option>
+                        <option value="3 Bed Flat">3 Bed Flat</option>
                         <option value="1 Bed House">1 Bed House</option>
                         <option value="2 Bed House">2 Bed House</option>
                         <option value="3 Bed House">3 Bed House</option>
