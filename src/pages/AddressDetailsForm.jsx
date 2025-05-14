@@ -518,7 +518,7 @@ const AddressDetailsForm = () => {
                         <option value="1 Bed House">1 Bed House</option>
                         <option value="2 Bed House">2 Bed House</option>
                         <option value="3 Bed House">3 Bed House</option>
-                        {/* <option value="4+ Bed House">4+ Bed House</option> */}
+                        <option value="4+ Bed House">4+ Bed House</option>
                       </select>
                       <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -623,10 +623,10 @@ const AddressDetailsForm = () => {
                         <option value="1 Bed Flat">1 Bed Flat</option>
                         <option value="2 Bed Flat">2 Bed Flat</option>
                         <option value="3 Bed Flat">3 Bed Flat</option>
-                        {/* <option value="1 Bed House">1 Bed House</option> */}
-                        {/* <option value="2 Bed House">2 Bed House</option> */}
-                        {/* <option value="3 Bed House">3 Bed House</option> */}
-                        {/* <option value="4+ Bed House">4+ Bed House</option> */}
+                        <option value="1 Bed House">1 Bed House</option>
+                        <option value="2 Bed House">2 Bed House</option>
+                        <option value="3 Bed House">3 Bed House</option>
+                        <option value="4+ Bed House">4+ Bed House</option>
                       </select>
                       <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                         <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
