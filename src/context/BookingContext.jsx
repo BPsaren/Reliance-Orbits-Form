@@ -120,6 +120,7 @@ export const BookingProvider = ({ children }) => {
             propertyType: stop.propertyType || '2 Bed House',
             floor: stop.floor || 'Ground floor',
             liftAvailable: stop.liftAvailable || false,
+            doorFlatNo: stop.doorFlatNo || '' 
             
         }]);
     };
@@ -131,7 +132,8 @@ export const BookingProvider = ({ children }) => {
                 ...updatedStop,
                 propertyType: updatedStop.propertyType !== undefined ? updatedStop.propertyType : stop.propertyType,
                 floor: updatedStop.floor !== undefined ? updatedStop.floor : stop.floor,
-                liftAvailable: updatedStop.liftAvailable !== undefined ? updatedStop.liftAvailable : stop.liftAvailable
+                liftAvailable: updatedStop.liftAvailable !== undefined ? updatedStop.liftAvailable : stop.liftAvailable,
+                doorFlatNo: updatedStop.doorFlatNo !== undefined ? updatedStop.doorFlatNo : stop.doorFlatNo // for door no/flat no
             } : stop
         ));
     };
