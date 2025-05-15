@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useBooking } from '../context/BookingContext';
 
 const EmailPopup = ({ onContinue }) => {
     const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ const EmailPopup = ({ onContinue }) => {
         aboutUs: true
     });
     const [isVisible, setIsVisible] = useState(false);
+    const {quoteDetails, setQuoteDetails} = useBooking();
 
     useEffect(() => {
         // Trigger the animation when component mounts
@@ -23,6 +25,7 @@ const EmailPopup = ({ onContinue }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setQuoteDetails({...quoteDetails, email: email})
         if (email) {
             // Add fade-out animation before continuing
             setIsVisible(false);

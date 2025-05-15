@@ -3,25 +3,50 @@ import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
+import axios from 'axios'; // Added missing import
 
 const AdditionalServices = () => {
   const navigate = useNavigate();
-
-  const { 
-    additionalServices, 
-    setAdditionalServices, 
-    selectedDate, 
-    setSelectedDate, 
-    itemsToDismantle, 
-    itemsToAssemble, 
-    setItemsToAssemble, 
-    setItemsToDismantle 
+  const {
+    customerDetails,
+    pickup,
+    delivery,
+    selectedDate,
+    setSelectedDate,
+    journey,
+    totalPrice,
+    items,
+    motorBike,
+    piano,
+    quoteRef,
+    setQuoteRef,
+    van,
+    extraStops,
+    itemsToAssemble,
+    itemsToDismantle,
+    setItemsToAssemble,
+    setItemsToDismantle,
+    additionalServices,
+    setAdditionalServices,
+    quoteDetails
   } = useBooking();
+
+  // const {
+  //   additionalServices,
+  //   setAdditionalServices,
+  //   selectedDate,
+  //   setSelectedDate,
+  //   itemsToDismantle,
+  //   itemsToAssemble,
+  //   setItemsToAssemble,
+  //   setItemsToDismantle
+  // } = useBooking();
 
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [collectionTime, setCollectionTime] = useState({ start: 8, end: 18 });
   const [deliveryTime, setDeliveryTime] = useState('Same day');
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
+  const [error, setError] = useState(''); // Added error state
 
   // Initialize the local state variables with context values
   useEffect(() => {
@@ -52,24 +77,124 @@ const AdditionalServices = () => {
     const minute = time % 1 === 0.5 ? 30 : 0;
     let period = 'am';
     let displayHour = hour;
-    
+
     if (hour >= 12) {
       period = 'pm';
       if (hour > 12) {
         displayHour = hour - 12;
       }
     }
-    
+
     if (hour === 0) {
       displayHour = 12; // midnight
     }
-    
+
     return `${displayHour}:${minute === 0 ? '00' : minute}${period}`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/booking-details');
+    setError(''); // Clear any previous errors
+
+    function hourToTime(hour) {
+      const hrs = hour.toString().padStart(2, '0');
+      return `${hrs}:00:00`;
+    }
+
+    try {
+      // Create quoteData first
+      const quoteData = {
+        username: customerDetails.name,
+        email: quoteDetails.email,
+        phoneNumber: customerDetails.phone,
+        price: totalPrice,
+        distance: parseInt(journey.distance) || 0,
+        route: "default route",
+        duration: journey.duration || "N/A",
+        pickupDate: selectedDate.date,
+        pickupTime: hourToTime(selectedDate.pickupTime),
+        pickupAddress: {
+          postcode: pickup.postcode,
+          addressLine1: pickup.addressLine1,
+          addressLine2: pickup.addressLine2,
+          city: pickup.city,
+          country: pickup.country,
+          contactName: pickup.contactName,
+          contactPhone: pickup.contactPhone,
+        },
+        dropDate: selectedDate.date,
+        dropTime: hourToTime(selectedDate.dropTime),
+        dropAddress: {
+          postcode: delivery.postcode,
+          addressLine1: delivery.addressLine1,
+          addressLine2: delivery.addressLine2,
+          city: delivery.city,
+          country: delivery.country,
+          contactName: delivery.contactName,
+          contactPhone: delivery.contactPhone,
+        },
+
+        vanType: van.type || "N/A",
+        worker: selectedDate.numberOfMovers || 1,
+        itemsToDismantle: itemsToDismantle,
+        itemsToAssemble: itemsToAssemble,
+        stoppage: [],
+        pickupLocation: {
+          location: pickup.location || "N/A",
+          floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+          lift: pickup.liftAvailable,
+          propertyType: pickup.propertyType || "standard"
+        },
+        dropLocation: {
+          location: delivery.location || "N/A",
+          floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+          lift: delivery.liftAvailable,
+          propertyType: delivery.propertyType || "standard"
+        },
+        details: {
+          items: {
+            name: items.map(item => item.name),
+            quantity: items.map(item => item.quantity),
+          },
+          isBusinessCustomer: customerDetails.isBusinessCustomer,
+          motorBike: motorBike.type,
+          piano: piano.type,
+        },
+      };
+
+      console.log("Quotation Data being sent:", JSON.stringify(quoteData, null, 2));
+
+      // 🔁 First: POST to /quote and get quotationRef
+      const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote', quoteData);
+      const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
+      console.log("quotation reference: ", quotationRef);
+
+      if (!quotationRef) {
+        throw new Error("Quotation reference not received from server");
+      }
+      
+      setQuoteRef(quotationRef);
+      navigate('/booking-details');
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      
+      // Set appropriate error message based on the error
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        setError(`Server error: ${error.response.data?.message || error.response.statusText || 'Unknown server error'}`);
+        console.error('Error response data:', error.response.data);
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError('Network error: No response received from server. Please check your internet connection and try again.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setError(`Error: ${error.message || 'An unknown error occurred'}`);
+      }
+      
+      // Do not navigate to the next page
+      // The navigation code is removed, and we'll display the error instead
+    }
   };
 
   const handleAddServices = () => {
@@ -88,10 +213,10 @@ const AdditionalServices = () => {
     const value = parseFloat(e.target.value);
     if (type === 'start') {
       setCollectionTime(prev => ({ ...prev, start: value }));
-      setSelectedDate(prev => ({...prev, pickupTime: value}));
+      setSelectedDate(prev => ({ ...prev, pickupTime: value }));
     } else {
       setCollectionTime(prev => ({ ...prev, end: value }));
-      setSelectedDate(prev => ({...prev, dropTime: value}));
+      setSelectedDate(prev => ({ ...prev, dropTime: value }));
     }
   };
 
@@ -109,10 +234,18 @@ const AdditionalServices = () => {
       <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">
         Our included insurance is twice the industry standard!
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 py-8 md:flex md:gap-8">
         <div className="md:w-2/3">
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
+            {/* Display error message if there is an error */}
+            {error && (
+              <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
+            
             {/* Collection & Delivery Section */}
             <div className="border rounded-lg p-6 mb-8">
               <div className="flex justify-between items-center mb-4">
@@ -121,54 +254,54 @@ const AdditionalServices = () => {
                   {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
                 </span>
               </div>
-              
+
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4">
                 <div>
                   <div className="font-medium">Between {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}</div>
                   <div className="text-sm text-gray-600">{deliveryTime} delivery</div>
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={handleTimeSlotChange}
                   className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
                 >
                   Change your time slot
                 </button>
               </div>
-              
+
               <div className="text-sm text-gray-600">
                 Live driver tracking and your time slots will be sent the day before your move
               </div>
             </div>
-            
+
             {/* Assembly Options */}
             <div className="border rounded-lg p-6 mb-8">
               <div className="mb-3">
                 <h3 className="text-lg font-semibold">Dismantling & reassembly</h3>
               </div>
-              
+
               <div className="text-gray-600 mb-4">
                 Dismantling and assembly can be arranged per item. Just tell us how many items require this service and we'll do the rest!
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-md mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <div className="font-semibold text-lg">£20</div>
                   <div className="text-gray-600">per item, to dismantle</div>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <div className="font-semibold text-lg">£30</div>
                   <div className="text-gray-600">per item, to assemble</div>
                 </div>
               </div>
-              
+
               {showAssemblyOptions ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span>Items to dismantle: £20 per item</span>
                     <div className="flex items-center gap-2">
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
@@ -179,7 +312,7 @@ const AdditionalServices = () => {
                         -
                       </button>
                       <span>{dismantleCount}</span>
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
@@ -191,11 +324,11 @@ const AdditionalServices = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span>Items to assemble: £30 per item</span>
                     <div className="flex items-center gap-2">
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
@@ -206,7 +339,7 @@ const AdditionalServices = () => {
                         -
                       </button>
                       <span>{assemblyCount}</span>
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
@@ -220,15 +353,15 @@ const AdditionalServices = () => {
                   </div>
 
                   <div className="flex gap-4 pt-2">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setShowAssemblyOptions(false)}
                       className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
                     >
                       Cancel
                     </button>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={handleAddServices}
                       className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
                     >
@@ -238,14 +371,14 @@ const AdditionalServices = () => {
                 </div>
               ) : (
                 <div className="flex gap-4">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
                   >
                     Learn more
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setShowAssemblyOptions(true)}
                     className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
                   >
@@ -254,35 +387,35 @@ const AdditionalServices = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Special Requirements */}
             <div className="mb-8">
               <div className="mb-3">
                 <h3 className="text-lg font-semibold">Any special requirements or notes?</h3>
               </div>
-              
-              <textarea 
-                placeholder="E.g. Parking available opposite property, sofa comes apart, slightly awkward entrance etc. The more information, the better! Please note: you will receive tracking prior to arrival" 
+
+              <textarea
+                placeholder="E.g. Parking available opposite property, sofa comes apart, slightly awkward entrance etc. The more information, the better! Please note: you will receive tracking prior to arrival"
                 value={additionalServices.specialRequirements}
                 onChange={(e) => setAdditionalServices({
-                  ...additionalServices, 
+                  ...additionalServices,
                   specialRequirements: e.target.value
                 })}
                 className="w-full p-3 border rounded-md h-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             {/* Form Actions */}
             <div className="flex justify-between">
-              <button 
-                type="button" 
-                onClick={() => navigate('/date')} 
+              <button
+                type="button"
+                onClick={() => navigate('/date')}
                 className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
               >
                 Back
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
               >
                 Next Step
@@ -290,7 +423,7 @@ const AdditionalServices = () => {
             </div>
           </form>
         </div>
-        
+
         <div className="md:w-1/3">
           <OrderSummary />
         </div>
@@ -303,7 +436,7 @@ const AdditionalServices = () => {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Choose Time Slot</h3>
-                <button 
+                <button
                   onClick={() => setShowTimeSlotModal(false)}
                   className="text-gray-500 hover:text-gray-700"
                 >
@@ -312,14 +445,14 @@ const AdditionalServices = () => {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="mb-6">
                 <div className="mb-4 text-center">
                   <div className="text-lg font-medium text-gray-700">
                     {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
                   </div>
                 </div>
-                
+
                 <div className="mb-6">
                   <div className="flex justify-between mb-4">
                     <div className="font-medium">
@@ -329,7 +462,7 @@ const AdditionalServices = () => {
                       Delivery: {deliveryTime}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <div>
                       <div className="flex justify-between items-center">
@@ -375,9 +508,9 @@ const AdditionalServices = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between">
-                  <button 
+                  <button
                     type="button"
                     onClick={handleResetTimeSlots}
                     className="text-blue-600 text-sm font-medium flex items-center"
@@ -389,13 +522,13 @@ const AdditionalServices = () => {
                   </button>
                 </div>
               </div>
-              
+
               <div className="text-sm text-gray-600 mb-6">
                 Live driver tracking and your time slots will be sent the day before your move
               </div>
-              
+
               <div className="flex justify-end">
-                <button 
+                <button
                   onClick={handleConfirmTimeSlot}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >

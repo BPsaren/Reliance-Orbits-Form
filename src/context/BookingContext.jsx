@@ -6,6 +6,7 @@ export const useBooking = () => useContext(BookingContext);
 
 export const BookingProvider = ({ children }) => {
     const [quoteRef, setQuoteRef] = useState('');
+    const [bookingRef, setBookingRef] = useState('');
 
     // Enhanced extra stops state with proper structure
     const [extraStops, setExtraStops] = useState([]);
@@ -23,6 +24,14 @@ export const BookingProvider = ({ children }) => {
         contactName: '',
         contactPhone: '',
     });
+
+    const [quoteDetails, setQuoteDetails]= useState({
+        email:'',
+        prices: true,
+        booking: true,
+        aboutUs: true
+
+    })
 
     const [delivery, setDelivery] = useState({
         location: '',
@@ -145,6 +154,7 @@ export const BookingProvider = ({ children }) => {
     return (
         <BookingContext.Provider value={{
             quoteRef,setQuoteRef,
+            bookingRef, setBookingRef,
             pickup, setPickup,
             delivery, setDelivery,
             items, setItems, addItem, updateItemQuantity, removeItem,
@@ -165,7 +175,8 @@ export const BookingProvider = ({ children }) => {
             setExtraStops,
             addExtraStop,
             updateExtraStop,
-            removeExtraStop
+            removeExtraStop,
+            quoteDetails, setQuoteDetails
         }}>
             {children}
         </BookingContext.Provider>

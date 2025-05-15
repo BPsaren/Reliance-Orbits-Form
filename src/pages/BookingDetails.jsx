@@ -57,12 +57,13 @@ const BookingDetails = () => {
     items,
     motorBike,
     piano,
-    quoteRef, 
+    quoteRef,
     setQuoteRef,
     van,
     extraStops,
     itemsToAssemble,
-    itemsToDismantle
+    itemsToDismantle,
+    bookingRef, setBookingRef
   } = useBooking();
 
   // Validate UK mobile number
@@ -155,134 +156,110 @@ const BookingDetails = () => {
     return !errors.customer && !errors.pickup && !errors.delivery;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!validateAllPhones()) {
-    setSubmitError('Please correct the phone number errors');
-    return;
-  }
+    if (!validateAllPhones()) {
+      setSubmitError('Please correct the phone number errors');
+      return;
+    }
 
-  setIsSubmitting(true);
-  setSubmitError(null);
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-  function hourToTime(hour) {
-    const hrs = hour.toString().padStart(2, '0');
-    return `${hrs}:00:00`;
-  }
+    function hourToTime(hour) {
+      const hrs = hour.toString().padStart(2, '0');
+      return `${hrs}:00:00`;
+    }
 
-  try {
-    // Create quoteData first
-    const quoteData = {
-      email: customerDetails.email,
-      price: totalPrice,
-      distance: parseInt(journey.distance) || 0,
-      route: "default route",
-      pickupLocation: {
-        location: pickup.location || "N/A",
-        floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
-        lift: pickup.liftAvailable,
-        propertyType: pickup.propertyType || "standard"
-      },
-      dropLocation: {
-        location: delivery.location || "N/A",
-        floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
-        lift: delivery.liftAvailable,
-        propertyType: delivery.propertyType || "standard"
-      },
-      vanType: van.type || "N/A",
-      worker: selectedDate.numberOfMovers || 1,
-      itemsToDismantle: itemsToDismantle,
-      itemsToAssemble: itemsToAssemble,
-      stoppage: [],
-      pickupDate: selectedDate.date,
-    };
-
-    // 🔁 First: POST to /quote and get quotationRef
-    const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote', quoteData);
-    const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
-
-    if (!quotationRef) throw new Error("quotationRef not received");
-
-    // ✅ Then create bookingData using quotationRef
-    const bookingData = {
-      username: customerDetails.name,
-      email: customerDetails.email,
-      phoneNumber: customerDetails.phone,
-      price: totalPrice,
-      distance: parseInt(journey.distance) || 0,
-      route: "default route",
-      pickupLocation: {
-        location: pickup.location || "N/A",
-        floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
-        lift: pickup.liftAvailable,
-        propertyType: pickup.propertyType || "standard"
-      },
-      dropLocation: {
-        location: delivery.location || "N/A",
-        floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
-        lift: delivery.liftAvailable,
-        propertyType: delivery.propertyType || "standard"
-      },
-      vanType: van.type || "N/A",
-      worker: selectedDate.numberOfMovers || 1,
-      itemsToDismantle: itemsToDismantle,
-      itemsToAssemble: itemsToAssemble,
-      stoppage: [],
-      pickupTime: hourToTime(selectedDate.pickupTime),
-      pickupDate: selectedDate.date,
-      dropDate: selectedDate.date,
-      dropTime: hourToTime(selectedDate.dropTime),
-      duration: journey.duration || "N/A",
-      quotationRef: quotationRef, // 👈 Injected here
-      dropAddress: {
-        postcode: delivery.postcode,
-        addressLine1: delivery.addressLine1,
-        addressLine2: delivery.addressLine2,
-        city: delivery.city,
-        country: delivery.country,
-        contactName: delivery.contactName,
-        contactPhone: delivery.contactPhone,
-      },
-      pickupAddress: {
-        postcode: pickup.postcode,
-        addressLine1: pickup.addressLine1,
-        addressLine2: pickup.addressLine2,
-        city: pickup.city,
-        country: pickup.country,
-        contactName: pickup.contactName,
-        contactPhone: pickup.contactPhone,
-      },
-      details: {
-        items: {
-          name: items.map(item => item.name),
-          quantity: items.map(item => item.quantity),
+    try {
+      // ✅ Then create bookingData using quotationRef
+      const bookingData = {
+        username: customerDetails.name,
+        email: customerDetails.email,
+        phoneNumber: customerDetails.phone,
+        price: totalPrice,
+        distance: parseInt(journey.distance) || 0,
+        route: "default route",
+        duration: journey.duration || "N/A",
+        pickupDate: selectedDate.date,
+        pickupTime: hourToTime(selectedDate.pickupTime),
+        pickupAddress: {
+          postcode: pickup.postcode,
+          addressLine1: pickup.addressLine1,
+          addressLine2: pickup.addressLine2,
+          city: pickup.city,
+          country: pickup.country,
+          contactName: pickup.contactName,
+          contactPhone: pickup.contactPhone,
         },
-        isBusinessCustomer: customerDetails.isBusinessCustomer,
-        motorBike: motorBike.type,
-        piano: piano.type,
-      },
-    };
+        dropDate: selectedDate.date,
+        dropTime: hourToTime(selectedDate.dropTime),
+        dropAddress: {
+          postcode: delivery.postcode,
+          addressLine1: delivery.addressLine1,
+          addressLine2: delivery.addressLine2,
+          city: delivery.city,
+          country: delivery.country,
+          contactName: delivery.contactName,
+          contactPhone: delivery.contactPhone,
+        },
 
-    console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
+        vanType: van.type || "N/A",
+        worker: selectedDate.numberOfMovers || 1,
+        itemsToDismantle: itemsToDismantle,
+        itemsToAssemble: itemsToAssemble,
+        stoppage: [],
+        pickupLocation: {
+          location: pickup.location || "N/A",
+          floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+          lift: pickup.liftAvailable,
+          propertyType: pickup.propertyType || "standard"
+        },
+        dropLocation: {
+          location: delivery.location || "N/A",
+          floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+          lift: delivery.liftAvailable,
+          propertyType: delivery.propertyType || "standard"
+        },
+        details: {
+          items: {
+            name: items.map(item => item.name),
+            quantity: items.map(item => item.quantity),
+          },
+          isBusinessCustomer: customerDetails.isBusinessCustomer,
+          motorBike: motorBike.type,
+          piano: piano.type,
+        },
+        quotationRef:quoteRef
+      };
 
-    // 🔁 Then: POST to /new with quotationRef included
-    const bookingResponse = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
+      console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
 
-    console.log('Quote created successful:', quoteResponse.data);
-    console.log('Booking successful:', bookingResponse.data);
-    setQuoteRef(quotationRef);
+      // 🔁 Then: POST to /new with quotationRef included
+      const bookingResponse = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
 
-    navigate('/confirmation');
+      const bookingRef = bookingResponse.data?.newOrder?.bookingRef;
 
-  } catch (error) {
-    console.error('Error submitting booking:', error);
-    setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
-    console.error('Error response data:', error.response?.data);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      console.log("Booking response: ", bookingResponse)
+      console.log("Booking ref: ",bookingRef);
+
+      if (!bookingRef) {
+        throw new Error("Booking reference not received from server");
+      }
+      console.log('Booking successful:', bookingResponse.data);
+      setBookingRef(bookingRef);
+      navigate('/confirmation');
+
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
+      console.error('Error response data:', error.response?.data);
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
 
   const handlePickupChange = (field, value) => {
