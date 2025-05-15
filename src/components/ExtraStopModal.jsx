@@ -15,7 +15,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
   const [doorFlatNo, setDoorFlatNo] = useState(''); // New state for door/flat number
 
   // New state for property type, floor, and lift availability
-  const [propertyType, setPropertyType] = useState('2 Bed House');
+  const [propertyType, setPropertyType] = useState('Studio');
   const [floor, setFloor] = useState('Ground floor');
   const [liftAvailable, setLiftAvailable] = useState(false);
 
@@ -26,7 +26,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
       setSuggestions([]);
       setPlaceId('');
       setError('');
-      setPropertyType('2 Bed House');
+      setPropertyType('Studio');
       setFloor('Ground floor');
       setLiftAvailable(false);
       setDoorFlatNo(''); // Reset door/flat number

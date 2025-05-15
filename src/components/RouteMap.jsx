@@ -3,6 +3,7 @@ import { useBooking } from '../context/BookingContext';
 import { GoogleMap, useLoadScript, DirectionsService, DirectionsRenderer, Marker } from '@react-google-maps/api';
 
 const apiKey = import.meta.env.VITE_API_KEY;
+console.log(apiKey);
 
 const MapWrapper = () => {
   const { isLoaded } = useLoadScript({
