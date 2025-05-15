@@ -28,7 +28,7 @@ const AdditionalServices = () => {
     setItemsToDismantle,
     additionalServices,
     setAdditionalServices,
-    quoteDetails
+    quoteDetails,
   } = useBooking();
 
   // const {
@@ -48,11 +48,31 @@ const AdditionalServices = () => {
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
   const [error, setError] = useState(''); // Added error state
 
-  // Initialize the local state variables with context values
+  // Initialize time values from context on component mount
   useEffect(() => {
+    // Check if there are time values in the context
+    if (selectedDate.pickupTime && selectedDate.dropTime) {
+      // If the times are in HH:MM:SS format, convert to decimal
+      const pickupTimeDecimal = typeof selectedDate.pickupTime === 'string' && selectedDate.pickupTime.includes(':') 
+        ? parseInt(selectedDate.pickupTime.split(':')[0]) + (selectedDate.pickupTime.split(':')[1] === '30' ? 0.5 : 0)
+        : selectedDate.pickupTime;
+        
+      const dropTimeDecimal = typeof selectedDate.dropTime === 'string' && selectedDate.dropTime.includes(':')
+        ? parseInt(selectedDate.dropTime.split(':')[0]) + (selectedDate.dropTime.split(':')[1] === '30' ? 0.5 : 0)
+        : selectedDate.dropTime;
+      
+      setCollectionTime({ 
+        start: pickupTimeDecimal || 8, 
+        end: dropTimeDecimal || 18 
+      });
+    } else {
+      // Use default values if no time in context
+      setCollectionTime({ start: 8, end: 18 });
+    }
+
     setDismantleCount(itemsToDismantle);
     setAssemblyCount(itemsToAssemble);
-  }, [itemsToDismantle, itemsToAssemble]);
+  }, [itemsToDismantle, itemsToAssemble, selectedDate.pickupTime, selectedDate.dropTime]);
 
   const [dismantleCount, setDismantleCount] = useState(itemsToDismantle || 0);
   const [assemblyCount, setAssemblyCount] = useState(itemsToAssemble || 0);
@@ -96,9 +116,16 @@ const AdditionalServices = () => {
     e.preventDefault();
     setError(''); // Clear any previous errors
 
+    // Corrected time conversion function that properly handles fractional hours
     function hourToTime(hour) {
-      const hrs = hour.toString().padStart(2, '0');
-      return `${hrs}:00:00`;
+      // If the hour is already in HH:MM:SS format, return it as is
+      if (typeof hour === 'string' && hour.includes(':')) {
+        return hour;
+      }
+      
+      const hrs = Math.floor(hour).toString().padStart(2, '0');
+      const mins = (hour % 1 === 0.5) ? '30' : '00';
+      return `${hrs}:${mins}:00`;
     }
 
     try {
@@ -138,7 +165,7 @@ const AdditionalServices = () => {
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle,
         itemsToAssemble: itemsToAssemble,
-        stoppage: [],
+        stoppage: extraStops.map(item => item.address),
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -159,6 +186,7 @@ const AdditionalServices = () => {
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
           piano: piano.type,
+          specialRequirements: additionalServices.specialRequirements
         },
       };
 
@@ -221,7 +249,15 @@ const AdditionalServices = () => {
   };
 
   const handleResetTimeSlots = () => {
+    // Reset the local state
     setCollectionTime({ start: 8, end: 18 });
+    
+    // Also update the context state to ensure consistency
+    setSelectedDate(prev => ({
+      ...prev,
+      pickupTime: 8,
+      dropTime: 18
+    }));
   };
 
   const handleConfirmTimeSlot = () => {

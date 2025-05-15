@@ -4,6 +4,7 @@ import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from 'axios';
+import AdditionalServices from './AdditionalServices';
 
 // List of UK cities for validation
 const UK_CITIES = [
@@ -63,7 +64,9 @@ const BookingDetails = () => {
     extraStops,
     itemsToAssemble,
     itemsToDismantle,
-    bookingRef, setBookingRef
+    bookingRef, setBookingRef,
+    additionalServices,
+    
   } = useBooking();
 
   // Validate UK mobile number
@@ -209,7 +212,7 @@ const BookingDetails = () => {
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle,
         itemsToAssemble: itemsToAssemble,
-        stoppage: [],
+        stoppage: extraStops.map(item => item.address),
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -230,6 +233,7 @@ const BookingDetails = () => {
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
           piano: piano.type,
+          specialRequirements: additionalServices.specialRequirements
         },
         quotationRef:quoteRef
       };
