@@ -170,16 +170,16 @@ const BookingDetails = () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
-    function hourToTime(hour) {
-      // If the hour is already in HH:MM:SS format, return it as is
-      if (typeof hour === 'string' && hour.includes(':')) {
-        return hour;
-      }
+    // function hourToTime(hour) {
+    //   // If the hour is already in HH:MM:SS format, return it as is
+    //   if (typeof hour === 'string' && hour.includes(':')) {
+    //     return hour;
+    //   }
 
-      const hrs = Math.floor(hour).toString().padStart(2, '0');
-      const mins = (hour % 1 === 0.5) ? '30' : '00';
-      return `${hrs}:${mins}:00`;
-    }
+    //   const hrs = Math.floor(hour).toString().padStart(2, '0');
+    //   const mins = (hour % 1 === 0.5) ? '30' : '00';
+    //   return `${hrs}:${mins}:00`;
+    // }
 
     try {
       // ✅ Then create bookingData using quotationRef
@@ -192,7 +192,7 @@ const BookingDetails = () => {
         route: "default route",
         duration: journey.duration || "N/A",
         pickupDate: selectedDate.date || 'NA',
-        pickupTime: hourToTime(selectedDate.pickupTime) || 'NA',
+        pickupTime: selectedDate.pickupTime || '08:00:00',
         pickupAddress: {
           postcode: pickup.postcode,
           addressLine1: pickup.addressLine1,
@@ -203,7 +203,7 @@ const BookingDetails = () => {
           contactPhone: pickup.contactPhone,
         },
         dropDate: selectedDate.date || 'NA',
-        dropTime: hourToTime(selectedDate.dropTime) || 'NA',
+        dropTime: selectedDate.dropTime || '18:00:00',
         dropAddress: {
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,

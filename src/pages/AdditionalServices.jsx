@@ -3,7 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
-import axios from 'axios'; // Added missing import
+import axios from 'axios';
+
+// Helper function for consistent time format conversion
+const hourToTime = (hour) => {
+  // If the hour is already in HH:MM:SS format, return it as is
+  if (typeof hour === 'string' && hour.includes(':')) {
+    return hour;
+  }
+  
+  // Handle possible NaN or undefined values
+  if (hour === undefined || isNaN(hour)) {
+    return '08:00:00'; // Default fallback time
+  }
+  
+  // Convert number to time string (e.g., 8.5 -> "08:30:00")
+  const hrs = Math.floor(hour).toString().padStart(2, '0');
+  const mins = (hour % 1 === 0.5) ? '30' : '00';
+  return `${hrs}:${mins}:00`;
+};
 
 const AdditionalServices = () => {
   const navigate = useNavigate();
@@ -31,34 +49,36 @@ const AdditionalServices = () => {
     quoteDetails,
   } = useBooking();
 
-  // const {
-  //   additionalServices,
-  //   setAdditionalServices,
-  //   selectedDate,
-  //   setSelectedDate,
-  //   itemsToDismantle,
-  //   itemsToAssemble,
-  //   setItemsToAssemble,
-  //   setItemsToDismantle
-  // } = useBooking();
-
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [collectionTime, setCollectionTime] = useState({ start: 8, end: 18 });
   const [deliveryTime, setDeliveryTime] = useState('Same day');
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
-  const [error, setError] = useState(''); // Added error state
+  const [error, setError] = useState('');
+  const [dismantleCount, setDismantleCount] = useState(itemsToDismantle || 0);
+  const [assemblyCount, setAssemblyCount] = useState(itemsToAssemble || 0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize time values from context on component mount
   useEffect(() => {
+    // Time conversion from string to decimal for slider display
+    const convertTimeToDecimal = (timeStr) => {
+      if (typeof timeStr !== 'string' || !timeStr.includes(':')) return null;
+      
+      const parts = timeStr.split(':');
+      const hours = parseInt(parts[0], 10);
+      const minutes = parseInt(parts[1], 10);
+      return hours + (minutes === 30 ? 0.5 : 0);
+    };
+
     // Check if there are time values in the context
     if (selectedDate.pickupTime && selectedDate.dropTime) {
-      // If the times are in HH:MM:SS format, convert to decimal
+      // Convert string times to decimal for sliders if needed
       const pickupTimeDecimal = typeof selectedDate.pickupTime === 'string' && selectedDate.pickupTime.includes(':')
-        ? parseInt(selectedDate.pickupTime.split(':')[0]) + (selectedDate.pickupTime.split(':')[1] === '30' ? 0.5 : 0)
+        ? convertTimeToDecimal(selectedDate.pickupTime)
         : selectedDate.pickupTime;
 
       const dropTimeDecimal = typeof selectedDate.dropTime === 'string' && selectedDate.dropTime.includes(':')
-        ? parseInt(selectedDate.dropTime.split(':')[0]) + (selectedDate.dropTime.split(':')[1] === '30' ? 0.5 : 0)
+        ? convertTimeToDecimal(selectedDate.dropTime)
         : selectedDate.dropTime;
 
       setCollectionTime({
@@ -66,16 +86,18 @@ const AdditionalServices = () => {
         end: dropTimeDecimal || 18
       });
     } else {
-      // Use default values if no time in context
+      // Use default values and update context with proper string format
       setCollectionTime({ start: 8, end: 18 });
+      setSelectedDate(prev => ({
+        ...prev,
+        pickupTime: hourToTime(8),
+        dropTime: hourToTime(18)
+      }));
     }
 
     setDismantleCount(itemsToDismantle);
     setAssemblyCount(itemsToAssemble);
-  }, [itemsToDismantle, itemsToAssemble, selectedDate.pickupTime, selectedDate.dropTime]);
-
-  const [dismantleCount, setDismantleCount] = useState(itemsToDismantle || 0);
-  const [assemblyCount, setAssemblyCount] = useState(itemsToAssemble || 0);
+  }, [itemsToDismantle, itemsToAssemble, selectedDate.pickupTime, selectedDate.dropTime, setSelectedDate]);
 
   // Format the date for display
   const formatDisplayDate = (date) => {
@@ -115,21 +137,10 @@ const AdditionalServices = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Clear any previous errors
-
-    // Corrected time conversion function that properly handles fractional hours
-    function hourToTime(hour) {
-      // If the hour is already in HH:MM:SS format, return it as is
-      if (typeof hour === 'string' && hour.includes(':')) {
-        return hour;
-      }
-
-      const hrs = Math.floor(hour).toString().padStart(2, '0');
-      const mins = (hour % 1 === 0.5) ? '30' : '00';
-      return `${hrs}:${mins}:00`;
-    }
+    setIsSubmitting(true); // Start loading animation
 
     try {
-      // Create quoteData first
+      // Create quoteData - no need to convert times again
       const quoteData = {
         username: customerDetails.name || 'NA',
         email: quoteDetails.email || 'NA',
@@ -139,7 +150,7 @@ const AdditionalServices = () => {
         route: "default route",
         duration: journey.duration || "N/A",
         pickupDate: selectedDate.date || 'NA',
-        pickupTime: hourToTime(selectedDate.pickupTime) || 'NA',
+        pickupTime: selectedDate.pickupTime || '08:00:00', // Already in correct format
         pickupAddress: {
           postcode: pickup.postcode,
           addressLine1: pickup.addressLine1,
@@ -150,7 +161,7 @@ const AdditionalServices = () => {
           contactPhone: pickup.contactPhone,
         },
         dropDate: selectedDate.date || 'NA',
-        dropTime: hourToTime(selectedDate.dropTime) || 'NA',
+        dropTime: selectedDate.dropTime || '18:00:00', // Already in correct format
         dropAddress: {
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
@@ -160,7 +171,6 @@ const AdditionalServices = () => {
           contactName: delivery.contactName,
           contactPhone: delivery.contactPhone,
         },
-
         vanType: van.type || "N/A",
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle || 0,
@@ -219,9 +229,8 @@ const AdditionalServices = () => {
         // Something happened in setting up the request that triggered an Error
         setError(`Error: ${error.message || 'An unknown error occurred'}`);
       }
-
-      // Do not navigate to the next page
-      // The navigation code is removed, and we'll display the error instead
+    } finally {
+      setIsSubmitting(false); // Stop loading animation regardless of outcome
     }
   };
 
@@ -239,12 +248,16 @@ const AdditionalServices = () => {
 
   const handleCollectionTimeChange = (e, type) => {
     const value = parseFloat(e.target.value);
+    const timeString = hourToTime(value); // Convert to time string immediately
+    
     if (type === 'start') {
       setCollectionTime(prev => ({ ...prev, start: value }));
-      setSelectedDate(prev => ({ ...prev, pickupTime: value }));
+      // Store the formatted time string in context
+      setSelectedDate(prev => ({ ...prev, pickupTime: timeString }));
     } else {
       setCollectionTime(prev => ({ ...prev, end: value }));
-      setSelectedDate(prev => ({ ...prev, dropTime: value }));
+      // Store the formatted time string in context
+      setSelectedDate(prev => ({ ...prev, dropTime: timeString }));
     }
   };
 
@@ -252,11 +265,11 @@ const AdditionalServices = () => {
     // Reset the local state
     setCollectionTime({ start: 8, end: 18 });
 
-    // Also update the context state to ensure consistency
+    // Update the context with properly formatted time strings
     setSelectedDate(prev => ({
       ...prev,
-      pickupTime: 8,
-      dropTime: 18
+      pickupTime: hourToTime(8),
+      dropTime: hourToTime(18)
     }));
   };
 
@@ -447,14 +460,28 @@ const AdditionalServices = () => {
                 type="button"
                 onClick={() => navigate('/date')}
                 className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
+                disabled={isSubmitting}
               >
                 Back
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
+                disabled={isSubmitting}
+                className={`px-6 py-3 bg-blue-600 text-white rounded-md font-medium flex items-center justify-center min-w-[120px] ${
+                  isSubmitting ? 'opacity-80 cursor-not-allowed' : 'hover:bg-blue-700'
+                }`}
               >
-                Next Step
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  'Next Step'
+                )}
               </button>
             </div>
           </form>

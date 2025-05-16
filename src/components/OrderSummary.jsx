@@ -65,7 +65,7 @@ const OrderSummary = () => {
 
         const res = await axios.post('https://orbit-0pxd.onrender.com/price', payload);
         setTotalPrice(res.data.price);
-        console.log(payload);
+        // console.log(payload);
       } catch (err) {
         console.error("Price fetch error:", err);
       }
