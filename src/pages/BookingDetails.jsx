@@ -171,22 +171,28 @@ const BookingDetails = () => {
     setSubmitError(null);
 
     function hourToTime(hour) {
-      const hrs = hour.toString().padStart(2, '0');
-      return `${hrs}:00:00`;
+      // If the hour is already in HH:MM:SS format, return it as is
+      if (typeof hour === 'string' && hour.includes(':')) {
+        return hour;
+      }
+
+      const hrs = Math.floor(hour).toString().padStart(2, '0');
+      const mins = (hour % 1 === 0.5) ? '30' : '00';
+      return `${hrs}:${mins}:00`;
     }
 
     try {
       // ✅ Then create bookingData using quotationRef
       const bookingData = {
-        username: customerDetails.name,
-        email: customerDetails.email,
-        phoneNumber: customerDetails.phone,
-        price: totalPrice,
+        username: customerDetails.name || 'NA',
+        email: customerDetails.email || 'NA',
+        phoneNumber: customerDetails.phone || 'NA',
+        price: totalPrice || 0,
         distance: parseInt(journey.distance) || 0,
         route: "default route",
         duration: journey.duration || "N/A",
-        pickupDate: selectedDate.date,
-        pickupTime: hourToTime(selectedDate.pickupTime),
+        pickupDate: selectedDate.date || 'NA',
+        pickupTime: hourToTime(selectedDate.pickupTime) || 'NA',
         pickupAddress: {
           postcode: pickup.postcode,
           addressLine1: pickup.addressLine1,
@@ -196,8 +202,8 @@ const BookingDetails = () => {
           contactName: pickup.contactName,
           contactPhone: pickup.contactPhone,
         },
-        dropDate: selectedDate.date,
-        dropTime: hourToTime(selectedDate.dropTime),
+        dropDate: selectedDate.date || 'NA',
+        dropTime: hourToTime(selectedDate.dropTime) || 'NA',
         dropAddress: {
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
@@ -210,9 +216,9 @@ const BookingDetails = () => {
 
         vanType: van.type || "N/A",
         worker: selectedDate.numberOfMovers || 1,
-        itemsToDismantle: itemsToDismantle,
-        itemsToAssemble: itemsToAssemble,
-        stoppage: extraStops.map(item => item.address),
+        itemsToDismantle: itemsToDismantle || 0,
+        itemsToAssemble: itemsToAssemble || 0,
+        stoppage: extraStops.map(item => item.address) || [],
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -227,15 +233,15 @@ const BookingDetails = () => {
         },
         details: {
           items: {
-            name: items.map(item => item.name),
-            quantity: items.map(item => item.quantity),
+            name: items.map(item => item.name) || [],
+            quantity: items.map(item => item.quantity) || [],
           },
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
           piano: piano.type,
           specialRequirements: additionalServices.specialRequirements
         },
-        quotationRef:quoteRef
+        quotationRef:quoteRef || 'NA'
       };
 
       console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));

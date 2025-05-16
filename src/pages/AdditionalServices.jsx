@@ -53,17 +53,17 @@ const AdditionalServices = () => {
     // Check if there are time values in the context
     if (selectedDate.pickupTime && selectedDate.dropTime) {
       // If the times are in HH:MM:SS format, convert to decimal
-      const pickupTimeDecimal = typeof selectedDate.pickupTime === 'string' && selectedDate.pickupTime.includes(':') 
+      const pickupTimeDecimal = typeof selectedDate.pickupTime === 'string' && selectedDate.pickupTime.includes(':')
         ? parseInt(selectedDate.pickupTime.split(':')[0]) + (selectedDate.pickupTime.split(':')[1] === '30' ? 0.5 : 0)
         : selectedDate.pickupTime;
-        
+
       const dropTimeDecimal = typeof selectedDate.dropTime === 'string' && selectedDate.dropTime.includes(':')
         ? parseInt(selectedDate.dropTime.split(':')[0]) + (selectedDate.dropTime.split(':')[1] === '30' ? 0.5 : 0)
         : selectedDate.dropTime;
-      
-      setCollectionTime({ 
-        start: pickupTimeDecimal || 8, 
-        end: dropTimeDecimal || 18 
+
+      setCollectionTime({
+        start: pickupTimeDecimal || 8,
+        end: dropTimeDecimal || 18
       });
     } else {
       // Use default values if no time in context
@@ -122,7 +122,7 @@ const AdditionalServices = () => {
       if (typeof hour === 'string' && hour.includes(':')) {
         return hour;
       }
-      
+
       const hrs = Math.floor(hour).toString().padStart(2, '0');
       const mins = (hour % 1 === 0.5) ? '30' : '00';
       return `${hrs}:${mins}:00`;
@@ -131,15 +131,15 @@ const AdditionalServices = () => {
     try {
       // Create quoteData first
       const quoteData = {
-        username: customerDetails.name,
-        email: quoteDetails.email,
-        phoneNumber: customerDetails.phone,
-        price: totalPrice,
+        username: customerDetails.name || 'NA',
+        email: quoteDetails.email || 'NA',
+        phoneNumber: customerDetails.phone || 'NA',
+        price: totalPrice || 0,
         distance: parseInt(journey.distance) || 0,
         route: "default route",
         duration: journey.duration || "N/A",
-        pickupDate: selectedDate.date,
-        pickupTime: hourToTime(selectedDate.pickupTime),
+        pickupDate: selectedDate.date || 'NA',
+        pickupTime: hourToTime(selectedDate.pickupTime) || 'NA',
         pickupAddress: {
           postcode: pickup.postcode,
           addressLine1: pickup.addressLine1,
@@ -149,8 +149,8 @@ const AdditionalServices = () => {
           contactName: pickup.contactName,
           contactPhone: pickup.contactPhone,
         },
-        dropDate: selectedDate.date,
-        dropTime: hourToTime(selectedDate.dropTime),
+        dropDate: selectedDate.date || 'NA',
+        dropTime: hourToTime(selectedDate.dropTime) || 'NA',
         dropAddress: {
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
@@ -163,9 +163,9 @@ const AdditionalServices = () => {
 
         vanType: van.type || "N/A",
         worker: selectedDate.numberOfMovers || 1,
-        itemsToDismantle: itemsToDismantle,
-        itemsToAssemble: itemsToAssemble,
-        stoppage: extraStops.map(item => item.address),
+        itemsToDismantle: itemsToDismantle || 0,
+        itemsToAssemble: itemsToAssemble || 0,
+        stoppage: extraStops.map(item => item.address) || [],
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -180,8 +180,8 @@ const AdditionalServices = () => {
         },
         details: {
           items: {
-            name: items.map(item => item.name),
-            quantity: items.map(item => item.quantity),
+            name: items.map(item => item.name) || [],
+            quantity: items.map(item => item.quantity) || [],
           },
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
@@ -200,12 +200,12 @@ const AdditionalServices = () => {
       if (!quotationRef) {
         throw new Error("Quotation reference not received from server");
       }
-      
+
       setQuoteRef(quotationRef);
       navigate('/booking-details');
     } catch (error) {
       console.error('Error submitting booking:', error);
-      
+
       // Set appropriate error message based on the error
       if (error.response) {
         // The request was made and the server responded with a status code
@@ -219,7 +219,7 @@ const AdditionalServices = () => {
         // Something happened in setting up the request that triggered an Error
         setError(`Error: ${error.message || 'An unknown error occurred'}`);
       }
-      
+
       // Do not navigate to the next page
       // The navigation code is removed, and we'll display the error instead
     }
@@ -251,7 +251,7 @@ const AdditionalServices = () => {
   const handleResetTimeSlots = () => {
     // Reset the local state
     setCollectionTime({ start: 8, end: 18 });
-    
+
     // Also update the context state to ensure consistency
     setSelectedDate(prev => ({
       ...prev,
@@ -281,7 +281,7 @@ const AdditionalServices = () => {
                 <span className="block sm:inline">{error}</span>
               </div>
             )}
-            
+
             {/* Collection & Delivery Section */}
             <div className="border rounded-lg p-6 mb-8">
               <div className="flex justify-between items-center mb-4">
