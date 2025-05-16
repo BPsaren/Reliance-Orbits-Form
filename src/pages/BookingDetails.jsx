@@ -258,7 +258,7 @@ const BookingDetails = () => {
     } catch (error) {
       console.error('Error submitting booking:', error);
       setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
-      console.error('Error response data:', error.response?.data);
+      console.error('Error response data:', error.response.data);
 
     } finally {
       setIsSubmitting(false);
