@@ -5,6 +5,9 @@ import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from 'axios';
 import AdditionalServices from './AdditionalServices';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe("pk_live_51RL5KtKBPwsna3OvmvQ3EbqIz8rMbj9Aj26Ur4X7y086GWPCZlQL3IEApu4ujhyUEtewYW4Fs1hezG9QmxfEKJtW00ySCy7f2C"); // replace with your Stripe publishable key
 
 // List of UK cities for validation
 const UK_CITIES = [
@@ -66,7 +69,7 @@ const BookingDetails = () => {
     itemsToDismantle,
     bookingRef, setBookingRef,
     additionalServices,
-    
+
   } = useBooking();
 
   // Validate UK mobile number
@@ -159,6 +162,18 @@ const BookingDetails = () => {
     return !errors.customer && !errors.pickup && !errors.delivery;
   };
 
+   const validateExtraStops = (stops) => {
+    if (!Array.isArray(stops) || stops.length === 0) return [];
+    
+    return stops.map(stop => ({
+      ...stop,
+      // Ensure doorNumber exists and is a string
+      doorNumber: stop.doorNumber || stop.doorFlatNo || '',
+      // Ensure lift exists and is a boolean
+      lift: typeof stop.lift === 'boolean' ? stop.lift : Boolean(stop.liftAvailable),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -182,18 +197,103 @@ const BookingDetails = () => {
     // }
 
     try {
+
+      const validatedStops = validateExtraStops(extraStops);
       // ✅ Then create bookingData using quotationRef
-      const bookingData = {
+      // const bookingData = {
+      //   username: customerDetails.name || 'NA',
+      //   email: customerDetails.email || 'NA',
+      //   phoneNumber: customerDetails.phone || 'NA',
+      //   price: totalPrice || 0,
+      //   distance: parseInt(journey.distance) || 0,
+      //   route: "default route",
+      //   duration: journey.duration || "N/A",
+      //   pickupDate: selectedDate.date || 'NA',
+      //   pickupTime: selectedDate.pickupTime || '08:00:00',
+      //   pickupAddress: {
+      //     postcode: pickup.postcode,
+      //     addressLine1: pickup.addressLine1,
+      //     addressLine2: pickup.addressLine2,
+      //     city: pickup.city,
+      //     country: pickup.country,
+      //     contactName: pickup.contactName,
+      //     contactPhone: pickup.contactPhone,
+      //   },
+      //   dropDate: selectedDate.date || 'NA',
+      //   dropTime: selectedDate.dropTime || '18:00:00',
+      //   dropAddress: {
+      //     postcode: delivery.postcode,
+      //     addressLine1: delivery.addressLine1,
+      //     addressLine2: delivery.addressLine2,
+      //     city: delivery.city,
+      //     country: delivery.country,
+      //     contactName: delivery.contactName,
+      //     contactPhone: delivery.contactPhone,
+      //   },
+
+      //   vanType: van.type || "N/A",
+      //   worker: selectedDate.numberOfMovers || 1,
+      //   itemsToDismantle: itemsToDismantle || 0,
+      //   itemsToAssemble: itemsToAssemble || 0,
+      //   stoppage: extraStops.map(item => item.address) || [],
+      //   pickupLocation: {
+      //     location: pickup.location || "N/A",
+      //     floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+      //     lift: pickup.liftAvailable,
+      //     propertyType: pickup.propertyType || "standard"
+      //   },
+      //   dropLocation: {
+      //     location: delivery.location || "N/A",
+      //     floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+      //     lift: delivery.liftAvailable,
+      //     propertyType: delivery.propertyType || "standard"
+      //   },
+      //   details: {
+      //     items: {
+      //       name: items.map(item => item.name) || [],
+      //       quantity: items.map(item => item.quantity) || [],
+      //     },
+      //     isBusinessCustomer: customerDetails.isBusinessCustomer,
+      //     motorBike: motorBike.type,
+      //     piano: piano.type,
+      //     specialRequirements: additionalServices.specialRequirements,
+          
+      //   },
+      //   quotationRef: quoteRef || 'NA'
+      // };
+
+      // console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
+
+      // 🔁 Then: POST to /new with quotationRef included
+      // const bookingResponse = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
+
+      // const bookingRefNumber = bookingResponse.data?.newOrder?.bookingRef;
+
+      // console.log("Booking response: ", bookingResponse)
+      // console.log("Booking ref: ", bookingRefNumber);
+
+      // if (!bookingRefNumber) {
+      //   throw new Error("Booking reference not received from server");
+      // }
+      // console.log('Booking successful:', bookingResponse.data);
+      // setBookingRef(bookingRefNumber);
+
+      // console.log('Booking Ref:', bookingRef);
+      // navigate('/confirmation');
+
+      const metaDataBody = {
         username: customerDetails.name || 'NA',
         email: customerDetails.email || 'NA',
         phoneNumber: customerDetails.phone || 'NA',
-        price: totalPrice || 0,
+        // price: totalPrice || 0,
+        price: 0,
         distance: parseInt(journey.distance) || 0,
         route: "default route",
         duration: journey.duration || "N/A",
         pickupDate: selectedDate.date || 'NA',
         pickupTime: selectedDate.pickupTime || '08:00:00',
         pickupAddress: {
+          flatNo: pickup.flatNo,
           postcode: pickup.postcode,
           addressLine1: pickup.addressLine1,
           addressLine2: pickup.addressLine2,
@@ -205,6 +305,7 @@ const BookingDetails = () => {
         dropDate: selectedDate.date || 'NA',
         dropTime: selectedDate.dropTime || '18:00:00',
         dropAddress: {
+          flatNo: delivery.flatNo,
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
           addressLine2: delivery.addressLine2,
@@ -218,7 +319,7 @@ const BookingDetails = () => {
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle || 0,
         itemsToAssemble: itemsToAssemble || 0,
-        stoppage: extraStops.map(item => item.address) || [],
+        ExtraStopsArray: validatedStops,
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -239,32 +340,25 @@ const BookingDetails = () => {
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
           piano: piano.type,
-          specialRequirements: additionalServices.specialRequirements
+          specialRequirements: additionalServices.specialRequirements,
         },
-        quotationRef:quoteRef || 'NA'
+        // bookingRef: bookingRefNumber,
+        quotationRef: quoteRef || 'NA',
+        itemsArray: items,
       };
 
-      console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
+      console.log("Metadata Data Body being sent:", JSON.stringify(metaDataBody, null, 2));
 
-      // 🔁 Then: POST to /new with quotationRef included
-      const bookingResponse = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
+      const sessionRes = await axios.post('https://payment-gateway-reliance.onrender.com/create-checkout-session', metaDataBody);
 
-      const bookingRef = bookingResponse.data?.newOrder?.bookingRef;
-
-      console.log("Booking response: ", bookingResponse)
-      console.log("Booking ref: ",bookingRef);
-
-      if (!bookingRef) {
-        throw new Error("Booking reference not received from server");
-      }
-      console.log('Booking successful:', bookingResponse.data);
-      setBookingRef(bookingRef);
-      navigate('/confirmation');
+      const stripe = await stripePromise;
+      await stripe.redirectToCheckout({ sessionId: sessionRes.data.sessionId });
 
     } catch (error) {
       console.error('Error submitting booking:', error);
       setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
       console.error('Error response data:', error.response.data);
+      navigate('/payment-failed'); // redirect on error
 
     } finally {
       setIsSubmitting(false);
@@ -600,15 +694,15 @@ const BookingDetails = () => {
                   <div className="font-medium">Moving from:</div>
                   <div className="text-gray-600">{pickup.location}</div>
                   <div className="font-medium">Door No/flat No:</div>
-                   <div className="text-gray-600">{pickup.flatNo}</div>
-                  
+                  <div className="text-gray-600">{pickup.flatNo}</div>
+
                 </div>
 
                 <div className="flex justify-between py-2">
                   <div className=" font-medium">Moving to:</div>
                   <div className="text-gray-600">{delivery.location}</div>
                   <div className="font-medium">Door No/flat No:</div>
-                   <div className=" text-gray-600">{delivery.flatNo}</div>
+                  <div className=" text-gray-600">{delivery.flatNo}</div>
                 </div>
 
                 {extraStops.map((stop, index) => (
@@ -705,7 +799,7 @@ const BookingDetails = () => {
                 className={`px-6 py-3 ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md font-medium`}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Processing...' : 'Complete Booking'}
+                {isSubmitting ? 'Redirecting to Payment...' : 'Pay Now'}
               </button>
             </div>
           </form>

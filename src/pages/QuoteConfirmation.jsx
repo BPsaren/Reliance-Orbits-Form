@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
@@ -6,21 +6,22 @@ import RouteMap from '../components/RouteMap';
 
 const QuoteConfirmation = () => {
   const navigate = useNavigate();
-  const { 
-    quoteRef, 
+  const {
+    quoteRef,
     bookingRef,
     quoteDetails,
-    pickup, 
-    delivery, 
+    pickup,
+    delivery,
     extraStops,
-    items, 
-    selectedDate, 
-    additionalServices, 
-    customerDetails, 
-    journey, 
+    items,
+    selectedDate,
+    additionalServices,
+    customerDetails,
+    journey,
     totalPrice,
     van
   } = useBooking();
+
 
   const formatAddress = (address) => {
     const parts = [];
@@ -30,7 +31,6 @@ const QuoteConfirmation = () => {
     if (address.city) parts.push(address.city);
     if (address.postcode) parts.push(address.postcode);
     if (address.country) parts.push(address.country);
-    if (address.propertyType) parts.push(address.propertyType);
     return parts.filter(Boolean).join(', ');
   };
 
@@ -38,7 +38,7 @@ const QuoteConfirmation = () => {
     <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-solid" style={{ borderLeftColor: color }}>
       <div className="flex items-start">
         <div className="flex-shrink-0">
-          <div className={`bg-${color} text-white rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-md`}>
+          <div className={`text-white rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-md` } style={{ backgroundColor: color }}>
             {letter}
           </div>
         </div>
@@ -62,24 +62,24 @@ const QuoteConfirmation = () => {
       </div>
     </div>
   );
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header title="Booking Confirmed!" />
-      
+
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 text-center mb-8 shadow">
           <div className="bg-green-500 text-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-5 text-3xl font-bold shadow-lg">✓</div>
           <h2 className="text-3xl font-bold text-gray-800 mb-3">Thank you for your booking!</h2>
-          <p className="text-gray-700">We have sent a confirmation email to <span className="font-medium">{customerDetails.email}</span></p>
+          <p className="text-gray-700">We have sent a confirmation email to <span className="font-medium">{customerDetails?.email || "your email"}</span></p>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow overflow-hidden mb-8">
           <div className="border-b border-gray-200 p-6 bg-blue-50">
             <h3 className="text-lg font-medium text-gray-700 mb-2">Your Booking Reference</h3>
-            <div className="text-3xl font-bold text-blue-600 tracking-wide">{bookingRef}</div>
+            <div className="text-3xl font-bold text-blue-600 tracking-wide">{bookingRef || "Processing..."}</div>
           </div>
-          
+
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,95 +88,110 @@ const QuoteConfirmation = () => {
               </svg>
               Journey Details
             </h3>
-            
+
             <div className="space-y-4 mb-6">
               {/* Pickup Location */}
-              {renderAddressCard(pickup.location, pickup, "blue-600", "A")}
-              
+              {pickup && renderAddressCard(pickup.location || "Pickup Location", pickup, "#3b82f6", "A")}
+
               {/* Extra Stops */}
               {extraStops && extraStops.length > 0 && (
                 <div className="pl-4 space-y-4">
                   {extraStops.map((stop, index) => (
                     <div key={index} className="relative">
                       <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-300 -ml-2"></div>
-                      {renderAddressCard(stop.address, 
-                        { 
+                      {renderAddressCard(
+                        stop.address || `Stop ${index + 1}`,
+                        {
+                          addressLine1: stop.addressLine1,
+                          addressLine2: stop.addressLine2,
+                          city: stop.city,
+                          postcode: stop.postcode,
+                          country: stop.country,
                           propertyType: stop.propertyType,
                           floor: stop.floor,
                           liftAvailable: stop.liftAvailable,
-                          flatNo: stop.doorFlatNo
-                        }, 
-                        "yellow-500", 
-                        `${index + 1}`
+                          flatNo: stop.flatNo || stop.doorFlatNo
+                        },
+                        "#eab308",
+                        `${String.fromCharCode(66 + index)}`
                       )}
                     </div>
                   ))}
                 </div>
               )}
-              
+
               {/* Delivery Location */}
-              <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-300 -ml-2"></div>
-                {renderAddressCard(delivery.location, delivery, "green-600", "B")}
-              </div>
+              {delivery && (
+                <div className="relative">
+                  {extraStops && extraStops.length > 0 && (
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-300 -ml-2"></div>
+                  )}
+                  {renderAddressCard(
+                    delivery.location || "Delivery Location", 
+                    delivery, 
+                    "#16a34a", 
+                    extraStops && extraStops.length > 0 ? `${String.fromCharCode(66 + extraStops.length)}` : "B"
+                  )}
+                </div>
+              )}
             </div>
-            
+
             <div className="my-6 px-4 py-3 bg-blue-50 rounded-lg">
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <div className="text-sm font-medium">Distance: <span className="text-gray-700">{journey.distance}</span></div>
+                  <div className="text-sm font-medium">Distance: <span className="text-gray-700">{journey?.distance || "Calculating..."}</span></div>
                 </div>
                 <div className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <div className="text-sm font-medium">Duration: <span className="text-gray-700">{journey.duration}</span></div>
+                  <div className="text-sm font-medium">Duration: <span className="text-gray-700">{journey?.duration || "Calculating..."}</span></div>
                 </div>
               </div>
             </div>
-            
+
             <div className="h-64 bg-gray-100 rounded-lg mb-6 overflow-hidden shadow-inner">
               <RouteMap />
             </div>
           </div>
-          
+
           <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-gray-200 bg-gray-50">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
                 <div className="bg-blue-100 rounded-full p-3 text-blue-600 text-xl">📅</div>
                 <div className="ml-3">
                   <div className="text-sm font-medium text-gray-500">Moving Date</div>
-                  <div className="font-medium text-gray-800">{selectedDate.date}</div>
+                  <div className="font-medium text-gray-800">{selectedDate?.date || "To be confirmed"}</div>
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
                 <div className="bg-indigo-100 rounded-full p-3 text-indigo-600 text-xl">⏰</div>
                 <div className="ml-3">
                   <div className="text-sm font-medium text-gray-500">Time Window</div>
                   <div className="font-medium text-gray-800">
-                    {selectedDate.pickupTime ? `${selectedDate.pickupTime} - ${selectedDate.dropTime || 'TBC'}` : 'To be confirmed'}
+                    {selectedDate?.pickupTime ? `${selectedDate.pickupTime} - ${selectedDate.dropTime || 'TBC'}` : 'To be confirmed'}
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
                 <div className="bg-purple-100 rounded-full p-3 text-purple-600 text-xl">👥</div>
                 <div className="ml-3">
                   <div className="text-sm font-medium text-gray-500">Service Level</div>
-                  <div className="font-medium text-gray-800">{selectedDate.numberOfMovers} Person Removal</div>
+                  <div className="font-medium text-gray-800">{selectedDate?.numberOfMovers || 1} Person Removal</div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,32 +199,42 @@ const QuoteConfirmation = () => {
               </svg>
               Vehicle & Items
             </h3>
-            
-            {van && van.type && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <h4 className="font-medium text-gray-700 mb-2">Vehicle Type</h4>
-                <div className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                  </svg>
-                  <span className="font-medium text-gray-800">{van.type} Van</span>
-                </div>
-              </div>
-            )}
-            
-            <h4 className="font-medium text-gray-700 mb-3">Items Summary</h4>
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="divide-y divide-gray-100">
-                {items.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center p-3 hover:bg-gray-50">
-                    <div className="font-medium text-gray-700">{item.name}</div>
-                    <div className="bg-blue-100 px-3 py-1 rounded-full text-blue-700 text-sm font-medium">×{item.quantity}</div>
-                  </div>
-                ))}
+
+            {/* Vehicle Section */}
+            <div className="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <h4 className="font-medium text-gray-700 mb-2">Vehicle Type</h4>
+              <div className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                <span className="font-medium text-gray-800">
+                  {typeof van === 'string' ? van : van && van.type ? van.type + ' Van' : 'Standard Van'}
+                </span>
               </div>
             </div>
+
+            {/* Items Section */}
+            <h4 className="font-medium text-gray-700 mb-3">Items Summary</h4>
+            {items && items.length > 0 ? (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="divide-y divide-gray-100">
+                  {items.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 hover:bg-gray-50">
+                      <div className="font-medium text-gray-700">{item.name || `Item ${index + 1}`}</div>
+                      <div className="bg-blue-100 px-3 py-1 rounded-full text-blue-700 text-sm font-medium">
+                        ×{item.quantity || 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-yellow-700">
+                No items have been specified for this move.
+              </div>
+            )}
           </div>
-          
+
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,9 +242,9 @@ const QuoteConfirmation = () => {
               </svg>
               Additional Services
             </h3>
-            
+
             <div className="space-y-3">
-              {additionalServices.basicCompensation && (
+              {additionalServices && additionalServices.basicCompensation && (
                 <div className="flex items-center bg-green-50 p-3 rounded-lg">
                   <div className="bg-green-100 rounded-full p-2 text-green-600">✓</div>
                   <div className="ml-3">
@@ -228,8 +253,8 @@ const QuoteConfirmation = () => {
                   </div>
                 </div>
               )}
-              
-              {additionalServices.comprehensiveInsurance && (
+
+              {additionalServices && additionalServices.comprehensiveInsurance && (
                 <div className="flex items-center bg-blue-50 p-3 rounded-lg">
                   <div className="bg-blue-100 rounded-full p-2 text-blue-600">✓</div>
                   <div className="ml-3">
@@ -238,8 +263,8 @@ const QuoteConfirmation = () => {
                   </div>
                 </div>
               )}
-              
-              {additionalServices.dismantling && additionalServices.dismantling.length > 0 && (
+
+              {additionalServices && additionalServices.dismantling && additionalServices.dismantling.length > 0 && (
                 <div className="flex items-start bg-purple-50 p-3 rounded-lg">
                   <div className="bg-purple-100 rounded-full p-2 text-purple-600 mt-1">🔧</div>
                   <div className="ml-3">
@@ -254,8 +279,8 @@ const QuoteConfirmation = () => {
                   </div>
                 </div>
               )}
-              
-              {additionalServices.reassembly && additionalServices.reassembly.length > 0 && (
+
+              {additionalServices && additionalServices.reassembly && additionalServices.reassembly.length > 0 && (
                 <div className="flex items-start bg-yellow-50 p-3 rounded-lg">
                   <div className="bg-yellow-100 rounded-full p-2 text-yellow-600 mt-1">🔨</div>
                   <div className="ml-3">
@@ -270,10 +295,22 @@ const QuoteConfirmation = () => {
                   </div>
                 </div>
               )}
+
+              {(!additionalServices || (
+                !additionalServices.basicCompensation &&
+                !additionalServices.comprehensiveInsurance &&
+                (!additionalServices.dismantling || additionalServices.dismantling.length === 0) &&
+                (!additionalServices.reassembly || additionalServices.reassembly.length === 0) &&
+                !additionalServices.specialRequirements
+              )) && (
+                  <div className="bg-gray-50 p-4 rounded-lg text-gray-600 italic">
+                    No additional services selected
+                  </div>
+                )}
             </div>
           </div>
-          
-          {additionalServices.specialRequirements && (
+
+          {additionalServices && additionalServices.specialRequirements && (
             <div className="p-6 border-b border-gray-200">
               <h4 className="font-medium text-gray-700 mb-3 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -286,11 +323,11 @@ const QuoteConfirmation = () => {
               </div>
             </div>
           )}
-          
+
           <div className="p-6 border-b border-gray-200 bg-blue-50">
             <div className="flex justify-between items-center mb-3">
               <div className="font-semibold text-lg text-gray-700">Total Price</div>
-              <div className="font-bold text-2xl text-blue-600">£{totalPrice.toFixed(2)}</div>
+              <div className="font-bold text-2xl text-blue-600">£{totalPrice ? totalPrice.toFixed(2) : '0.00'}</div>
             </div>
             <div className="text-right">
               <span className="inline-block bg-green-100 text-green-800 px-4 py-1 rounded-full text-sm font-medium shadow-sm">
@@ -298,7 +335,7 @@ const QuoteConfirmation = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="p-6 border-b border-gray-200">
             <h4 className="font-medium text-gray-700 mb-4 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -311,7 +348,7 @@ const QuoteConfirmation = () => {
                 <div className="flex-shrink-0 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center">1</div>
                 <div className="ml-4">
                   <div className="font-medium text-gray-800">Check your email</div>
-                  <div className="text-sm text-gray-600">We've sent a booking confirmation to {customerDetails.email}</div>
+                  <div className="text-sm text-gray-600">We've sent a booking confirmation to {customerDetails?.email || "your email"}</div>
                 </div>
               </div>
               <div className="flex items-start p-3 bg-blue-50 rounded-lg">
@@ -325,12 +362,12 @@ const QuoteConfirmation = () => {
                 <div className="flex-shrink-0 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center">3</div>
                 <div className="ml-4">
                   <div className="font-medium text-gray-800">Moving day!</div>
-                  <div className="text-sm text-gray-600">Your movers will arrive on <span className="font-medium">{selectedDate.date}</span> at the scheduled time</div>
+                  <div className="text-sm text-gray-600">Your movers will arrive on <span className="font-medium">{selectedDate?.date || "the scheduled date"}</span> at the scheduled time</div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <div className="p-6">
             <h4 className="font-medium text-gray-700 mb-4 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -343,24 +380,24 @@ const QuoteConfirmation = () => {
                 <div className="bg-red-100 rounded-full p-3 text-red-600 text-xl">📞</div>
                 <div className="ml-4">
                   <div className="text-sm font-medium text-gray-500">Customer Support</div>
-                  <div className="font-medium text-gray-800">0121 269 7956</div>
+                  <div className="font-medium text-gray-800">020 3051 6033</div>
                 </div>
               </div>
               <div className="flex items-center">
                 <div className="bg-blue-100 rounded-full p-3 text-blue-600 text-xl">✉️</div>
                 <div className="ml-4">
                   <div className="text-sm font-medium text-gray-500">Email Support</div>
-                  <div className="font-medium text-gray-800">support@movingcompany.com</div>
+                  <div className="font-medium text-gray-800">info@https://reliancemove.com</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-          <button 
-            type="button" 
-            onClick={() => window.print()} 
+          <button
+            type="button"
+            onClick={() => window.print()}
             className="bg-white border border-gray-300 text-gray-700 font-medium py-4 px-6 rounded-lg shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition flex items-center justify-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -368,9 +405,9 @@ const QuoteConfirmation = () => {
             </svg>
             Print Confirmation
           </button>
-          <button 
-            type="button" 
-            className="bg-blue-600 text-white font-medium py-4 px-6 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition flex items-center justify-center" 
+          <button
+            type="button"
+            className="bg-blue-600 text-white font-medium py-4 px-6 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition flex items-center justify-center"
             onClick={() => navigate('/')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

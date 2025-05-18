@@ -20,6 +20,8 @@ import ItemCategoryForm from './pages/ItemCategoryForm';
 import Home from './Home';
 import PianoLocationForm from './pages/PianoLocationForm';
 import MotorBikeLocationForm from './pages/MotorBikeLocationForm';
+import PaymentFailed from './pages/PaymentFailed';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 
 function App() {
@@ -38,6 +40,8 @@ function App() {
             <Route path="/additional-services" element={<AdditionalServices />} />
             <Route path="/booking-details" element={<BookingDetails />} />
             <Route path="/confirmation" element={<QuoteConfirmation />} />
+            <Route path="/payment-failed" element={<PaymentFailed />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/other-removals" element={<OtherRemovals />} />
             <Route path="/motorbike-removals" element={<MotorBikeLocationForm prepath='/motorbike-removals'/>} />
             

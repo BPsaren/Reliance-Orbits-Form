@@ -11,12 +11,12 @@ const hourToTime = (hour) => {
   if (typeof hour === 'string' && hour.includes(':')) {
     return hour;
   }
-  
+
   // Handle possible NaN or undefined values
   if (hour === undefined || isNaN(hour)) {
     return '08:00:00'; // Default fallback time
   }
-  
+
   // Convert number to time string (e.g., 8.5 -> "08:30:00")
   const hrs = Math.floor(hour).toString().padStart(2, '0');
   const mins = (hour % 1 === 0.5) ? '30' : '00';
@@ -63,7 +63,7 @@ const AdditionalServices = () => {
     // Time conversion from string to decimal for slider display
     const convertTimeToDecimal = (timeStr) => {
       if (typeof timeStr !== 'string' || !timeStr.includes(':')) return null;
-      
+
       const parts = timeStr.split(':');
       const hours = parseInt(parts[0], 10);
       const minutes = parseInt(parts[1], 10);
@@ -134,12 +134,27 @@ const AdditionalServices = () => {
     return `${displayHour}:${minute === 0 ? '00' : minute}${period}`;
   };
 
+  const validateExtraStops = (stops) => {
+    if (!Array.isArray(stops) || stops.length === 0) return [];
+
+    return stops.map(stop => ({
+      ...stop,
+      // Ensure doorNumber exists and is a string
+      doorNumber: stop.doorNumber || stop.doorFlatNo || '',
+      // Ensure lift exists and is a boolean
+      lift: typeof stop.lift === 'boolean' ? stop.lift : Boolean(stop.liftAvailable),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Clear any previous errors
     setIsSubmitting(true); // Start loading animation
 
     try {
+
+      const validatedStops = validateExtraStops(extraStops);
+
       // Create quoteData - no need to convert times again
       const quoteData = {
         username: customerDetails.name || 'NA',
@@ -175,7 +190,7 @@ const AdditionalServices = () => {
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle || 0,
         itemsToAssemble: itemsToAssemble || 0,
-        stoppage: extraStops.map(item => item.address) || [],
+        stoppage: validatedStops,
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -249,7 +264,7 @@ const AdditionalServices = () => {
   const handleCollectionTimeChange = (e, type) => {
     const value = parseFloat(e.target.value);
     const timeString = hourToTime(value); // Convert to time string immediately
-    
+
     if (type === 'start') {
       setCollectionTime(prev => ({ ...prev, start: value }));
       // Store the formatted time string in context
@@ -467,9 +482,8 @@ const AdditionalServices = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-6 py-3 bg-blue-600 text-white rounded-md font-medium flex items-center justify-center min-w-[120px] ${
-                  isSubmitting ? 'opacity-80 cursor-not-allowed' : 'hover:bg-blue-700'
-                }`}
+                className={`px-6 py-3 bg-blue-600 text-white rounded-md font-medium flex items-center justify-center min-w-[120px] ${isSubmitting ? 'opacity-80 cursor-not-allowed' : 'hover:bg-blue-700'
+                  }`}
               >
                 {isSubmitting ? (
                   <>

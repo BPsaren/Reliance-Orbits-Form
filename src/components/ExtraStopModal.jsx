@@ -19,6 +19,18 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
   const [floor, setFloor] = useState('Ground floor');
   const [liftAvailable, setLiftAvailable] = useState(false);
 
+    const floorToNumber = (floor) => {
+    const map = {
+      "Ground floor": 0,
+      "1st floor": 1,
+      "2nd floor": 2,
+      "3rd floor": 3,
+      "4th floor": 4,
+      "5th floor +": 5
+    };
+    return typeof floor === 'string' ? map[floor] ?? 0 : floor;
+  };
+
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -137,11 +149,11 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     }
 
     const newStop = {
+      lift: liftAvailable,  // Renamed from liftAvailable to lift
+      floor: floorToNumber(floor),
       address: addressWithPostalCode || address,
       propertyType,
-      floor,
-      liftAvailable,
-      doorFlatNo // Add door/flat number to the stop object
+      doorNumber: doorFlatNo || ''  // Renamed from doorFlatNo to doorNumber, with fallback to empty string
     };
 
     setExtraStops([...extraStops, newStop]);
