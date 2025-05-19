@@ -387,7 +387,7 @@ const QuoteConfirmation = () => {
                 <div className="bg-blue-100 rounded-full p-3 text-blue-600 text-xl">✉️</div>
                 <div className="ml-4">
                   <div className="text-sm font-medium text-gray-500">Email Support</div>
-                  <div className="font-medium text-gray-800">info@https://reliancemove.com</div>
+                  <div className="font-medium text-gray-800">info@reliancemove.com</div>
                 </div>
               </div>
             </div>
