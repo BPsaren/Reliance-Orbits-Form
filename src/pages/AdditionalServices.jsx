@@ -295,9 +295,7 @@ const AdditionalServices = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header title="Additional Services and Special Requirements" />
-      <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">
-        Our included insurance is twice the industry standard!
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-4 py-8 md:flex md:gap-8">
         <div className="md:w-2/3">
