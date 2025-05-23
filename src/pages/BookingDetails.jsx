@@ -49,6 +49,13 @@ const BookingDetails = () => {
     delivery: ''
   });
 
+  
+  // State for postcode search functionality
+  const [pickupSuggestions, setPickupSuggestions] = useState([]);
+  const [deliverySuggestions, setDeliverySuggestions] = useState([]);
+  const [isPickupSearching, setIsPickupSearching] = useState(false);
+  const [isDeliverySearching, setIsDeliverySearching] = useState(false);
+
   const {
     customerDetails,
     setCustomerDetails,
@@ -75,74 +82,154 @@ const BookingDetails = () => {
 
   // Validate UK mobile number
   const validateUKPhoneNumber = (phone) => {
-    // UK mobile numbers start with 07 and are 11 digits long
-    // Also accept +447 format
     const regex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
     return regex.test(phone);
   };
 
-  const parseLocationToAddress = (location) => {
-    if (!location) return {};
-
-    // Clean the input
-    const cleaned = location
-      .replace(/\bUK\b/i, '')
-      .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '')
-      .trim();
-
-    // Split into parts
-    const parts = cleaned.split(',')
-      .map(part => part.trim())
-      .filter(part => part !== '');
-
-    // Find city (exact match only)
-    let city = '';
-    let cityFoundInPart1 = false;
-
-    parts.forEach((part, index) => {
-      const matchedCity = UK_CITIES.find(c =>
-        c.toLowerCase() === part.toLowerCase()
-      );
-      if (matchedCity) {
-        city = matchedCity;
-        cityFoundInPart1 = (index === 1);
-      }
-    });
-
-    return {
-      addressLine1: parts[0] || "",
-      addressLine2: cityFoundInPart1 ? "" : (parts[1] || ""),
-      city: city,
-      county: ""
-    };
+  // Handle pickup postcode search
+  const handlePickupPostcodeSearch = async () => {
+    if (!pickup.postcode) return;
+    
+    setIsPickupSearching(true);
+    try {
+      const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
+        place: pickup.postcode 
+      });
+      setPickupSuggestions(response.data.predictions || []);
+    } catch (error) {
+      console.error('Error searching pickup postcode:', error);
+      setPickupSuggestions([]);
+    } finally {
+      setIsPickupSearching(false);
+    }
   };
-  // Auto-fill address when location changes for pickup
-  useEffect(() => {
-    if (pickup.location) {
-      const address = parseLocationToAddress(pickup.location);
-      setPickup(prev => ({
-        ...prev,
-        addressLine1: address.addressLine1,
-        addressLine2: address.addressLine2,
-        city: address.city,
-        //county: address.county,
-      }));
-    }
-  }, [pickup.location]);
 
-  // Auto-fill address when location changes for delivery
-  useEffect(() => {
-    if (delivery.location) {
-      const address = parseLocationToAddress(delivery.location);
-      setDelivery(prev => ({
-        ...prev,
-        addressLine1: address.addressLine1,
-        addressLine2: address.addressLine2,
-        city: address.city,
-        //county: address.county,
-      }));
+  // Handle delivery postcode search
+  const handleDeliveryPostcodeSearch = async () => {
+    if (!delivery.postcode) return;
+    
+    setIsDeliverySearching(true);
+    try {
+      const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
+        place: delivery.postcode 
+      });
+      setDeliverySuggestions(response.data.predictions || []);
+    } catch (error) {
+      console.error('Error searching delivery postcode:', error);
+      setDeliverySuggestions([]);
+    } finally {
+      setIsDeliverySearching(false);
     }
-  }, [delivery.location]);
+  };
+
+  // Unified address parser that works for both scenarios
+const parseAddressComponents = (fullAddress) => {
+  if (!fullAddress) return { addressLine1: '', addressLine2: '', city: '' };
+
+  // Clean the input
+  const cleaned = fullAddress
+    .replace(/\bUK\b/i, '')
+    .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '')
+    .trim();
+
+  // Split into parts
+  const parts = cleaned.split(',')
+    .map(part => part.trim())
+    .filter(part => part !== '');
+
+  // Find city (exact match only)
+  let city = '';
+
+  // Check each part for a city match
+  const filteredParts = parts.filter(part => {
+    const matchedCity = UK_CITIES.find(c => 
+      c.toLowerCase() === part.toLowerCase()
+    );
+    if (matchedCity) {
+      city = matchedCity; // Store the matched city
+      return false; // Remove this part from address lines
+    }
+    return true; // Keep this part in address lines
+  });
+
+  return {
+    addressLine1: filteredParts[0] || "",
+    addressLine2: filteredParts[1] || "",
+    city: city
+  };
+};
+
+// For postcode search selection
+const handlePickupAddressSelect = async (suggestion) => {
+  try {
+    const { addressLine1, addressLine2, city } = parseAddressComponents(suggestion.description);
+    
+    setPickup(prev => ({
+      ...prev,
+      addressLine1,
+      addressLine2,
+      city,
+      location: suggestion.description,
+      // Keep original postcode
+    }));
+    
+    setPickupSuggestions([]);
+  } catch (error) {
+    console.error('Error processing address:', error);
+    setPickupSuggestions([]);
+  }
+};
+
+// For initial address parsing (from previous steps)
+useEffect(() => {
+  if (pickup.location && !pickup.addressLine1) {
+    const { addressLine1, addressLine2, city } = parseAddressComponents(pickup.location);
+    setPickup(prev => ({
+      ...prev,
+      addressLine1,
+      addressLine2,
+      city
+    }));
+  }
+}, [pickup.location]);
+
+// Same for delivery address
+const handleDeliveryAddressSelect = async (suggestion) => {
+  try {
+    const { addressLine1, addressLine2, city } = parseAddressComponents(suggestion.description);
+    
+    setDelivery(prev => ({
+      ...prev,
+      addressLine1,
+      addressLine2,
+      city,
+      location: suggestion.description,
+      // Keep original postcode
+    }));
+    
+   setDeliverySuggestions([]);
+  } catch (error) {
+    console.error('Error processing address:', error);
+    setDeliverySuggestions([]);
+  }
+  
+};
+
+useEffect(() => {
+  if (delivery.location && !delivery.addressLine1) {
+    /* same pattern as pickup */
+    const { addressLine1, addressLine2, city } = parseAddressComponents(delivery.location);
+     setDelivery(prev => ({
+      ...prev,
+      addressLine1,
+      addressLine2,
+      city
+    }));
+  }
+}, [delivery.location]);
+
+
+
 
 
   //for add extra stop
@@ -389,7 +476,7 @@ const BookingDetails = () => {
         <div className="md:w-2/3">
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
             {/* Pickup Address Section */}
-            <div className="mb-8">
+               <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Pickup Details</h2>
 
               <div className="mb-4">
@@ -401,26 +488,32 @@ const BookingDetails = () => {
                       placeholder="Enter Postcode"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.postcode || ''}
-                      onChange={(e) => handlePickupChange('postcode', e.target.value)}
+                      onChange={(e) => setPickup({ ...pickup, postcode: e.target.value })}
                     />
                     <button
                       type="button"
-                      className="ml-2 p-3 bg-gray-100 border rounded-md"
-                      onClick={() => {/* Search functionality here */ }}
+                      onClick={handlePickupPostcodeSearch}
+                      disabled={isPickupSearching}
+                      className="ml-2 p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
                     >
-                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                      </svg>
+                      {isPickupSearching ? 'Searching...' : 'Search'}
                     </button>
                   </div>
-                  {!pickup.postcode && (
-                    <div className="mt-2 p-3 bg-red-100 text-red-600 rounded-md">
-                      <span className="flex items-center">
-                        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        Postcode can't be blank
-                      </span>
+                  
+                  {/* Pickup Address Suggestions */}
+                  {pickupSuggestions.length > 0 && (
+                    <div className="mt-2 border border-gray-200 rounded-md">
+                      <ul className="max-h-60 overflow-y-auto">
+                        {pickupSuggestions.map((suggestion, index) => (
+                          <li
+                            key={index}
+                            className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => handlePickupAddressSelect(suggestion)}
+                          >
+                            {suggestion.description}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </div>
@@ -434,7 +527,7 @@ const BookingDetails = () => {
                       placeholder="Flat No/Door No"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.flatNo || ''}
-                      onChange={(e) => handlePickupChange('flatNo', e.target.value)}
+                      onChange={(e) => setPickup({ ...pickup, flatNo: e.target.value })}
                       required
                     />
                   </div>
@@ -445,7 +538,7 @@ const BookingDetails = () => {
                       placeholder="Address Line 1"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.addressLine1 || ''}
-                      onChange={(e) => handlePickupChange('addressLine1', e.target.value)}
+                      onChange={(e) => setPickup({ ...pickup, addressLine1: e.target.value })}
                       required
                     />
                   </div>
@@ -455,7 +548,7 @@ const BookingDetails = () => {
                       placeholder="Address Line 2"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.addressLine2 || ''}
-                      onChange={(e) => handlePickupChange('addressLine2', e.target.value)}
+                      onChange={(e) => setPickup({ ...pickup, addressLine2: e.target.value })}
                     />
                   </div>
                   <div>
@@ -465,7 +558,7 @@ const BookingDetails = () => {
                       placeholder="City"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.city || ''}
-                      onChange={(e) => handlePickupChange('city', e.target.value)}
+                      onChange={(e) => setPickup({ ...pickup, city: e.target.value })}
                       required
                     />
                   </div>
@@ -525,18 +618,34 @@ const BookingDetails = () => {
                       placeholder="Enter Postcode"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.postcode || ''}
-                      onChange={(e) => handleDeliveryChange('postcode', e.target.value)}
+                      onChange={(e) => setDelivery({ ...delivery, postcode: e.target.value })}
                     />
                     <button
                       type="button"
-                      className="ml-2 p-3 bg-gray-100 border rounded-md"
-                      onClick={() => {/* Search functionality here */ }}
+                      onClick={handleDeliveryPostcodeSearch}
+                      disabled={isDeliverySearching}
+                      className="ml-2 p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
                     >
-                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                      </svg>
+                      {isDeliverySearching ? 'Searching...' : 'Search'}
                     </button>
                   </div>
+                  
+                  {/* Delivery Address Suggestions */}
+                  {deliverySuggestions.length > 0 && (
+                    <div className="mt-2 border border-gray-200 rounded-md">
+                      <ul className="max-h-60 overflow-y-auto">
+                        {deliverySuggestions.map((suggestion, index) => (
+                          <li
+                            key={index}
+                            className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => handleDeliveryAddressSelect(suggestion)}
+                          >
+                            {suggestion.description}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 {/* Manual address fields for delivery */}
@@ -548,7 +657,7 @@ const BookingDetails = () => {
                       placeholder="Flat No/Door No"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.flatNo || ''}
-                      onChange={(e) => handleDeliveryChange('flatNo', e.target.value)}
+                      onChange={(e) => setDelivery({ ...delivery, flatNo: e.target.value })}
                       required
                     />
                   </div>
@@ -559,7 +668,7 @@ const BookingDetails = () => {
                       placeholder="Address Line 1"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.addressLine1 || ''}
-                      onChange={(e) => handleDeliveryChange('addressLine1', e.target.value)}
+                      onChange={(e) => setDelivery({ ...delivery, addressLine1: e.target.value })}
                       required
                     />
                   </div>
@@ -569,7 +678,7 @@ const BookingDetails = () => {
                       placeholder="Address Line 2"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.addressLine2 || ''}
-                      onChange={(e) => handleDeliveryChange('addressLine2', e.target.value)}
+                      onChange={(e) => setDelivery({ ...delivery, addressLine2: e.target.value })}
                     />
                   </div>
                   <div>
@@ -579,7 +688,7 @@ const BookingDetails = () => {
                       placeholder="City"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.city || ''}
-                      onChange={(e) => handleDeliveryChange('city', e.target.value)}
+                      onChange={(e) => setDelivery({ ...delivery, city: e.target.value })}
                       required
                     />
                   </div>
@@ -693,25 +802,31 @@ const BookingDetails = () => {
               <div className="bg-gray-50 p-4 rounded-md mb-6">
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <div className="font-medium">Moving from:</div>
-                  <div className="text-gray-600">{pickup.location}</div>
-                  <div className="font-medium">Door No/flat No:</div>
-                  <div className="text-gray-600">{pickup.flatNo}</div>
+                  {/** <div className="text-gray-600"></div>*/}
+                   
+                  <div className="text-gray-600">Flat no-{pickup.flatNo}, {pickup.location}</div>
+                  {/**<div className="font-medium">Door No/flat No:</div> */}
+                 
 
                 </div>
 
                 <div className="flex justify-between py-2">
                   <div className=" font-medium">Moving to:</div>
-                  <div className="text-gray-600">{delivery.location}</div>
-                  <div className="font-medium">Door No/flat No:</div>
-                  <div className=" text-gray-600">{delivery.flatNo}</div>
+                  {/* <div className=" text-gray-600">{delivery.flatNo}</div>*/}
+                  
+                  <div className="text-gray-600">Falt no -{delivery.flatNo}, {delivery.location}</div>
+                  {/** <div className="font-medium">Door No/flat No:</div>*/}
+                 
                 </div>
 
                 {extraStops.map((stop, index) => (
                   <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
                     <div className="font-medium"> Extra Stops: </div>
-                    <div className="text-gray-600">{stop.address}</div>
-                    <div className="font-medium"> Door No/flat No: </div>
-                    <div className="text-gray-600">{stop.doorFlatNo}</div>
+                    {/* <div className="text-gray-600">{stop.doorFlatNo}</div>*/}
+                   
+                    <div className="text-gray-600">Flat no-{stop.doorFlatNo}, {stop.address}</div>
+                     {/*<div className="font-medium"> Door No/flat No: </div>*/} 
+                    
 
                   </div>
                 ))}
