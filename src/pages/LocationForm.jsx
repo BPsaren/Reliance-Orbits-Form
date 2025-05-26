@@ -8,12 +8,12 @@ import ExtraStopModal from '../components/ExtraStopModal';
 
 const LocationForm = () => {
   const { pickup, setPickup,
-     delivery, setDelivery,
-      pickupAddressWithPostalCode, 
-      setpickupAddressWithPostalCode, 
-      dropAddressWithPostalCode, 
-      setdropAddressWithPostalCode, 
-      extraStops, setExtraStops } = useBooking();
+    delivery, setDelivery,
+    pickupAddressWithPostalCode,
+    setpickupAddressWithPostalCode,
+    dropAddressWithPostalCode,
+    setdropAddressWithPostalCode,
+    extraStops, setExtraStops } = useBooking();
 
   const [pickupQuery, setPickupQuery] = useState(pickup.location || '');
   const [deliveryQuery, setDeliveryQuery] = useState(delivery.location || '');
@@ -37,10 +37,10 @@ const LocationForm = () => {
   const [pickupSelecting, setPickupSelecting] = useState(false);
   const [deliverySelecting, setDeliverySelecting] = useState(false);
 
-   //for extraStopmodal
+  //for extraStopmodal
   const [isExtraStopModalOpen, setIsExtraStopModalOpen] = useState(false);
-  
-  
+
+
 
   const navigate = useNavigate();
 
@@ -58,7 +58,7 @@ const LocationForm = () => {
 
 
 
- 
+
   // Autocomplete for pickup
   useEffect(() => {
     // Don't show suggestions when:
@@ -116,7 +116,7 @@ const LocationForm = () => {
     if (containsUK(cleanAddress)) {
       cleanAddress = cleanAddress.replace(/,?\s*UK,?$/, '');
     }
-    
+
     // Add postcode if not already present and format with UK
     if (!containsUKPostalCode(cleanAddress)) {
       return `${cleanAddress} ${postcode}, UK`;
@@ -129,19 +129,19 @@ const LocationForm = () => {
   // for address with postal code for pickup
   useEffect(() => {
     if (!pickupPlaceId) return;
-    
+
     getPostalCode(pickupPlaceId).then((res) => {
       setPickup(prev => {
         const newPickup = { ...prev, postcode: res.data.long_name };
-        
+
         // Format the address properly
         const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
-        
+
         // Update the query in a way that doesn't trigger suggestions
         setPickupSelecting(true);
         setPickupQuery(formattedAddress);
         setTimeout(() => setPickupSelecting(false), 100);
-        
+
         setpickupAddressWithPostalCode(formattedAddress);
         return { ...newPickup, location: formattedAddress };
       });
@@ -151,19 +151,19 @@ const LocationForm = () => {
   // for address with postal code for delivery
   useEffect(() => {
     if (!deliveryPlaceId) return;
-    
+
     getPostalCode(deliveryPlaceId).then((res) => {
       setDelivery(prev => {
         const newDelivery = { ...prev, postcode: res.data.long_name };
-        
+
         // Format the address properly
         const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
-        
+
         // Update the query in a way that doesn't trigger suggestions
         setDeliverySelecting(true);
         setDeliveryQuery(formattedAddress);
         setTimeout(() => setDeliverySelecting(false), 100);
-        
+
         setdropAddressWithPostalCode(formattedAddress);
         return { ...newDelivery, location: formattedAddress };
       });
@@ -179,14 +179,14 @@ const LocationForm = () => {
   const handlePickupSuggestionSelect = (suggestion) => {
     // Mark that we're selecting something, which will prevent suggestions
     setPickupSelecting(true);
-    
+
     setPickupQuery(suggestion.description);
     setPickup({ ...pickup, location: suggestion.description });
     setPickupPlaceId(suggestion.place_id);
     setPickupSuggestions([]);
     setFocusedPickupIndex(-1);
     setPickupError('');
-    
+
     // Reset the selection flag after a short delay to allow state updates
     setTimeout(() => setPickupSelecting(false), 100);
   };
@@ -194,14 +194,14 @@ const LocationForm = () => {
   const handleDeliverySuggestionSelect = (suggestion) => {
     // Mark that we're selecting something, which will prevent suggestions
     setDeliverySelecting(true);
-    
+
     setDeliveryQuery(suggestion.description);
     setDelivery({ ...delivery, location: suggestion.description });
     setDeliveryPlaceId(suggestion.place_id);
     setDeliverySuggestions([]);
     setFocusedDeliveryIndex(-1);
     setDeliveryError('');
-    
+
     // Reset the selection flag after a short delay to allow state updates
     setTimeout(() => setDeliverySelecting(false), 100);
   };
@@ -421,13 +421,13 @@ const LocationForm = () => {
 
               {/* Buttons */}
               <div className="p-6 flex justify-between items-center">
-              <button
-                      type="button"
-                      onClick={() => setIsExtraStopModalOpen(true)}
-                      className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
-                      >
-                      Add an extra stop
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setIsExtraStopModalOpen(true)}
+                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
+                >
+                  Add an extra stop
+                </button>
                 <button
                   type="submit"
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -441,11 +441,11 @@ const LocationForm = () => {
           <OrderSummary />
         </div>
       </div>
-      < ExtraStopModal
-  isOpen={isExtraStopModalOpen}
-  onClose={() => setIsExtraStopModalOpen(false)}
-  onAddStop={(stop) => setExtraStops([...extraStops, stop])}
-/>
+      <ExtraStopModal
+        isOpen={isExtraStopModalOpen}
+        onClose={() => setIsExtraStopModalOpen(false)}
+        onAddStop={(stop) => setExtraStops([...extraStops, stop])}
+      />
     </div>
   );
 };

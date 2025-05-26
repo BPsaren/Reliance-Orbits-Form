@@ -4,20 +4,26 @@ import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
+import ExtraStopModal from '../components/ExtraStopModal';
 
 const PianoLocationForm = () => {
   const navigate = useNavigate();
-  const { 
-    pickup, 
-    setPickup, 
-    delivery, 
-    setDelivery, 
-    piano, 
-    setPiano, 
-    pickupAddressWithPostalCode, 
-    setpickupAddressWithPostalCode, 
-    dropAddressWithPostalCode, 
+  const {
+    pickup,
+    setPickup,
+    delivery,
+    setDelivery,
+    items,
+    setItems,
+    addItem,
+    updateItemQuantity,
+    removeItem,
+    pickupAddressWithPostalCode,
+    setpickupAddressWithPostalCode,
+    dropAddressWithPostalCode,
     setdropAddressWithPostalCode,
+    extraStops,
+    setExtraStops,
   } = useBooking();
 
   // State for address inputs and autocomplete
@@ -35,7 +41,12 @@ const PianoLocationForm = () => {
   const [deliveryError, setDeliveryError] = useState('');
   const [pickupSelecting, setPickupSelecting] = useState(false);
   const [deliverySelecting, setDeliverySelecting] = useState(false);
-  
+
+  // State for selected piano type
+  const [selectedPianoType, setSelectedPianoType] = useState('');
+
+  // For extra stop modal
+  const [isExtraStopModalOpen, setIsExtraStopModalOpen] = useState(false);
 
   // Constants
   const floorOptions = [
@@ -46,6 +57,32 @@ const PianoLocationForm = () => {
     "Upright Piano", "Baby Grand Piano", "Grand Piano",
     "Digital Piano", "Electric Piano", "Console Piano"
   ];
+
+  // Check if piano is already in items and set initial state
+  useEffect(() => {
+    const existingPiano = items.find(item =>
+      pianoTypes.includes(item.name)
+    );
+    if (existingPiano) {
+      setSelectedPianoType(existingPiano.name);
+    }
+  }, [items]);
+
+  // Handle piano type selection
+  const handlePianoTypeChange = (pianoType) => {
+    // Remove any existing piano from items
+    // setItems([]);
+
+    // Add new piano type to items
+    if (pianoType) {
+      setItems([{ name: pianoType, quantity: 1 }]);
+      // addItem(pianoType);
+      setSelectedPianoType(pianoType);
+    } else {
+      setItems([]);
+      setSelectedPianoType('');
+    }
+  };
 
   // Utility functions
   const containsUKPostalCode = (str) => {
@@ -62,7 +99,7 @@ const PianoLocationForm = () => {
     if (containsUK(cleanAddress)) {
       cleanAddress = cleanAddress.replace(/,?\s*UK,?$/, '');
     }
-    
+
     if (!containsUKPostalCode(cleanAddress)) {
       return `${cleanAddress} ${postcode}, UK`;
     } else {
@@ -143,7 +180,7 @@ const PianoLocationForm = () => {
   // Postal code effects
   useEffect(() => {
     if (!pickupPlaceId) return;
-    
+
     getPostalCode(pickupPlaceId).then((res) => {
       setPickup(prev => {
         const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
@@ -158,7 +195,7 @@ const PianoLocationForm = () => {
 
   useEffect(() => {
     if (!deliveryPlaceId) return;
-    
+
     getPostalCode(deliveryPlaceId).then((res) => {
       setDelivery(prev => {
         const formattedAddress = formatAddressWithPostcode(prev.location, res.data.long_name);
@@ -269,23 +306,18 @@ const PianoLocationForm = () => {
     }
   };
 
-  // Extra stop functions
-  const handleAddExtraStop = (stopAddress) => {
-    setExtraStops([...extraStops, stopAddress]);
-  };
-
   // Form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const isPickupValid = validatePickupAddress();
     const isDeliveryValid = validateDeliveryAddress();
-    
+
     if (!isPickupValid || !isDeliveryValid) {
       return;
     }
 
-    if (!piano?.type) {
+    if (!selectedPianoType) {
       alert('Please select your piano type');
       return;
     }
@@ -304,8 +336,8 @@ const PianoLocationForm = () => {
               {/* Piano Type */}
               <div className="p-6 border-b border-gray-200">
                 <select
-                  value={piano?.type || ''}
-                  onChange={(e) => setPiano({ ...piano, type: e.target.value })}
+                  value={selectedPianoType}
+                  onChange={(e) => handlePianoTypeChange(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
@@ -412,8 +444,8 @@ const PianoLocationForm = () => {
                   {deliveryError && <p className="text-red-600 text-sm mt-1">{deliveryError}</p>}
                 </div>
 
-                 {/* Delivery Floor */}
-                 <div className="mb-4">
+                {/* Delivery Floor */}
+                <div className="mb-4">
                   <label className="block mb-1">Select Floor</label>
                   <select
                     value={delivery.floor}
@@ -444,7 +476,13 @@ const PianoLocationForm = () => {
 
               {/* Footer Buttons */}
               <div className="p-6 flex justify-between items-center">
-                <div></div>
+                {/* <button
+                  type="button"
+                  onClick={() => setIsExtraStopModalOpen(true)}
+                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
+                >
+                  Add an extra stop
+                </button> */}
                 <button
                   type="submit"
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -459,7 +497,11 @@ const PianoLocationForm = () => {
         </div>
       </div>
 
-
+      {/* <ExtraStopModal
+        isOpen={isExtraStopModalOpen}
+        onClose={() => setIsExtraStopModalOpen(false)}
+        onAddStop={(stop) => setExtraStops([...extraStops, stop])}
+      /> */}
     </div>
   );
 };

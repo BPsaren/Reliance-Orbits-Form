@@ -9,7 +9,7 @@ import { loadStripe } from '@stripe/stripe-js';
 
 // const stripePromise = loadStripe("pk_live_51RL5KtKBPwsna3OvmvQ3EbqIz8rMbj9Aj26Ur4X7y086GWPCZlQL3IEApu4ujhyUEtewYW4Fs1hezG9QmxfEKJtW00ySCy7f2C"); // replace with your Stripe publishable key
 // const stripePromise = loadStripe("pk_test_51RL5LKGfC2VzRjpzblhE80Xh5e2gJEDSQ345CBQoaFoMBLSwo0BVKLTYTLHAEAneSmaLs8yI2pBcGqEI3xTPZqFZ00pbEmjRoC"); // replace with your Stripe publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 // List of UK cities for validation
 const UK_CITIES = [
   "London", "Birmingham", "Manchester", "Leeds", "Sheffield",
@@ -352,8 +352,10 @@ const BookingDetails = () => {
 
       const sessionRes = await axios.post('https://payment-gateway-reliance.onrender.com/create-checkout-session', metaDataBody);
 
-      const stripe = await stripePromise;
-      await stripe.redirectToCheckout({ sessionId: sessionRes.data.sessionId });
+      // const stripe = await stripePromise;
+      // await stripe.redirectToCheckout({ sessionId: sessionRes.data.sessionId });
+      window.location.href = sessionRes.data.url;
+
 
     } catch (error) {
       console.error('Error submitting booking:', error);
