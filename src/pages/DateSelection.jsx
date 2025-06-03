@@ -39,7 +39,7 @@ const DateSelection = () => {
     ];
 
     useEffect(() => {
-        generatePriceData();
+        // generatePriceData();
     }, []);
 
     const generatePriceData = () => {

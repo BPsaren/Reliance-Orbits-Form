@@ -263,7 +263,7 @@ const OrderSummary = () => {
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-200">
+      {/* <div className="p-4 border-t border-gray-200">
         <div className="flex items-start space-x-2">
           <div className="text-green-600 mt-1">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -271,10 +271,11 @@ const OrderSummary = () => {
             </svg>
           </div>
           <div className="text-sm text-gray-700">
-            Money Back Guarantee & Free Cancellation! <a href="#" className="text-blue-600 hover:underline font-medium">Learn more</a>
+            Money Back Guarantee & Free Cancellation! 
+            <a href="#" className="text-blue-600 hover:underline font-medium">Learn more</a>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="p-4 border-t border-gray-200 flex items-center justify-center space-x-4">
         <div className="w-10 h-6 bg-gray-200 rounded flex items-center justify-center">

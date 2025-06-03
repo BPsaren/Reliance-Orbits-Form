@@ -342,9 +342,9 @@ const AdditionalServices = () => {
                 <h3 className="text-lg font-semibold">Dismantling & reassembly</h3>
               </div>
 
-              <div className="text-gray-600 mb-4">
+              {/* <div className="text-gray-600 mb-4">
                 Dismantling and assembly can be arranged per item. Just tell us how many items require this service and we'll do the rest!
-              </div>
+              </div> */}
 
               <div className="bg-gray-50 p-4 rounded-md mb-4">
                 <div className="flex justify-between items-center mb-2">
