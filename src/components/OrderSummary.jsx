@@ -63,7 +63,7 @@ const OrderSummary = () => {
           stoppage:extraStops.map(item => item.address)
         };
 
-        const res = await axios.post('https://orbit-0pxd.onrender.com/price', payload);
+        const res = await axios.post('https://api.reliancemove.com/price', payload);
         setTotalPrice(res.data.price);
         console.log(payload);
       } catch (err) {
@@ -77,7 +77,7 @@ const OrderSummary = () => {
   useEffect(() => {
     const fetchDistance = async () => {
       try {
-        const res = await axios.post('https://orbit-0pxd.onrender.com/distance', {
+        const res = await axios.post('https://api.reliancemove.com/distance', {
           origin: pickup.location,
           destination: delivery.location
         });

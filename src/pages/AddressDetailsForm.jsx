@@ -223,7 +223,7 @@ const AddressDetailsForm = () => {
     if (pickupTypingTimeout) clearTimeout(pickupTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://orbit-0pxd.onrender.com/autocomplete", {
+      axios.post("https://api.reliancemove.com/autocomplete", {
         place: pickupQuery
       })
         .then(res => {
@@ -253,7 +253,7 @@ const AddressDetailsForm = () => {
     if (deliveryTypingTimeout) clearTimeout(deliveryTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://orbit-0pxd.onrender.com/autocomplete", {
+      axios.post("https://api.reliancemove.com/autocomplete", {
         place: deliveryQuery
       })
         .then(res => {
@@ -314,7 +314,7 @@ const AddressDetailsForm = () => {
   }, [deliveryPlaceId]);
 
   async function getPostalCode(place_id) {
-    const response = await axios.get("https://orbit-0pxd.onrender.com/postalcode/" + place_id);
+    const response = await axios.get("https://api.reliancemove.com/postalcode/" + place_id);
     return response;
   }
 

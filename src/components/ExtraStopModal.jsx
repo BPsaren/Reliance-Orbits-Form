@@ -56,7 +56,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     if (typingTimeout) clearTimeout(typingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://orbit-0pxd.onrender.com/autocomplete", { place: address })
+      axios.post("https://api.reliancemove.com/autocomplete", { place: address })
         .then(res => {
           setSuggestions(res.data.predictions || []);
           setFocusedIndex(-1);
@@ -74,7 +74,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     
     const getPostalCode = async () => {
       try {
-        const response = await axios.get(`https://orbit-0pxd.onrender.com/postalcode/${placeId}`);
+        const response = await axios.get(`https://api.reliancemove.com/postalcode/${placeId}`);
         const formattedAddress = formatAddressWithPostcode(address, response.data.long_name);
         
         setSelecting(true);

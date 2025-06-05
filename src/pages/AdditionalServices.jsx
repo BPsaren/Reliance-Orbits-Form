@@ -218,7 +218,7 @@ const AdditionalServices = () => {
       console.log("Quotation Data being sent:", JSON.stringify(quoteData, null, 2));
 
       // 🔁 First: POST to /quote and get quotationRef
-      const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote', quoteData);
+      const quoteResponse = await axios.post('https://api.reliancemove.com/quote', quoteData);
       const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
       console.log("quotation reference: ", quotationRef);
 

@@ -248,7 +248,7 @@ const PaymentSuccess = () => {
 
             // Send the booking data to the server
             // setTimeout(5000);
-            const bookingResponse = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
+            const bookingResponse = await axios.post('https://api.reliancemove.com/new', bookingData);
             const bookingRefNumber = bookingResponse.data?.newOrder?.bookingRef;
 
             const vanTypeResponse = bookingResponse.data?.newOrder?.vanType;

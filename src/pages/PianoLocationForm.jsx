@@ -144,7 +144,7 @@ const PianoLocationForm = () => {
     if (pickupTypingTimeout) clearTimeout(pickupTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://orbit-0pxd.onrender.com/autocomplete", { place: pickupQuery })
+      axios.post("https://api.reliancemove.com/autocomplete", { place: pickupQuery })
         .then(res => {
           setPickupSuggestions(res.data.predictions || []);
           setFocusedPickupIndex(-1);
@@ -165,7 +165,7 @@ const PianoLocationForm = () => {
     if (deliveryTypingTimeout) clearTimeout(deliveryTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://orbit-0pxd.onrender.com/autocomplete", { place: deliveryQuery })
+      axios.post("https://api.reliancemove.com/autocomplete", { place: deliveryQuery })
         .then(res => {
           setDeliverySuggestions(res.data.predictions || []);
           setFocusedDeliveryIndex(-1);
@@ -210,7 +210,7 @@ const PianoLocationForm = () => {
 
   // Helper functions
   async function getPostalCode(place_id) {
-    const response = await axios.get(`https://orbit-0pxd.onrender.com/postalcode/${place_id}`);
+    const response = await axios.get(`https://api.reliancemove.com/postalcode/${place_id}`);
     return response;
   }
 
