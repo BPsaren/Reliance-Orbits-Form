@@ -149,11 +149,11 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     }
 
     const newStop = {
-      lift: liftAvailable,  // Renamed from liftAvailable to lift
+      liftAvailable: liftAvailable,  // Renamed from liftAvailable to lift
       floor: floorToNumber(floor),
       address: addressWithPostalCode || address,
       propertyType,
-      doorNumber: doorFlatNo || ''  // Renamed from doorFlatNo to doorNumber, with fallback to empty string
+      doorFlatNo: doorFlatNo || ''  // Renamed from doorFlatNo to doorNumber, with fallback to empty string
     };
 
     setExtraStops([...extraStops, newStop]);
