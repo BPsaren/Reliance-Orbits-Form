@@ -408,7 +408,7 @@ const QuoteConfirmation = () => {
           <button
             type="button"
             className="bg-blue-600 text-white font-medium py-4 px-6 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition flex items-center justify-center"
-            onClick={() => window.open('https://reliancemove.com', '_blank')}
+             onClick={() => window.location.href = 'https://reliancemove.com'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
