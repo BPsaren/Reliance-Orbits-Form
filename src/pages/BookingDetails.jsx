@@ -48,12 +48,11 @@ const BookingDetails = () => {
     delivery: ''
   });
 
-  
-  // State for postcode search functionality
-  const [pickupSuggestions, setPickupSuggestions] = useState([]);
-  const [deliverySuggestions, setDeliverySuggestions] = useState([]);
-  const [isPickupSearching, setIsPickupSearching] = useState(false);
-  const [isDeliverySearching, setIsDeliverySearching] = useState(false);
+  // State for auto-fetch functionality
+  const [isPickupFetching, setIsPickupFetching] = useState(false);
+  const [isDeliveryFetching, setIsDeliveryFetching] = useState(false);
+  const [pickupPostcodeTimer, setPickupPostcodeTimer] = useState(null);
+  const [deliveryPostcodeTimer, setDeliveryPostcodeTimer] = useState(null);
 
   const {
     customerDetails,
@@ -76,7 +75,6 @@ const BookingDetails = () => {
     itemsToDismantle,
     bookingRef, setBookingRef,
     additionalServices,
-
   } = useBooking();
 
   // Validate UK mobile number
@@ -85,151 +83,161 @@ const BookingDetails = () => {
     return regex.test(phone);
   };
 
-  // Handle pickup postcode search
-  const handlePickupPostcodeSearch = async () => {
-    if (!pickup.postcode) return;
-    
-    setIsPickupSearching(true);
-    try {
-      const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
-        place: pickup.postcode 
-      });
-      setPickupSuggestions(response.data.predictions || []);
-    } catch (error) {
-      console.error('Error searching pickup postcode:', error);
-      setPickupSuggestions([]);
-    } finally {
-      setIsPickupSearching(false);
-    }
-  };
-
-  // Handle delivery postcode search
-  const handleDeliveryPostcodeSearch = async () => {
-    if (!delivery.postcode) return;
-    
-    setIsDeliverySearching(true);
-    try {
-      const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
-        place: delivery.postcode 
-      });
-      setDeliverySuggestions(response.data.predictions || []);
-    } catch (error) {
-      console.error('Error searching delivery postcode:', error);
-      setDeliverySuggestions([]);
-    } finally {
-      setIsDeliverySearching(false);
-    }
-  };
-
   // Unified address parser that works for both scenarios
-const parseAddressComponents = (fullAddress) => {
-  if (!fullAddress) return { addressLine1: '', addressLine2: '', city: '' };
+  const parseAddressComponents = (fullAddress) => {
+    if (!fullAddress) return { addressLine1: '', addressLine2: '', city: '' };
 
-  // Clean the input
-  const cleaned = fullAddress
-    .replace(/\bUK\b/i, '')
-    .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '')
-    .trim();
+    // Clean the input
+    const cleaned = fullAddress
+      .replace(/\bUK\b/i, '')
+      .replace(/[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}/g, '')
+      .trim();
 
-  // Split into parts
-  const parts = cleaned.split(',')
-    .map(part => part.trim())
-    .filter(part => part !== '');
+    // Split into parts
+    const parts = cleaned.split(',')
+      .map(part => part.trim())
+      .filter(part => part !== '');
 
-  // Find city (exact match only)
-  let city = '';
+    // Find city (exact match only)
+    let city = '';
 
-  // Check each part for a city match
-  const filteredParts = parts.filter(part => {
-    const matchedCity = UK_CITIES.find(c => 
-      c.toLowerCase() === part.toLowerCase()
-    );
-    if (matchedCity) {
-      city = matchedCity; // Store the matched city
-      return false; // Remove this part from address lines
-    }
-    return true; // Keep this part in address lines
-  });
+    // Check each part for a city match
+    const filteredParts = parts.filter(part => {
+      const matchedCity = UK_CITIES.find(c => 
+        c.toLowerCase() === part.toLowerCase()
+      );
+      if (matchedCity) {
+        city = matchedCity; // Store the matched city
+        return false; // Remove this part from address lines
+      }
+      return true; // Keep this part in address lines
+    });
 
-  return {
-    addressLine1: filteredParts[0] || "",
-    addressLine2: filteredParts[1] || "",
-    city: city
+    return {
+      addressLine1: filteredParts[0] || "",
+      addressLine2: filteredParts[1] || "",
+      city: city
+    };
   };
-};
 
-// For postcode search selection
-const handlePickupAddressSelect = async (suggestion) => {
-  try {
-    const { addressLine1, addressLine2, city } = parseAddressComponents(suggestion.description);
-    
-    setPickup(prev => ({
-      ...prev,
-      addressLine1,
-      addressLine2,
-      city,
-      location: suggestion.description,
-      // Keep original postcode
-    }));
-    
-    setPickupSuggestions([]);
-  } catch (error) {
-    console.error('Error processing address:', error);
-    setPickupSuggestions([]);
-  }
-};
+  // Auto-fetch pickup address when postcode changes
+  const handlePickupPostcodeChange = (postcode) => {
+    setPickup(prev => ({ ...prev, postcode }));
 
-// For initial address parsing (from previous steps)
-useEffect(() => {
-  if (pickup.location && !pickup.addressLine1) {
-    const { addressLine1, addressLine2, city } = parseAddressComponents(pickup.location);
-    setPickup(prev => ({
-      ...prev,
-      addressLine1,
-      addressLine2,
-      city
-    }));
-  }
-}, [pickup.location]);
+    // Clear previous timer
+    if (pickupPostcodeTimer) {
+      clearTimeout(pickupPostcodeTimer);
+    }
 
-// Same for delivery address
-const handleDeliveryAddressSelect = async (suggestion) => {
-  try {
-    const { addressLine1, addressLine2, city } = parseAddressComponents(suggestion.description);
-    
-    setDelivery(prev => ({
-      ...prev,
-      addressLine1,
-      addressLine2,
-      city,
-      location: suggestion.description,
-      // Keep original postcode
-    }));
-    
-   setDeliverySuggestions([]);
-  } catch (error) {
-    console.error('Error processing address:', error);
-    setDeliverySuggestions([]);
-  }
-  
-};
+    // Set new timer for debounced API call
+    if (postcode.trim().length >= 3) {
+      const timer = setTimeout(async () => {
+        setIsPickupFetching(true);
+        try {
+          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
+            place: postcode 
+          });
+          
+          const predictions = response.data.predictions || [];
+          if (predictions.length > 0) {
+            // Automatically select the first result
+            const firstResult = predictions[0];
+            const { addressLine1, addressLine2, city } = parseAddressComponents(firstResult.description);
+            
+            setPickup(prev => ({
+              ...prev,
+              addressLine1,
+              addressLine2,
+              city,
+              location: firstResult.description,
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching pickup address:', error);
+        } finally {
+          setIsPickupFetching(false);
+        }
+      }, 500); // 500ms delay for better UX
 
-useEffect(() => {
-  if (delivery.location && !delivery.addressLine1) {
-    /* same pattern as pickup */
-    const { addressLine1, addressLine2, city } = parseAddressComponents(delivery.location);
-     setDelivery(prev => ({
-      ...prev,
-      addressLine1,
-      addressLine2,
-      city
-    }));
-  }
-}, [delivery.location]);
+      setPickupPostcodeTimer(timer);
+    }
+  };
 
+  // Auto-fetch delivery address when postcode changes
+  const handleDeliveryPostcodeChange = (postcode) => {
+    setDelivery(prev => ({ ...prev, postcode }));
 
+    // Clear previous timer
+    if (deliveryPostcodeTimer) {
+      clearTimeout(deliveryPostcodeTimer);
+    }
 
+    // Set new timer for debounced API call
+    if (postcode.trim().length >= 3) {
+      const timer = setTimeout(async () => {
+        setIsDeliveryFetching(true);
+        try {
+          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
+            place: postcode 
+          });
+          
+          const predictions = response.data.predictions || [];
+          if (predictions.length > 0) {
+            // Automatically select the first result
+            const firstResult = predictions[0];
+            const { addressLine1, addressLine2, city } = parseAddressComponents(firstResult.description);
+            
+            setDelivery(prev => ({
+              ...prev,
+              addressLine1,
+              addressLine2,
+              city,
+              location: firstResult.description,
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching delivery address:', error);
+        } finally {
+          setIsDeliveryFetching(false);
+        }
+      }, 500); // 500ms delay for better UX
 
+      setDeliveryPostcodeTimer(timer);
+    }
+  };
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (pickupPostcodeTimer) clearTimeout(pickupPostcodeTimer);
+      if (deliveryPostcodeTimer) clearTimeout(deliveryPostcodeTimer);
+    };
+  }, [pickupPostcodeTimer, deliveryPostcodeTimer]);
+
+  // For initial address parsing (from previous steps)
+  useEffect(() => {
+    if (pickup.location && !pickup.addressLine1) {
+      const { addressLine1, addressLine2, city } = parseAddressComponents(pickup.location);
+      setPickup(prev => ({
+        ...prev,
+        addressLine1,
+        addressLine2,
+        city
+      }));
+    }
+  }, [pickup.location]);
+
+  useEffect(() => {
+    if (delivery.location && !delivery.addressLine1) {
+      const { addressLine1, addressLine2, city } = parseAddressComponents(delivery.location);
+      setDelivery(prev => ({
+        ...prev,
+        addressLine1,
+        addressLine2,
+        city
+      }));
+    }
+  }, [delivery.location]);
 
   //for add extra stop
   useEffect(() => {
@@ -249,7 +257,7 @@ useEffect(() => {
     return !errors.customer && !errors.pickup && !errors.delivery;
   };
 
-   const validateExtraStops = (stops) => {
+  const validateExtraStops = (stops) => {
     if (!Array.isArray(stops) || stops.length === 0) return [];
     
     return stops.map(stop => ({
@@ -260,16 +268,17 @@ useEffect(() => {
       lift: typeof stop.lift === 'boolean' ? stop.lift : Boolean(stop.liftAvailable),
     }));
   };
-const validateItems = (items)=>{
-  if (!Array.isArray(items) || items.length === 0 ) return [];
-  return items.map(items=>({
-    ...items,
-    name: items.name || '',
-    // Ensure quantity exists and is a number
-    quantity: items.quantity || 0,
 
-  }))
-}
+  const validateItems = (items) => {
+    if (!Array.isArray(items) || items.length === 0 ) return [];
+    return items.map(items => ({
+      ...items,
+      name: items.name || '',
+      // Ensure quantity exists and is a number
+      quantity: items.quantity || 0,
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -281,109 +290,15 @@ const validateItems = (items)=>{
     setIsSubmitting(true);
     setSubmitError(null);
 
-    // function hourToTime(hour) {
-    //   // If the hour is already in HH:MM:SS format, return it as is
-    //   if (typeof hour === 'string' && hour.includes(':')) {
-    //     return hour;
-    //   }
-
-    //   const hrs = Math.floor(hour).toString().padStart(2, '0');
-    //   const mins = (hour % 1 === 0.5) ? '30' : '00';
-    //   return `${hrs}:${mins}:00`;
-    // }
-
     try {
-
       const validatedStops = validateExtraStops(extraStops);
       const validatedItems = validateItems(items);
-      // ✅ Then create bookingData using quotationRef
-      // const bookingData = {
-      //   username: customerDetails.name || 'NA',
-      //   email: customerDetails.email || 'NA',
-      //   phoneNumber: customerDetails.phone || 'NA',
-      //   price: totalPrice || 0,
-      //   distance: parseInt(journey.distance) || 0,
-      //   route: "default route",
-      //   duration: journey.duration || "N/A",
-      //   pickupDate: selectedDate.date || 'NA',
-      //   pickupTime: selectedDate.pickupTime || '08:00:00',
-      //   pickupAddress: {
-      //     postcode: pickup.postcode,
-      //     addressLine1: pickup.addressLine1,
-      //     addressLine2: pickup.addressLine2,
-      //     city: pickup.city,
-      //     country: pickup.country,
-      //     contactName: pickup.contactName,
-      //     contactPhone: pickup.contactPhone,
-      //   },
-      //   dropDate: selectedDate.date || 'NA',
-      //   dropTime: selectedDate.dropTime || '18:00:00',
-      //   dropAddress: {
-      //     postcode: delivery.postcode,
-      //     addressLine1: delivery.addressLine1,
-      //     addressLine2: delivery.addressLine2,
-      //     city: delivery.city,
-      //     country: delivery.country,
-      //     contactName: delivery.contactName,
-      //     contactPhone: delivery.contactPhone,
-      //   },
-
-      //   vanType: van.type || "N/A",
-      //   worker: selectedDate.numberOfMovers || 1,
-      //   itemsToDismantle: itemsToDismantle || 0,
-      //   itemsToAssemble: itemsToAssemble || 0,
-      //   stoppage: extraStops.map(item => item.address) || [],
-      //   pickupLocation: {
-      //     location: pickup.location || "N/A",
-      //     floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
-      //     lift: pickup.liftAvailable,
-      //     propertyType: pickup.propertyType || "standard"
-      //   },
-      //   dropLocation: {
-      //     location: delivery.location || "N/A",
-      //     floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
-      //     lift: delivery.liftAvailable,
-      //     propertyType: delivery.propertyType || "standard"
-      //   },
-      //   details: {
-      //     items: {
-      //       name: items.map(item => item.name) || [],
-      //       quantity: items.map(item => item.quantity) || [],
-      //     },
-      //     isBusinessCustomer: customerDetails.isBusinessCustomer,
-      //     motorBike: motorBike.type,
-      //     piano: piano.type,
-      //     specialRequirements: additionalServices.specialRequirements,
-          
-      //   },
-      //   quotationRef: quoteRef || 'NA'
-      // };
-
-      // console.log("Booking Data being sent:", JSON.stringify(bookingData, null, 2));
-
-      // 🔁 Then: POST to /new with quotationRef included
-      // const bookingResponse = await axios.post('https://orbit-0pxd.onrender.com/new', bookingData);
-
-      // const bookingRefNumber = bookingResponse.data?.newOrder?.bookingRef;
-
-      // console.log("Booking response: ", bookingResponse)
-      // console.log("Booking ref: ", bookingRefNumber);
-
-      // if (!bookingRefNumber) {
-      //   throw new Error("Booking reference not received from server");
-      // }
-      // console.log('Booking successful:', bookingResponse.data);
-      // setBookingRef(bookingRefNumber);
-
-      // console.log('Booking Ref:', bookingRef);
-      // navigate('/confirmation');
 
       const metaDataBody = {
         username: customerDetails.name || 'NA',
         email: customerDetails.email || 'NA',
         phoneNumber: customerDetails.phone || 'NA',
         price: totalPrice || 0,
-        // price: 0,
         distance: parseInt(journey.distance) || 0,
         route: "default route",
         duration: journey.duration || "N/A",
@@ -411,7 +326,6 @@ const validateItems = (items)=>{
           contactName: delivery.contactName,
           contactPhone: delivery.contactPhone,
         },
-
         vanType: van.type || "N/A",
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle || 0,
@@ -439,7 +353,6 @@ const validateItems = (items)=>{
           piano: piano.type,
           specialRequirements: additionalServices.specialRequirements,
         },
-        // bookingRef: bookingRefNumber,
         quotationRef: quoteRef || 'NA',
         itemsArray: items,
       };
@@ -461,7 +374,6 @@ const validateItems = (items)=>{
       setIsSubmitting(false);
     }
   };
-
 
   const handlePickupChange = (field, value) => {
     setPickup({
@@ -485,45 +397,28 @@ const validateItems = (items)=>{
         <div className="md:w-2/3">
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
             {/* Pickup Address Section */}
-               <div className="mb-8">
+            <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Pickup Details</h2>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
                 <div className="mb-2">
-                  <div className="flex items-center">
+                  <div className="relative">
                     <input
                       type="text"
                       placeholder="Enter Postcode"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={pickup.postcode || ''}
-                      onChange={(e) => setPickup({ ...pickup, postcode: e.target.value })}
+                      onChange={(e) => handlePickupPostcodeChange(e.target.value)}
                     />
-                    <button
-                      type="button"
-                      onClick={handlePickupPostcodeSearch}
-                      disabled={isPickupSearching}
-                      className="ml-2 p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
-                    >
-                      {isPickupSearching ? 'Searching...' : 'Search'}
-                    </button>
+                    {isPickupFetching && (
+                      <div className="absolute right-3 top-3 text-blue-600">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      </div>
+                    )}
                   </div>
-                  
-                  {/* Pickup Address Suggestions */}
-                  {pickupSuggestions.length > 0 && (
-                    <div className="mt-2 border border-gray-200 rounded-md">
-                      <ul className="max-h-60 overflow-y-auto">
-                        {pickupSuggestions.map((suggestion, index) => (
-                          <li
-                            key={index}
-                            className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                            onClick={() => handlePickupAddressSelect(suggestion)}
-                          >
-                            {suggestion.description}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {isPickupFetching && (
+                    <div className="text-blue-600 text-sm mt-1">Fetching address...</div>
                   )}
                 </div>
 
@@ -621,39 +516,22 @@ const validateItems = (items)=>{
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
                 <div className="mb-2">
-                  <div className="flex items-center">
+                  <div className="relative">
                     <input
                       type="text"
                       placeholder="Enter Postcode"
                       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={delivery.postcode || ''}
-                      onChange={(e) => setDelivery({ ...delivery, postcode: e.target.value })}
+                      onChange={(e) => handleDeliveryPostcodeChange(e.target.value)}
                     />
-                    <button
-                      type="button"
-                      onClick={handleDeliveryPostcodeSearch}
-                      disabled={isDeliverySearching}
-                      className="ml-2 p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
-                    >
-                      {isDeliverySearching ? 'Searching...' : 'Search'}
-                    </button>
+                    {isDeliveryFetching && (
+                      <div className="absolute right-3 top-3 text-blue-600">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      </div>
+                    )}
                   </div>
-                  
-                  {/* Delivery Address Suggestions */}
-                  {deliverySuggestions.length > 0 && (
-                    <div className="mt-2 border border-gray-200 rounded-md">
-                      <ul className="max-h-60 overflow-y-auto">
-                        {deliverySuggestions.map((suggestion, index) => (
-                          <li
-                            key={index}
-                            className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                            onClick={() => handleDeliveryAddressSelect(suggestion)}
-                          >
-                            {suggestion.description}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {isDeliveryFetching && (
+                    <div className="text-blue-600 text-sm mt-1">Fetching address...</div>
                   )}
                 </div>
 
