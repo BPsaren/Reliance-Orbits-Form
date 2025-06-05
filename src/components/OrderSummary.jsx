@@ -60,7 +60,7 @@ const OrderSummary = () => {
           worker: selectedDate.numberOfMovers,
           itemsToDismantle:itemsToDismantle,
           itemsToAssemble:itemsToAssemble,
-          stoppage:extraStops.map(item => item.address)
+          stoppage:extraStops.map(item => ({ address: item.address }))
         };
 
         const res = await axios.post('https://api.reliancemove.com/price', payload);

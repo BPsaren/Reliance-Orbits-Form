@@ -99,10 +99,36 @@ const PaymentSuccess = () => {
                 setDelivery(deliveryData);
 
                 // Parse arrays if they exist in metadata
-                const parsedItems = m.itemsArray ? JSON.parse(m.itemsArray) : items;
+                let parsedItems = [];
+                if (m.items) {
+                    try {
+                        parsedItems = JSON.parse(m.items);
+                        console.log("Successfully parsed items:", parsedItems);
+                    } catch (parseError) {
+                        console.error("Error parsing items:", parseError);
+                        parsedItems = items; // fallback to existing state
+                    }
+                } else {
+                    console.log("No items found in metadata, using existing state");
+                    parsedItems = items;
+                }
+
                 setItems(parsedItems);
 
-                const parsedExtraStops = m.ExtraStopsArray ? JSON.parse(m.ExtraStopsArray) : extraStops;
+                let parsedExtraStops = [];
+                if (m.extraStops) {
+                    try {
+                        parsedExtraStops = JSON.parse(m.extraStops);
+                        console.log("Successfully parsed extra stops:", parsedExtraStops);
+                    } catch (parseError) {
+                        console.error("Error parsing extra stops:", parseError);
+                        parsedExtraStops = extraStops; // fallback to existing state
+                    }
+                } else {
+                    console.log("No extra stops found in metadata, using existing state");
+                    parsedExtraStops = extraStops;
+                }
+
                 setExtraStops(parsedExtraStops);
 
                 setSelectedDate({
@@ -149,7 +175,8 @@ const PaymentSuccess = () => {
                     parsedItems,
                     parsedExtraStops,
                     m.van,
-                    m.quoteRef
+                    m.quoteRef,
+                    m
                 );
 
                 // Update the booking reference with the actual value from the server
@@ -179,10 +206,13 @@ const PaymentSuccess = () => {
         }));
     };
 
-    const sendBookingToServer = async (customerData, pickupData, deliveryData, parsedItems, parsedExtraStops, vanRef, quote) => {
+    const sendBookingToServer = async (customerData, pickupData, deliveryData, parsedItems, parsedExtraStops, vanRef, quote, metadata) => {
         try {
 
             const validatedStops = validateExtraStops(parsedExtraStops);
+            // Log the parsed items to verify they exist
+            console.log("Parsed items in sendBookingToServer:", parsedItems);
+        console.log("Parsed extra stops in sendBookingToServer:", parsedExtraStops);
             // Create the booking data object similar to what was in BookingDetails.jsx
             const bookingData = {
                 username: customerData.name || 'NA',
@@ -233,8 +263,8 @@ const PaymentSuccess = () => {
                 },
                 details: {
                     items: {
-                        name: parsedItems.map(item => item.name) || [],
-                        quantity: parsedItems.map(item => item.quantity) || [],
+                        name: parsedItems?.map(item => item.name) || [],
+                        quantity: parsedItems?.map(item => item.quantity) || [],
                     },
                     isBusinessCustomer: customerData.isBusinessCustomer,
                     motorBike: motorBike.type,

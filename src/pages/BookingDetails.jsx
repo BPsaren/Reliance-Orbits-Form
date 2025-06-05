@@ -173,7 +173,16 @@ const BookingDetails = () => {
       lift: typeof stop.lift === 'boolean' ? stop.lift : Boolean(stop.liftAvailable),
     }));
   };
+const validateItems = (items)=>{
+  if (!Array.isArray(items) || items.length === 0 ) return [];
+  return items.map(items=>({
+    ...items,
+    name: items.name || '',
+    // Ensure quantity exists and is a number
+    quantity: items.quantity || 0,
 
+  }))
+}
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -199,6 +208,7 @@ const BookingDetails = () => {
     try {
 
       const validatedStops = validateExtraStops(extraStops);
+      const validatedItems = validateItems(items);
       // ✅ Then create bookingData using quotationRef
       // const bookingData = {
       //   username: customerDetails.name || 'NA',
@@ -716,39 +726,7 @@ const BookingDetails = () => {
                 ))}
               </div>
 
-              {/* Payment Options */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3">Payment Options</h3>
 
-                <div className="bg-white border rounded-md p-4 mb-3 flex items-center">
-                  <input
-                    type="radio"
-                    id="card-payment"
-                    name="payment"
-                    defaultChecked
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  />
-                  <label htmlFor="card-payment" className="ml-2 block text-sm font-medium text-gray-700">Pay by card</label>
-                  <div className="ml-auto flex items-center">
-                    <span className="mr-2 text-xl">💳</span>
-                    <span className="text-sm text-gray-600">Major cards accepted</span>
-                  </div>
-                </div>
-
-                <div className="bg-white border rounded-md p-4 flex items-center">
-                  <input
-                    type="radio"
-                    id="klarna-payment"
-                    name="payment"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  />
-                  <label htmlFor="klarna-payment" className="ml-2 block text-sm font-medium text-gray-700">Pay with Klarna</label>
-                  <div className="ml-auto flex items-center">
-                    <span className="mr-2 text-lg font-bold text-pink-500">K</span>
-                    <span className="text-sm text-gray-600">Pay in 3 interest-free installments</span>
-                  </div>
-                </div>
-              </div>
 
               {/* Terms Section */}
               <div className="space-y-3">

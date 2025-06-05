@@ -50,6 +50,7 @@ const AdditionalServices = () => {
   } = useBooking();
 
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
+  const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
   const [collectionTime, setCollectionTime] = useState({ start: 8, end: 18 });
   const [deliveryTime, setDeliveryTime] = useState('Same day');
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
@@ -435,6 +436,7 @@ const AdditionalServices = () => {
                 <div className="flex gap-4">
                   <button
                     type="button"
+                    onClick={() => setShowLearnMoreModal(true)}
                     className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
                   >
                     Learn more
@@ -608,6 +610,68 @@ const AdditionalServices = () => {
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Confirm Time Slot
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Learn More Modal */}
+      {showLearnMoreModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Dismantle & Assemble</h3>
+                <button
+                  onClick={() => setShowLearnMoreModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-700 text-center text-lg leading-relaxed">
+                  We can take apart your large items at pickup and reassemble back at delivery
+                </p>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-md mb-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Dismantling service</span>
+                    <span className="font-semibold text-lg">£20 per item</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Assembly service</span>
+                    <span className="font-semibold text-lg">£30 per item</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-sm text-gray-600 mb-6">
+                Our professional movers will carefully dismantle your furniture at the pickup location and reassemble it at your new home, saving you time and ensuring everything is properly set up.
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowLearnMoreModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLearnMoreModal(false);
+                    setShowAssemblyOptions(true);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Add to your move
                 </button>
               </div>
             </div>
