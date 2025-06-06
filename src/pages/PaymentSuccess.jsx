@@ -213,6 +213,7 @@ const PaymentSuccess = () => {
             // Log the parsed items to verify they exist
             console.log("Parsed items in sendBookingToServer:", parsedItems);
         console.log("Parsed extra stops in sendBookingToServer:", parsedExtraStops);
+        console.log("metadata: ", metadata);
             // Create the booking data object similar to what was in BookingDetails.jsx
             const bookingData = {
                 username: customerData.name || 'NA',
