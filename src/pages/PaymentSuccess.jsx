@@ -134,14 +134,13 @@ const PaymentSuccess = () => {
 
                 setExtraStops(parsedExtraStops);
 
-                 console.log("=== STRIPE METADATA DEBUG ===");
-                console.log("Full metadata object:", m);
+
                 console.log("pickupDate:", m.pickupDate);
                 console.log("pickupTime:", m.pickupTime);
                 console.log("dropDate:", m.dropDate);
                 console.log("dropTime:", m.dropTime);
                 console.log("worker:", m.worker);
-                console.log("================================");
+
 
                 setSelectedDate({
                     date: m.pickupDate || selectedDate.date,
@@ -188,7 +187,13 @@ const PaymentSuccess = () => {
                     parsedExtraStops,
                     m.van,
                     m.quoteRef,
-                    m
+                    m.pickupData,
+                    m.dropData,
+                    m.pickupTime,
+                    m.dropTime,
+                    m.worker,
+                    m,
+                
                 );
 
                 // Update the booking reference with the actual value from the server
@@ -218,7 +223,7 @@ const PaymentSuccess = () => {
         }));
     };
 
-    const sendBookingToServer = async (customerData, pickupData, deliveryData, parsedItems, parsedExtraStops, vanRef, quote, metadata) => {
+    const sendBookingToServer = async (customerData, pickupData, deliveryData, parsedItems, parsedExtraStops, vanRef, quote, pickupDate, dropDate, pickupTime, dropTime, worker, metadata) => {
         try {
 
             const validatedStops = validateExtraStops(parsedExtraStops);
@@ -235,8 +240,8 @@ const PaymentSuccess = () => {
                 distance: parseInt(metadata.distance) || 0,
                 route: journey.route || "default route",
                 duration: metadata.duration || "N/A",
-                pickupDate: metadata.pickupdate || 'NA',
-                pickupTime: metadata.pickupTime || '08:00:00',
+                pickupDate: pickupDate || 'NA',
+                pickupTime: pickupTime || '08:00:00',
                 pickupAddress: {
                     postcode: pickupData.postcode,
                     addressLine1: pickupData.addressLine1,
@@ -246,8 +251,8 @@ const PaymentSuccess = () => {
                     contactName: pickupData.contactName,
                     contactPhone: pickupData.contactPhone,
                 },
-                dropDate: metadata.dropdate || 'NA',
-                dropTime: metadata.dropTime || '18:00:00',
+                dropDate: dropDate || 'NA',
+                dropTime: dropTime || '18:00:00',
                 dropAddress: {
                     postcode: deliveryData.postcode,
                     addressLine1: deliveryData.addressLine1,
@@ -258,7 +263,7 @@ const PaymentSuccess = () => {
                     contactPhone: deliveryData.contactPhone,
                 },
                 vanType: vanRef || "N/A",
-                worker: parseInt(metadata.worker) || 1,
+                worker: parseInt(worker) || 1,
                 itemsToDismantle: parseInt(metadata.itemsToDismantle) || 0,
                 itemsToAssemble: parseInt(metadata.itemsToAssemble) || 0,
                 stoppage: validatedStops,
