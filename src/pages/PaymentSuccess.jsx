@@ -48,6 +48,15 @@ const PaymentSuccess = () => {
                 const session = res.data;
                 const m = session.metadata;
 
+                console.log("=== STRIPE METADATA DEBUG ===");
+                console.log("Full metadata object:", m);
+                console.log("pickupDate:", m.pickupDate);
+                console.log("pickupTime:", m.pickupTime);
+                console.log("dropDate:", m.dropDate);
+                console.log("dropTime:", m.dropTime);
+                console.log("worker:", m.worker);
+                console.log("================================");
+
                 // Set individual fields from metadata
 
                 setQuoteRef(m.quoteRef);
@@ -212,8 +221,8 @@ const PaymentSuccess = () => {
             const validatedStops = validateExtraStops(parsedExtraStops);
             // Log the parsed items to verify they exist
             console.log("Parsed items in sendBookingToServer:", parsedItems);
-        console.log("Parsed extra stops in sendBookingToServer:", parsedExtraStops);
-        console.log("metadata: ", metadata);
+            console.log("Parsed extra stops in sendBookingToServer:", parsedExtraStops);
+            console.log("metadata: ", metadata);
             // Create the booking data object similar to what was in BookingDetails.jsx
             const bookingData = {
                 username: customerData.name || 'NA',
