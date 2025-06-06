@@ -19,7 +19,9 @@ const QuoteConfirmation = () => {
     customerDetails,
     journey,
     totalPrice,
-    van
+    van,
+    itemsToAssemble,
+    itemsToDismantle
   } = useBooking();
 
 
@@ -38,7 +40,7 @@ const QuoteConfirmation = () => {
     <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-solid" style={{ borderLeftColor: color }}>
       <div className="flex items-start">
         <div className="flex-shrink-0">
-          <div className={`text-white rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-md` } style={{ backgroundColor: color }}>
+          <div className={`text-white rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-md`} style={{ backgroundColor: color }}>
             {letter}
           </div>
         </div>
@@ -127,9 +129,9 @@ const QuoteConfirmation = () => {
                     <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-300 -ml-2"></div>
                   )}
                   {renderAddressCard(
-                    delivery.location || "Delivery Location", 
-                    delivery, 
-                    "#16a34a", 
+                    delivery.location || "Delivery Location",
+                    delivery,
+                    "#16a34a",
                     extraStops && extraStops.length > 0 ? `${String.fromCharCode(66 + extraStops.length)}` : "B"
                   )}
                 </div>
@@ -264,33 +266,25 @@ const QuoteConfirmation = () => {
                 </div>
               )}
 
-              {additionalServices && additionalServices.dismantling && additionalServices.dismantling.length > 0 && (
-                <div className="flex items-start bg-purple-50 p-3 rounded-lg">
-                  <div className="bg-purple-100 rounded-full p-2 text-purple-600 mt-1">🔧</div>
-                  <div className="ml-3">
-                    <div className="font-medium text-gray-800">Dismantling Service</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {additionalServices.dismantling.map((item, i) => (
-                        <div key={`dismantle-${i}`} className="bg-white px-2 py-1 rounded mb-1 border border-purple-100">
-                          {item}
-                        </div>
-                      ))}
+              {itemsToDismantle > 0 && (
+                <div>
+                  🔧
+                  <div>
+                    <div>Dismantling Service</div>
+                    <div>
+                      {itemsToDismantle} {itemsToDismantle === 1 ? 'item' : 'items'} to dismantle
                     </div>
                   </div>
                 </div>
               )}
 
-              {additionalServices && additionalServices.reassembly && additionalServices.reassembly.length > 0 && (
-                <div className="flex items-start bg-yellow-50 p-3 rounded-lg">
-                  <div className="bg-yellow-100 rounded-full p-2 text-yellow-600 mt-1">🔨</div>
-                  <div className="ml-3">
-                    <div className="font-medium text-gray-800">Reassembly Service</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {additionalServices.reassembly.map((item, i) => (
-                        <div key={`reassemble-${i}`} className="bg-white px-2 py-1 rounded mb-1 border border-yellow-100">
-                          {item}
-                        </div>
-                      ))}
+              {itemsToAssemble > 0 && (
+                <div>
+                  🔨
+                  <div>
+                    <div>Reassembly Service</div>
+                    <div>
+                      {itemsToAssemble} {itemsToAssemble === 1 ? 'item' : 'items'} to assemble
                     </div>
                   </div>
                 </div>
@@ -408,7 +402,7 @@ const QuoteConfirmation = () => {
           <button
             type="button"
             className="bg-blue-600 text-white font-medium py-4 px-6 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition flex items-center justify-center"
-             onClick={() => window.location.href = 'https://reliancemove.com'}
+            onClick={() => window.location.href = 'https://reliancemove.com'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
