@@ -9,6 +9,8 @@ const EmailPopup = ({ onContinue }) => {
         aboutUs: true
     });
     const [isVisible, setIsVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
     const {quoteDetails, setQuoteDetails} = useBooking();
 
     useEffect(() => {
@@ -23,14 +25,54 @@ const EmailPopup = ({ onContinue }) => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const validateEmail = async (emailToValidate) => {
+        try {
+            const response = await fetch('https://api.reliancemove.com/user/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: emailToValidate
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return { success: true, data };
+        } catch (error) {
+            console.error('Email validation error:', error);
+            return { success: false, error: error.message };
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setQuoteDetails({...quoteDetails, email: email})
-        if (email) {
-            // Add fade-out animation before continuing
+        
+        if (!email) {
+            setError('Please enter an email address');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+
+        const validationResult = await validateEmail(email);
+
+        if (validationResult.success) {
+            // Email is valid, proceed
+            setQuoteDetails({...quoteDetails, email: email});
             setIsVisible(false);
             setTimeout(() => onContinue(email), 300); // Match the animation duration
+        } else {
+            // Email validation failed
+            setError('Invalid email address. Please check and try again.');
         }
+
+        setIsLoading(false);
     };
 
     return (
@@ -85,15 +127,40 @@ const EmailPopup = ({ onContinue }) => {
                         type="email"
                         placeholder="Enter your email address"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-md mb-4"
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError(''); // Clear error when user types
+                        }}
+                        className={`w-full p-3 border rounded-md mb-2 ${
+                            error ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         required
+                        disabled={isLoading}
                     />
+                    
+                    {error && (
+                        <div className="text-red-500 text-sm mb-4 text-center">
+                            {error}
+                        </div>
+                    )}
+
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                        disabled={isLoading}
+                        className={`w-full py-3 rounded-md font-medium transition-colors ${
+                            isLoading 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-blue-600 hover:bg-blue-700'
+                        } text-white`}
                     >
-                        View Prices Now
+                        {isLoading ? (
+                            <div className="flex items-center justify-center">
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                Validating...
+                            </div>
+                        ) : (
+                            'View Prices Now'
+                        )}
                     </button>
                 </form>
             </div>
