@@ -218,10 +218,10 @@ const PaymentSuccess = () => {
                 username: customerData.name || 'NA',
                 email: customerData.email || 'NA',
                 phoneNumber: customerData.phone || 'NA',
-                price: totalPrice || 0,
-                distance: parseInt(journey.distance) || 0,
+                price: parseFloat(metadata.price) || 0,
+                distance: parseInt(metadata.distance) || 0,
                 route: journey.route || "default route",
-                duration: journey.duration || "N/A",
+                duration: metadata.duration || "N/A",
                 pickupDate: selectedDate.date || 'NA',
                 pickupTime: selectedDate.pickupTime || '08:00:00',
                 pickupAddress: {
