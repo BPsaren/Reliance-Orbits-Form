@@ -48,14 +48,7 @@ const PaymentSuccess = () => {
                 const session = res.data;
                 const m = session.metadata;
 
-                console.log("=== STRIPE METADATA DEBUG ===");
-                console.log("Full metadata object:", m);
-                console.log("pickupDate:", m.pickupDate);
-                console.log("pickupTime:", m.pickupTime);
-                console.log("dropDate:", m.dropDate);
-                console.log("dropTime:", m.dropTime);
-                console.log("worker:", m.worker);
-                console.log("================================");
+               
 
                 // Set individual fields from metadata
 
@@ -138,7 +131,17 @@ const PaymentSuccess = () => {
                     parsedExtraStops = extraStops;
                 }
 
+
                 setExtraStops(parsedExtraStops);
+
+                 console.log("=== STRIPE METADATA DEBUG ===");
+                console.log("Full metadata object:", m);
+                console.log("pickupDate:", m.pickupDate);
+                console.log("pickupTime:", m.pickupTime);
+                console.log("dropDate:", m.dropDate);
+                console.log("dropTime:", m.dropTime);
+                console.log("worker:", m.worker);
+                console.log("================================");
 
                 setSelectedDate({
                     date: m.pickupDate || selectedDate.date,
