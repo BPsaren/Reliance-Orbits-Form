@@ -223,7 +223,7 @@ const PaymentSuccess = () => {
                 distance: parseInt(metadata.distance) || 0,
                 route: journey.route || "default route",
                 duration: metadata.duration || "N/A",
-                pickupDate: metadata.date || 'NA',
+                pickupDate: metadata.pickupdate || 'NA',
                 pickupTime: metadata.pickupTime || '08:00:00',
                 pickupAddress: {
                     postcode: pickupData.postcode,
@@ -234,7 +234,7 @@ const PaymentSuccess = () => {
                     contactName: pickupData.contactName,
                     contactPhone: pickupData.contactPhone,
                 },
-                dropDate: metadata.date || 'NA',
+                dropDate: metadata.dropdate || 'NA',
                 dropTime: metadata.dropTime || '18:00:00',
                 dropAddress: {
                     postcode: deliveryData.postcode,
@@ -246,7 +246,7 @@ const PaymentSuccess = () => {
                     contactPhone: deliveryData.contactPhone,
                 },
                 vanType: vanRef || "N/A",
-                worker: metadata.numberOfMovers || 1,
+                worker: parseInt(metadata.worker) || 1,
                 itemsToDismantle: parseInt(metadata.itemsToDismantle) || 0,
                 itemsToAssemble: parseInt(metadata.itemsToAssemble) || 0,
                 stoppage: validatedStops,
