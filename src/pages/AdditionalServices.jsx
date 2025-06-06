@@ -55,8 +55,6 @@ const AdditionalServices = () => {
   const [deliveryTime, setDeliveryTime] = useState('Same day');
   const [showAssemblyOptions, setShowAssemblyOptions] = useState(false);
   const [error, setError] = useState('');
-  const [dismantleCount, setDismantleCount] = useState(itemsToDismantle || 0);
-  const [assemblyCount, setAssemblyCount] = useState(itemsToAssemble || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize time values from context on component mount
@@ -95,10 +93,7 @@ const AdditionalServices = () => {
         dropTime: hourToTime(18)
       }));
     }
-
-    setDismantleCount(itemsToDismantle);
-    setAssemblyCount(itemsToAssemble);
-  }, [itemsToDismantle, itemsToAssemble, selectedDate.pickupTime, selectedDate.dropTime, setSelectedDate]);
+  }, [selectedDate.pickupTime, selectedDate.dropTime, setSelectedDate]);
 
   // Format the date for display
   const formatDisplayDate = (date) => {
@@ -251,10 +246,8 @@ const AdditionalServices = () => {
   };
 
   const handleAddServices = () => {
-    setItemsToDismantle(dismantleCount);
-    setItemsToAssemble(assemblyCount);
-    console.log(itemsToAssemble);
-    console.log(itemsToDismantle);
+    console.log('Items to assemble:', itemsToAssemble);
+    console.log('Items to dismantle:', itemsToDismantle);
     setShowAssemblyOptions(false);
   };
 
@@ -368,18 +361,18 @@ const AdditionalServices = () => {
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          setDismantleCount(Math.max(0, dismantleCount - 1));
+                          setItemsToDismantle(Math.max(0, itemsToDismantle - 1));
                         }}
                         className="px-3 py-1 border rounded-md hover:bg-gray-100"
                       >
                         -
                       </button>
-                      <span>{dismantleCount}</span>
+                      <span>{itemsToDismantle}</span>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          setDismantleCount(dismantleCount + 1);
+                          setItemsToDismantle(itemsToDismantle + 1);
                         }}
                         className="px-3 py-1 border rounded-md hover:bg-gray-100"
                       >
@@ -395,18 +388,18 @@ const AdditionalServices = () => {
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          setAssemblyCount(Math.max(0, assemblyCount - 1));
+                          setItemsToAssemble(Math.max(0, itemsToAssemble - 1));
                         }}
                         className="px-3 py-1 border rounded-md hover:bg-gray-100"
                       >
                         -
                       </button>
-                      <span>{assemblyCount}</span>
+                      <span>{itemsToAssemble}</span>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          setAssemblyCount(assemblyCount + 1);
+                          setItemsToAssemble(itemsToAssemble + 1);
                         }}
                         className="px-3 py-1 border rounded-md hover:bg-gray-100"
                       >
