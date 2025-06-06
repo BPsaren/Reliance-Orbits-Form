@@ -246,8 +246,8 @@ const PaymentSuccess = () => {
                 },
                 vanType: vanRef || "N/A",
                 worker: selectedDate.numberOfMovers || 1,
-                itemsToDismantle: itemsToDismantle || 0,
-                itemsToAssemble: itemsToAssemble || 0,
+                itemsToDismantle: parseInt(metadata.itemsToDismantle) || 0,
+                itemsToAssemble: parseInt(metadata.itemsToAssemble) || 0,
                 stoppage: validatedStops,
                 pickupLocation: {
                     location: pickupData.location || "N/A",
