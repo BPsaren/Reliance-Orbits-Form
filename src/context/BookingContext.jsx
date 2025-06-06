@@ -23,11 +23,11 @@ export const BookingProvider = ({ children }) => {
         country: '',
         contactName: '',
         contactPhone: '',
-        flatNo:''
+        flatNo: ''
     });
 
-    const [quoteDetails, setQuoteDetails]= useState({
-        email:'',
+    const [quoteDetails, setQuoteDetails] = useState({
+        email: '',
         prices: true,
         booking: true,
         aboutUs: true
@@ -46,14 +46,21 @@ export const BookingProvider = ({ children }) => {
         country: '',
         contactName: '',
         contactPhone: '',
-        flatNo:''
+        flatNo: ''
     });
+
+    const today = new Date();
+
+    const day = today.getDate();
+    const month = today.toLocaleString('default', { month: 'short' }); // e.g., "Apr"
+
+    const dateString = `${day} ${month}`;
 
     const [items, setItems] = useState([]);
     const [selectedDate, setSelectedDate] = useState({
-        date: '18 Apr',
-        pickupTime:'08:00:00',
-        dropTime:'18:00:00',
+        date: dateString,
+        pickupTime: '08:00:00',
+        dropTime: '18:00:00',
         price: 179,
         numberOfMovers: 0,
     });
@@ -131,14 +138,14 @@ export const BookingProvider = ({ children }) => {
             propertyType: stop.propertyType || 'Studio',
             floor: stop.floor || 'Ground floor',
             liftAvailable: stop.liftAvailable || false,
-            doorFlatNo: stop.doorFlatNo || '' 
-            
+            doorFlatNo: stop.doorFlatNo || ''
+
         }]);
     };
 
     const updateExtraStop = (index, updatedStop) => {
-        setExtraStops(extraStops.map((stop, i) => 
-            i === index ? { 
+        setExtraStops(extraStops.map((stop, i) =>
+            i === index ? {
                 ...stop,
                 ...updatedStop,
                 propertyType: updatedStop.propertyType !== undefined ? updatedStop.propertyType : stop.propertyType,
@@ -155,7 +162,7 @@ export const BookingProvider = ({ children }) => {
 
     return (
         <BookingContext.Provider value={{
-            quoteRef,setQuoteRef,
+            quoteRef, setQuoteRef,
             bookingRef, setBookingRef,
             pickup, setPickup,
             delivery, setDelivery,
@@ -165,7 +172,7 @@ export const BookingProvider = ({ children }) => {
             motorBike, setMotorBike,
             additionalServices, setAdditionalServices,
             customerDetails, setCustomerDetails,
-            journey, setJourney, 
+            journey, setJourney,
             totalPrice, setTotalPrice,
             van, setVan, toggleVanType,
             pickupAddressWithPostalCode, setpickupAddressWithPostalCode,
