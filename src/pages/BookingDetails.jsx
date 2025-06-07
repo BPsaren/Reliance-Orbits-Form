@@ -103,7 +103,7 @@ const BookingDetails = () => {
 
     // Check each part for a city match
     const filteredParts = parts.filter(part => {
-      const matchedCity = UK_CITIES.find(c => 
+      const matchedCity = UK_CITIES.find(c =>
         c.toLowerCase() === part.toLowerCase()
       );
       if (matchedCity) {
@@ -134,16 +134,16 @@ const BookingDetails = () => {
       const timer = setTimeout(async () => {
         setIsPickupFetching(true);
         try {
-          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
-            place: postcode 
+          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", {
+            place: postcode
           });
-          
+
           const predictions = response.data.predictions || [];
           if (predictions.length > 0) {
             // Automatically select the first result
             const firstResult = predictions[0];
             const { addressLine1, addressLine2, city } = parseAddressComponents(firstResult.description);
-            
+
             setPickup(prev => ({
               ...prev,
               addressLine1,
@@ -177,16 +177,16 @@ const BookingDetails = () => {
       const timer = setTimeout(async () => {
         setIsDeliveryFetching(true);
         try {
-          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", { 
-            place: postcode 
+          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", {
+            place: postcode
           });
-          
+
           const predictions = response.data.predictions || [];
           if (predictions.length > 0) {
             // Automatically select the first result
             const firstResult = predictions[0];
             const { addressLine1, addressLine2, city } = parseAddressComponents(firstResult.description);
-            
+
             setDelivery(prev => ({
               ...prev,
               addressLine1,
@@ -205,6 +205,20 @@ const BookingDetails = () => {
       setDeliveryPostcodeTimer(timer);
     }
   };
+
+
+
+
+  const saveData = () => {
+    localStorage.setItem('dateToken', selectedDate.date);
+    localStorage.setItem('timeToken', selectedDate.pickupTime);
+    localStorage.setItem('workerToken', selectedDate.numberOfMovers);
+    console.log('Data stored in localStorage');
+  };
+
+
+
+
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -259,7 +273,7 @@ const BookingDetails = () => {
 
   const validateExtraStops = (stops) => {
     if (!Array.isArray(stops) || stops.length === 0) return [];
-    
+
     return stops.map(stop => ({
       ...stop,
       // Ensure doorNumber exists and is a string
@@ -270,7 +284,7 @@ const BookingDetails = () => {
   };
 
   const validateItems = (items) => {
-    if (!Array.isArray(items) || items.length === 0 ) return [];
+    if (!Array.isArray(items) || items.length === 0) return [];
     return items.map(items => ({
       ...items,
       name: items.name || '',
@@ -293,7 +307,7 @@ const BookingDetails = () => {
     try {
       const validatedStops = validateExtraStops(extraStops);
       const validatedItems = validateItems(items);
-
+      // window.localStorage.setItem
       const metaDataBody = {
         username: customerDetails.name || 'NA',
         email: customerDetails.email || 'NA',
@@ -358,6 +372,11 @@ const BookingDetails = () => {
       };
 
       console.log("Metadata Data Body being sent:", JSON.stringify(metaDataBody, null, 2));
+      saveData();
+
+
+
+
 
       const sessionRes = await axios.post('https://payment-gateway-reliance.onrender.com/create-checkout-session', metaDataBody);
 
@@ -690,30 +709,30 @@ const BookingDetails = () => {
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <div className="font-medium">Moving from:</div>
                   {/** <div className="text-gray-600"></div>*/}
-                   
+
                   <div className="text-gray-600">Flat no-{pickup.flatNo}, {pickup.location}</div>
                   {/**<div className="font-medium">Door No/flat No:</div> */}
-                 
+
 
                 </div>
 
                 <div className="flex justify-between py-2">
                   <div className=" font-medium">Moving to:</div>
                   {/* <div className=" text-gray-600">{delivery.flatNo}</div>*/}
-                  
+
                   <div className="text-gray-600">Falt no -{delivery.flatNo}, {delivery.location}</div>
                   {/** <div className="font-medium">Door No/flat No:</div>*/}
-                 
+
                 </div>
 
                 {extraStops.map((stop, index) => (
                   <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
                     <div className="font-medium"> Extra Stops: </div>
                     {/* <div className="text-gray-600">{stop.doorFlatNo}</div>*/}
-                   
+
                     <div className="text-gray-600">Flat no-{stop.doorFlatNo}, {stop.address}</div>
-                     {/*<div className="font-medium"> Door No/flat No: </div>*/} 
-                    
+                    {/*<div className="font-medium"> Door No/flat No: </div>*/}
+
 
                   </div>
                 ))}
