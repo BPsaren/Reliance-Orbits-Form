@@ -29,29 +29,30 @@ import Footer from './components/Footer';
 function App() {
   return (
     <BookingProvider>
-    <Navbar/>
+      
       <Router>
         <div className="app-container">
+        <Navbar />
           <Routes>
-          <Route path="/" element={< Home/>} />
+            <Route path="/" element={< Home />} />
             <Route path="/furniture-loc" element={<LocationForm />} />
             <Route path="/home-loc" element={<AddressDetailsForm />} />
-            <Route path="/piano-loc" element={<PianoLocationForm prepath='/piano-loc'/>} />
-            <Route path="/items" element={<ItemsForm prepath="/items"/>} />
+            <Route path="/piano-loc" element={<PianoLocationForm prepath='/piano-loc' />} />
+            <Route path="/items" element={<ItemsForm prepath="/items" />} />
             <Route path="/date" element={<DateSelection />} />
-            <Route path="/items-home" element={<ItemCategoryForm prepath="/items-home"/>} />
+            <Route path="/items-home" element={<ItemCategoryForm prepath="/items-home" />} />
             <Route path="/additional-services" element={<AdditionalServices />} />
             <Route path="/booking-details" element={<BookingDetails />} />
             <Route path="/confirmation" element={<QuoteConfirmation />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/other-removals" element={<OtherRemovals />} />
-            <Route path="/motorbike-removals" element={<MotorBikeLocationForm prepath='/motorbike-removals'/>} />
-            
+            <Route path="/motorbike-removals" element={<MotorBikeLocationForm prepath='/motorbike-removals' />} />
+
           </Routes>
         </div>
       </Router>
-      <Footer/>
+      <Footer />
     </BookingProvider>
   );
 }
