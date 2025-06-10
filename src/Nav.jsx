@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 // import logo from '../assets/REA.png';
 
-const Navbar = () => {
+const Nav = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -197,4 +197,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Nav;
