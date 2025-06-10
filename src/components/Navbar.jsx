@@ -12,7 +12,7 @@ import {
   ChevronRight,
   Truck,
 } from "lucide-react";
-import logo from '../assets/REA.png';
+// import logo from '../assets/REA.png';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

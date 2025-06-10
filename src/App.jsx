@@ -22,8 +22,9 @@ import PianoLocationForm from './pages/PianoLocationForm';
 import MotorBikeLocationForm from './pages/MotorBikeLocationForm';
 import PaymentFailed from './pages/PaymentFailed';
 import PaymentSuccess from './pages/PaymentSuccess';
-import Navbar from './components/NavBar';
+// import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Navbar from './components/NavBar';
 
 
 function App() {
@@ -32,7 +33,7 @@ function App() {
       
       <Router>
         <div className="app-container">
-        <Navbar />
+        <Navbar/>
           <Routes>
             <Route path="/" element={< Home />} />
             <Route path="/furniture-loc" element={<LocationForm />} />
