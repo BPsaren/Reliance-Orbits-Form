@@ -185,180 +185,201 @@ const DateSelection = () => {
     return (
         <>
             {showEmailPopup && <EmailPopup onContinue={handleEmailSubmit} />}
-            
-            <div className={`bg-gray-50 min-h-screen ${showEmailPopup ? 'blur-sm' : ''}`}>
-                <Header title="Select a date" />
-                <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">
-                    Your delivery will be same day
-                </div>
 
-                <div className="max-w-7xl mx-auto px-4 py-8 md:flex md:gap-8">
-                    <div className="md:w-2/3">
-                        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
-                            <div className="grid grid-cols-3 gap-4 mb-8">
-                                <button
-                                    type="button"
-                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${
-                                        selectedMovers === 0
-                                            ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                            : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                                    }`}
-                                    onClick={() => handleSelectMovers(0)}
-                                >
-                                    <span className="text-2xl mb-2">🚚</span>
-                                    <span className="font-medium">0 Person</span>
-                                    <span className="text-xs">(Only Driver)</span>
-                                </button>
-                                
-                                <button
-                                    type="button"
-                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${
-                                        selectedMovers === 1
-                                            ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                            : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                                    }`}
-                                    onClick={() => handleSelectMovers(1)}
-                                >
-                                    <span className="text-2xl mb-2">👤</span>
-                                    <span className="font-medium">1 Person</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={`flex flex-col items-center justify-center p-4 border rounded-lg transition-all ${
-                                        selectedMovers === 2
-                                            ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                            : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                                    }`}
-                                    onClick={() => handleSelectMovers(2)}
-                                >
-                                    <span className="text-2xl mb-2">👥</span>
-                                    <span className="font-medium">2 People</span>
-                                </button>
-                                
-                                <div className="flex flex-col items-center justify-center p-4 border rounded-lg border-gray-300 col-span-3">
-                                    <span className="text-2xl mb-2">{getVanEmoji(van.type)}</span>
-                                    <select
-                                        value={van.type || ''}
-                                        onChange={(e) => handleSelectVanType(e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-md font-medium text-center"
-                                    >
-                                        <option value="" disabled>Select Van</option>
-                                        {vanOptions.map((option) => (
-                                            <option key={option.type} value={option.type}>
-                                                {option.emoji} {option.type}
-                                            </option>
-                                        ))}
-                                    </select>
+            <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 ${showEmailPopup ? 'blur-sm' : ''}`}>
+                <div className="max-w-7xl mx-auto px-4 py-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Main Form Section */}
+                        <div className="flex-1">
+                            <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+                                {/* Header with gradient */}
+                                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+                                    <h2 className="text-2xl font-bold flex items-center">
+                                        <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m4 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v.01M8 7v8a1 1 0 001 1h6a1 1 0 001-1V7" />
+                                        </svg>
+                                        Select Date & Service
+                                    </h2>
+                                    <p className="text-blue-100 mt-1">Choose your van type, movers, and preferred date</p>
                                 </div>
-                            </div>
 
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between mb-4 px-2">
+                                <div className="p-6 space-y-6">
+                                    {/* Van & Movers Selection */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Van Selection */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                                                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414A1 1 0 0017.414 13H20" />
+                                                </svg>
+                                                Van Type
+                                            </h3>
+                                            <div className="relative">
+                                                <select
+                                                    value={van.type || ''}
+                                                    onChange={(e) => handleSelectVanType(e.target.value)}
+                                                    className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm font-medium text-gray-700"
+                                                >
+                                                    <option value="" disabled>Select Van Type</option>
+                                                    {vanOptions.map((option) => (
+                                                        <option key={option.type} value={option.type}>
+                                                            {option.emoji} {option.type} - £{option.price}/hr
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-2xl pointer-events-none">
+                                                    {getVanEmoji(van.type)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Movers Selection */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                                                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                Number of Movers
+                                            </h3>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {[0, 1, 2].map((count) => (
+                                                    <button
+                                                        key={count}
+                                                        type="button"
+                                                        className={`p-3 border-2 rounded-xl transition-all duration-200 backdrop-blur-sm group text-center ${selectedMovers === count
+                                                                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                                                : 'border-gray-200 bg-white/50 hover:border-blue-300 hover:bg-blue-50 text-gray-700'
+                                                            }`}
+                                                        onClick={() => handleSelectMovers(count)}
+                                                    >
+                                                        <div className="text-xl mb-1 group-hover:scale-110 transition-transform">
+                                                            {count === 0 ? '🚚' : count === 1 ? '👤' : '👥'}
+                                                        </div>
+                                                        <div className="font-medium text-sm">
+                                                            {count === 0 ? 'Driver Only' : `${count} Person${count > 1 ? 's' : ''}`}
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Calendar Section */}
+                                    <div className="border-t-2 border-gray-200 pt-6">
+                                        <h3 className="text-xl font-bold text-gray-800 flex items-center mb-4">
+                                            <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m4 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v.01M8 7v8a1 1 0 001 1h6a1 1 0 001-1V7" />
+                                            </svg>
+                                            Select Your Date
+                                        </h3>
+
+                                        {/* Calendar Navigation */}
+                                        <div className="flex items-center justify-between mb-4 p-3 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200">
+                                            <button
+                                                type="button"
+                                                className={`p-2 rounded-lg transition-all duration-200 ${isCurrentMonth() ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                                    }`}
+                                                onClick={!isCurrentMonth() ? handlePrevMonth : undefined}
+                                                disabled={isCurrentMonth()}
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                </svg>
+                                            </button>
+                                            <div className="text-lg font-bold text-gray-800">{currentMonth} {currentYear}</div>
+                                            <button
+                                                type="button"
+                                                className="p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                                                onClick={handleNextMonth}
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        {/* Calendar */}
+                                        <div className="bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden">
+                                            <Calendar
+                                                onChange={handleSelectDate}
+                                                value={value}
+                                                activeStartDate={currentView}
+                                                onActiveStartDateChange={({ activeStartDate }) => setCurrentView(activeStartDate)}
+                                                tileContent={tileContent}
+                                                tileClassName={tileClassName}
+                                                showNavigation={false}
+                                                minDate={new Date()}
+                                                tileDisabled={isDateDisabled}
+                                                className="custom-calendar"
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t-2 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                                     <button
                                         type="button"
-                                        className={`p-2 ${
-                                            isCurrentMonth() ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-blue-600'
-                                        }`}
-                                        onClick={!isCurrentMonth() ? handlePrevMonth : undefined}
-                                        disabled={isCurrentMonth()}
+                                        onClick={() => navigate(prepath)}
+                                        className="flex items-center space-x-2 px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200 font-medium group"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                                         </svg>
+                                        <span>Edit Job Info</span>
                                     </button>
-                                    <div className="text-lg font-semibold">{currentMonth} {currentYear}</div>
                                     <button
-                                        type="button"
-                                        className="p-2 text-gray-600 hover:text-blue-600"
-                                        onClick={handleNextMonth}
+                                        type="submit"
+                                        className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        <span>Next Step</span>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                         </svg>
                                     </button>
                                 </div>
+                            </form>
+                        </div>
 
-                                <div className="border rounded-lg overflow-hidden calendar-container">
-                                    <Calendar
-                                        onChange={handleSelectDate}
-                                        value={value}
-                                        activeStartDate={currentView}
-                                        onActiveStartDateChange={({ activeStartDate }) => setCurrentView(activeStartDate)}
-                                        tileContent={tileContent}
-                                        tileClassName={tileClassName}
-                                        showNavigation={false}
-                                        minDate={new Date()}
-                                        tileDisabled={isDateDisabled}
-                                        className="custom-calendar"
-                                    />
+                        <div className="lg:w-1/3">
+                            <OrderSummary />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Alert Modal */}
+                {showAlert && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl max-w-md w-full p-6 border border-white/20 transform transition-all duration-300 scale-100">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div className="ml-4">
+                                    <h3 className="text-lg font-bold text-gray-900">Selection Required</h3>
+                                    <div className="mt-2 text-sm text-gray-600">
+                                        <p>Please select both the van type and number of movers before continuing.</p>
+                                    </div>
+                                    <div className="mt-4">
+                                        <button
+                                            type="button"
+                                            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                            onClick={() => setShowAlert(false)}
+                                        >
+                                            Got it
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="mb-8">
-                                <div className="bg-pink-50 border border-pink-100 rounded-lg p-4 text-center">
-                                    <div className="font-medium text-pink-700">You can now pay with Klarna</div>
-                                    <div className="text-sm text-pink-600 mt-1">Pay in 3 interest-free installments</div>
-                                    <div className="text-xs text-pink-500 mt-1">18+. T&C apply. Credit subject to status.</div>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={() => navigate(prepath)}
-                                    className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
-                                >
-                                    Edit Job Info
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
-                                >
-                                    Next Step
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-
-                    <div className="md:w-1/3">
-                        <OrderSummary />
-                    </div>
-                </div>
+                )}
             </div>
-
-            {showAlert && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className={`
-            bg-white rounded-lg shadow-xl max-w-md w-full p-6
-            transition-all duration-300 ease-out transform-gpu
-            ${showAlert ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
-        `}>
-            <div className="flex items-start">
-                <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">Selection Required</h3>
-                    <div className="mt-2 text-sm text-gray-500">
-                        <p>Please select both the van type and number of persons (movers) before continuing.</p>
-                    </div>
-                    <div className="mt-4">
-                        <button
-                            type="button"
-                            className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
-                            onClick={() => setShowAlert(false)}
-                        >
-                            Got it
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-)}
         </>
     );
 };

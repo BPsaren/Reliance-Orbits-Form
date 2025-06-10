@@ -408,340 +408,344 @@ const BookingDetails = () => {
     });
   };
 
-  return (
-    <div className="bg-gray-50 min-h-screen">
-      <Header title="Your Booking Details" />
+ return (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    {/* <Header title="Your Booking Details" /> */}
 
-      <div className="max-w-7xl mx-auto px-4 py-8 md:flex md:gap-8">
-        <div className="md:w-2/3">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
-            {/* Pickup Address Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Pickup Details</h2>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1">
+          <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+              <h2 className="text-2xl font-bold flex items-center">
+                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Booking Details
+              </h2>
+              <p className="text-blue-100 mt-1">Complete your booking information</p>
+            </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
-                <div className="mb-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Enter Postcode"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={pickup.postcode || ''}
-                      onChange={(e) => handlePickupPostcodeChange(e.target.value)}
-                    />
+            <div className="p-6 space-y-6">
+              {/* Two Column Layout for Pickup and Delivery */}
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* Pickup Details Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <h3 className="text-lg font-semibold text-gray-800">Pickup Details</h3>
+                  </div>
+
+                  {/* Postcode */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Postcode</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Enter Postcode"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        value={pickup.postcode || ''}
+                        onChange={(e) => handlePickupPostcodeChange(e.target.value)}
+                      />
+                      {isPickupFetching && (
+                        <div className="absolute right-3 top-3 text-blue-600">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                    </div>
                     {isPickupFetching && (
-                      <div className="absolute right-3 top-3 text-blue-600">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                      </div>
+                      <div className="text-blue-600 text-sm">Fetching address...</div>
                     )}
                   </div>
-                  {isPickupFetching && (
-                    <div className="text-blue-600 text-sm mt-1">Fetching address...</div>
-                  )}
-                </div>
 
-                {/* Manual address fields for pickup */}
-                <div className="mt-3 space-y-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
-                    <input
-                      type="text"
-                      placeholder="Flat No/Door No"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={pickup.flatNo || ''}
-                      onChange={(e) => setPickup({ ...pickup, flatNo: e.target.value })}
-                      required
-                    />
+                  {/* Address Fields in Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
+                      <input
+                        type="text"
+                        placeholder="Flat No/Door No"
+                        className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        value={pickup.flatNo || ''}
+                        onChange={(e) => setPickup({ ...pickup, flatNo: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">City</label>
+                      <input
+                        type="text"
+                        placeholder="City"
+                        className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        value={pickup.city || ''}
+                        onChange={(e) => setPickup({ ...pickup, city: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Address</label>
+
+                  <div className="space-y-3">
                     <input
                       type="text"
                       placeholder="Address Line 1"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       value={pickup.addressLine1 || ''}
                       onChange={(e) => setPickup({ ...pickup, addressLine1: e.target.value })}
                       required
                     />
-                  </div>
-                  <div>
                     <input
                       type="text"
-                      placeholder="Address Line 2"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Address Line 2 (Optional)"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       value={pickup.addressLine2 || ''}
                       onChange={(e) => setPickup({ ...pickup, addressLine2: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">City</label>
-                    <input
-                      type="text"
-                      placeholder="City"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={pickup.city || ''}
-                      onChange={(e) => setPickup({ ...pickup, city: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Pickup Contact Details */}
-              <div className="mb-4">
-                <h3 className="text-lg font-medium mb-3">Contact Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  {/* Contact Details */}
+                  <div className="space-y-3 pt-3 border-t border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-700">Contact Details</h4>
                     <input
                       type="text"
                       placeholder="Contact Name at Pickup"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       value={pickup.contactName || ''}
                       onChange={(e) => handlePickupChange('contactName', e.target.value)}
                       required
                     />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      placeholder="Pickup Contact Number (UK mobile)"
-                      className={`w-full p-3 border rounded-md focus:ring-2 ${phoneErrors.pickup ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
-                      value={pickup.contactPhone || ''}
-                      onChange={(e) => handlePickupChange('contactPhone', e.target.value)}
-                      required
-                    />
-                    {phoneErrors.pickup && (
-                      <div className="text-red-500 text-xs mt-1">{phoneErrors.pickup}</div>
-                    )}
-                    <button
-                      type="button"
-                      className="absolute right-3 top-3 text-blue-600 font-bold text-xl"
-                    >
-                      +
-                    </button>
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        placeholder="Pickup Contact Number (UK mobile)"
+                        className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/50 backdrop-blur-sm ${phoneErrors.pickup ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
+                        value={pickup.contactPhone || ''}
+                        onChange={(e) => handlePickupChange('contactPhone', e.target.value)}
+                        required
+                      />
+                      {phoneErrors.pickup && (
+                        <div className="text-red-500 text-xs mt-1 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          {phoneErrors.pickup}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-2">
-                  It is your responsibility to make this person aware that Relaince and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing Relaince to share essential booking information with this person and a driver.
-                </div>
-              </div>
-            </div>
 
-            {/* Delivery Address Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Delivery Details</h2>
+                {/* Delivery Details Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <h3 className="text-lg font-semibold text-gray-800">Delivery Details</h3>
+                  </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
-                <div className="mb-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Enter Postcode"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={delivery.postcode || ''}
-                      onChange={(e) => handleDeliveryPostcodeChange(e.target.value)}
-                    />
+                  {/* Postcode */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Postcode</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Enter Postcode"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        value={delivery.postcode || ''}
+                        onChange={(e) => handleDeliveryPostcodeChange(e.target.value)}
+                      />
+                      {isDeliveryFetching && (
+                        <div className="absolute right-3 top-3 text-blue-600">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                    </div>
                     {isDeliveryFetching && (
-                      <div className="absolute right-3 top-3 text-blue-600">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                      </div>
+                      <div className="text-blue-600 text-sm">Fetching address...</div>
                     )}
                   </div>
-                  {isDeliveryFetching && (
-                    <div className="text-blue-600 text-sm mt-1">Fetching address...</div>
-                  )}
-                </div>
 
-                {/* Manual address fields for delivery */}
-                <div className="mt-3 space-y-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
-                    <input
-                      type="text"
-                      placeholder="Flat No/Door No"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={delivery.flatNo || ''}
-                      onChange={(e) => setDelivery({ ...delivery, flatNo: e.target.value })}
-                      required
-                    />
+                  {/* Address Fields in Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Flat No.</label>
+                      <input
+                        type="text"
+                        placeholder="Flat No/Door No"
+                        className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        value={delivery.flatNo || ''}
+                        onChange={(e) => setDelivery({ ...delivery, flatNo: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">City</label>
+                      <input
+                        type="text"
+                        placeholder="City"
+                        className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        value={delivery.city || ''}
+                        onChange={(e) => setDelivery({ ...delivery, city: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Address</label>
+
+                  <div className="space-y-3">
                     <input
                       type="text"
                       placeholder="Address Line 1"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       value={delivery.addressLine1 || ''}
                       onChange={(e) => setDelivery({ ...delivery, addressLine1: e.target.value })}
                       required
                     />
-                  </div>
-                  <div>
                     <input
                       type="text"
-                      placeholder="Address Line 2"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Address Line 2 (Optional)"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       value={delivery.addressLine2 || ''}
                       onChange={(e) => setDelivery({ ...delivery, addressLine2: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">City</label>
-                    <input
-                      type="text"
-                      placeholder="City"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={delivery.city || ''}
-                      onChange={(e) => setDelivery({ ...delivery, city: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Delivery Contact Details */}
-              <div className="mb-4">
-                <h3 className="text-lg font-medium mb-3">Contact Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  {/* Contact Details */}
+                  <div className="space-y-3 pt-3 border-t border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-700">Contact Details</h4>
                     <input
                       type="text"
                       placeholder="Contact Name at Delivery"
-                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       value={delivery.contactName || ''}
                       onChange={(e) => handleDeliveryChange('contactName', e.target.value)}
                       required
                     />
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        placeholder="Delivery Contact Number (UK mobile)"
+                        className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/50 backdrop-blur-sm ${phoneErrors.delivery ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
+                        value={delivery.contactPhone || ''}
+                        onChange={(e) => handleDeliveryChange('contactPhone', e.target.value)}
+                        required
+                      />
+                      {phoneErrors.delivery && (
+                        <div className="text-red-500 text-xs mt-1 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          {phoneErrors.delivery}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="relative">
+                </div>
+              </div>
+
+              {/* Customer Contact Details Section */}
+              <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center space-x-2 mb-4">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-gray-800">Your Contact Details</h3>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                     <input
-                      type="tel"
-                      placeholder="Delivery Contact Number (UK mobile)"
-                      className={`w-full p-3 border rounded-md focus:ring-2 ${phoneErrors.delivery ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
-                      value={delivery.contactPhone || ''}
-                      onChange={(e) => handleDeliveryChange('contactPhone', e.target.value)}
+                      type="text"
+                      id="name"
+                      value={customerDetails.name}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/70"
+                      placeholder="Enter your full name"
                       required
                     />
-                    {phoneErrors.delivery && (
-                      <div className="text-red-500 text-xs mt-1">{phoneErrors.delivery}</div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={customerDetails.email}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, email: e.target.value })}
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/70"
+                      placeholder="Enter your email address"
+                      required
+                    />
+                    <div className="text-xs text-gray-500 mt-1">We'll send your booking confirmation here</div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number (UK mobile)</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      value={customerDetails.phone}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, phone: e.target.value })}
+                      className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/70 ${phoneErrors.customer ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
+                      placeholder="Enter your UK mobile number"
+                      required
+                    />
+                    {phoneErrors.customer && (
+                      <div className="text-red-500 text-xs mt-1 flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {phoneErrors.customer}
+                      </div>
                     )}
-                    <button
-                      type="button"
-                      className="absolute right-3 top-3 text-blue-600 font-bold text-xl"
-                    >
-                      +
-                    </button>
+                    <div className="text-xs text-gray-500 mt-1">We'll use this to contact you about your move</div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <label className="flex items-center space-x-2 cursor-pointer bg-white/70 px-3 py-2 rounded-lg hover:bg-white transition-colors">
+                      <input
+                        type="checkbox"
+                        id="businessCustomer"
+                        checked={customerDetails.isBusinessCustomer}
+                        onChange={(e) => setCustomerDetails({ ...customerDetails, isBusinessCustomer: e.target.checked })}
+                        className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">I am a business customer</span>
+                    </label>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-2">
-                  It is your responsibility to make this person aware that Relaince and a driver will contact them during the course of the job. By clicking 'Book Now' you are authorizing Relaince to share essential booking information with this person and a driver.
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Details Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Contact Details</h2>
-
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={customerDetails.name}
-                  onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
-                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your full name"
-                  required
-                />
               </div>
 
-              <div className="mb-4">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={customerDetails.email}
-                  onChange={(e) => setCustomerDetails({ ...customerDetails, email: e.target.value })}
-                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your email address"
-                  required
-                />
-                <div className="text-xs text-gray-500 mt-1">We'll send your booking confirmation here</div>
-              </div>
+              {/* Booking Summary */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Booking Summary
+                </h3>
 
-              <div className="mb-4">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number (UK mobile)</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={customerDetails.phone}
-                  onChange={(e) => setCustomerDetails({ ...customerDetails, phone: e.target.value })}
-                  className={`w-full p-3 border rounded-md focus:ring-2 ${phoneErrors.customer ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
-                  placeholder="Enter your UK mobile number"
-                  required
-                />
-                {phoneErrors.customer && (
-                  <div className="text-red-500 text-xs mt-1">{phoneErrors.customer}</div>
-                )}
-                <div className="text-xs text-gray-500 mt-1">We'll use this to contact you about your move</div>
-              </div>
-
-              <div className="flex items-center mb-4">
-                <input
-                  type="checkbox"
-                  id="businessCustomer"
-                  checked={customerDetails.isBusinessCustomer}
-                  onChange={(e) => setCustomerDetails({ ...customerDetails, isBusinessCustomer: e.target.checked })}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="businessCustomer" className="ml-2 block text-sm text-gray-700">I am a business customer</label>
-              </div>
-            </div>
-
-            {/* Booking Summary */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Booking Summary</h2>
-
-              <div className="bg-gray-50 p-4 rounded-md mb-6">
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <div className="font-medium">Moving from:</div>
-                  {/** <div className="text-gray-600"></div>*/}
-
-                  <div className="text-gray-600">Flat no-{pickup.flatNo}, {pickup.location}</div>
-                  {/**<div className="font-medium">Door No/flat No:</div> */}
-
-
-                </div>
-
-                <div className="flex justify-between py-2">
-                  <div className=" font-medium">Moving to:</div>
-                  {/* <div className=" text-gray-600">{delivery.flatNo}</div>*/}
-
-                  <div className="text-gray-600">Falt no -{delivery.flatNo}, {delivery.location}</div>
-                  {/** <div className="font-medium">Door No/flat No:</div>*/}
-
-                </div>
-
-                {extraStops.map((stop, index) => (
-                  <div key={index} className="flex justify-between items-center group hover:bg-gray-50 rounded -mx-2 px-2 py-1">
-                    <div className="font-medium"> Extra Stops: </div>
-                    {/* <div className="text-gray-600">{stop.doorFlatNo}</div>*/}
-
-                    <div className="text-gray-600">Flat no-{stop.doorFlatNo}, {stop.address}</div>
-                    {/*<div className="font-medium"> Door No/flat No: </div>*/}
-
-
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-blue-200">
+                    <div className="font-medium text-gray-700">Moving from:</div>
+                    <div className="text-gray-600 text-right">Flat no-{pickup.flatNo}, {pickup.location}</div>
                   </div>
-                ))}
+
+                  <div className="flex justify-between items-center py-2 border-b border-blue-200">
+                    <div className="font-medium text-gray-700">Moving to:</div>
+                    <div className="text-gray-600 text-right">Flat no-{delivery.flatNo}, {delivery.location}</div>
+                  </div>
+
+                  {extraStops.map((stop, index) => (
+                    <div key={index} className="flex justify-between items-center py-2">
+                      <div className="font-medium text-gray-700">Extra Stop:</div>
+                      <div className="text-gray-600 text-right">Flat no-{stop.doorFlatNo}, {stop.address}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-
-
-              {/* Terms Section */}
-              <div className="space-y-3">
+              {/* Terms and Conditions */}
+              <div className="space-y-3 bg-gray-50 rounded-xl p-4">
                 <div className="flex items-start">
                   <input
                     type="checkbox"
@@ -750,7 +754,7 @@ const BookingDetails = () => {
                     className="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                    I agree to the <a href="#" className="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-blue-600 hover:underline">Data Protection Policy</a>
+                    I agree to the <a href="#" className="text-blue-600 hover:underline font-medium">Terms and Conditions</a> and <a href="#" className="text-blue-600 hover:underline font-medium">Data Protection Policy</a>
                   </label>
                 </div>
 
@@ -765,42 +769,64 @@ const BookingDetails = () => {
                   </label>
                 </div>
               </div>
-            </div>
 
-            {/* Error message if submission fails */}
-            {submitError && (
-              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
-                {submitError}
+              {/* Error message if submission fails */}
+              {submitError && (
+                <div className="p-3 bg-red-50 text-red-700 rounded-xl border border-red-200 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {submitError}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => navigate('/additional-services')}
+                  className="flex items-center space-x-2 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                  disabled={isSubmitting}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span>Back</span>
+                </button>
+                <button
+                  type="submit"
+                  className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                    isSubmitting 
+                      ? 'bg-blue-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl transform hover:-translate-y-0.5'
+                  } text-white`}
+                  disabled={isSubmitting}
+                >
+                  <span>{isSubmitting ? 'Redirecting to Payment...' : 'Pay Now'}</span>
+                  {!isSubmitting && (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  )}
+                </button>
               </div>
-            )}
 
-            {/* Form Actions */}
-            <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={() => navigate('/additional-services')}
-                className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
-                disabled={isSubmitting}
-              >
-                Back
-              </button>
-              <button
-                type="submit"
-                className={`px-6 py-3 ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md font-medium`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Redirecting to Payment...' : 'Pay Now'}
-              </button>
+              {/* Privacy Notice */}
+              <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
+                <p className="mb-2"><strong>Privacy Notice:</strong></p>
+                <p>It is your responsibility to make contact persons aware that Reliance and a driver will contact them during the course of the job. By clicking 'Pay Now' you are authorizing Reliance to share essential booking information with these persons and a driver.</p>
+              </div>
             </div>
           </form>
         </div>
 
-        <div className="md:w-1/3">
+        <div className="lg:w-1/3">
           <OrderSummary />
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default BookingDetails;

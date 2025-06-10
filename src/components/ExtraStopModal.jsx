@@ -163,77 +163,112 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Background overlay with fade-in animation */}
-      <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div className="absolute inset-0 bg-gray-500 opacity-75 animate-fade-in"></div>
-      </div>
+return (
+  <div className="fixed inset-0 z-50 overflow-y-auto">
+    {/* Background overlay with enhanced blur */}
+    <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"></div>
+    </div>
 
-      {/* Modal container with fade-in animation */}
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    {/* Modal container */}
+    <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      
+      <div className="inline-block align-bottom bg-white/90 backdrop-blur-sm rounded-2xl text-left overflow-hidden shadow-xl border border-white/20 transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-fade-in">
+        {/* Header with gradient matching LocationForm - Fixed alignment */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 text-white rounded-t-2xl">
+          <h3 className="text-xl font-bold flex items-center">
+            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Extra Stop
+          </h3>
+          <p className="text-blue-100 text-sm mt-1">Add an additional pickup or delivery location</p>
+        </div>
         
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 animate-fade-in">
-          <div>
-            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-              Add Extra Stop
-            </h3>
-            
-            <form onSubmit={handleSubmit}>
-              {/* Door/Flat Number Input - NEW FIELD */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Door/Flat No
-                </label>
+        <div className="px-6 pt-6 pb-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Door/Flat Number Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Door/Flat No
+              </label>
+              <div className="relative">
                 <input
                   type="text"
                   value={doorFlatNo}
                   onChange={(e) => setDoorFlatNo(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                   placeholder="e.g., Flat 3, Door 42"
                 />
-              </div>
-
-              {/* Address Input */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter stop address"
-                  />
-                  {suggestions.length > 0 && !selecting && (
-                    <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                      {suggestions.map((suggestion, idx) => (
-                        <li
-                          key={idx}
-                          className={`px-3 py-2 cursor-pointer ${idx === focusedIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-                          onClick={() => handleSuggestionSelect(suggestion)}
-                        >
-                          {suggestion.description}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                <div className="absolute right-3 top-3 text-gray-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                 </div>
-                {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
               </div>
+            </div>
 
+            {/* Address Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Address
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                  placeholder="Enter stop address"
+                />
+                <div className="absolute right-3 top-3 text-gray-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  </svg>
+                </div>
+                {suggestions.length > 0 && !selecting && (
+                  <ul className="absolute z-20 mt-1 w-full bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {suggestions.map((suggestion, idx) => (
+                      <li
+                        key={idx}
+                        className={`px-4 py-3 cursor-pointer transition-colors ${
+                          idx === focusedIndex ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                      >
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                          <span className="text-sm">{suggestion.description}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              {error && (
+                <p className="text-red-500 text-sm flex items-center bg-red-50 p-2 rounded-lg">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {error}
+                </p>
+              )}
+            </div>
+
+            {/* Property Type and Floor in Grid Layout */}
+            <div className="grid md:grid-cols-2 gap-4">
               {/* Property Type Select */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Select property type</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Property Type</label>
                 <div className="relative">
                   <select
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm appearance-none"
                   >
                     <option value="Studio">Studio</option>
                     <option value="1 Bed Flat">1 Bed Flat</option>
@@ -244,7 +279,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
                     <option value="3 Bed House">3 Bed House</option>
                     <option value="4+ Bed House">4+ Bed House</option>
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                     <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
@@ -253,13 +288,13 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
               </div>
 
               {/* Floor Select */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Select floor</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Floor</label>
                 <div className="relative">
                   <select
                     value={floor}
                     onChange={(e) => setFloor(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm appearance-none"
                   >
                     <option value="Ground floor">Ground floor</option>
                     <option value="1st floor">1st floor</option>
@@ -268,50 +303,59 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
                     <option value="4th floor">4th floor</option>
                     <option value="5th floor +">5th floor +</option>
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                     <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Lift Availability Checkbox */}
-              <div className="mb-6 flex items-center">
+            {/* Lift Availability Checkbox */}
+            <div className="flex items-center">
+              <label className="flex items-center space-x-3 cursor-pointer bg-gray-50/50 px-4 py-3 rounded-xl hover:bg-gray-100/50 transition-colors w-full">
                 <input
                   type="checkbox"
                   id="extraStopLift"
                   checked={liftAvailable}
                   onChange={(e) => setLiftAvailable(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="extraStopLift" className="ml-2 block text-sm text-gray-700">
-                  Lift Available
-                </label>
-              </div>
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">Lift Available</span>
+                </div>
+              </label>
+            </div>
 
-              {/* Buttons */}
-              <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                <button
-                  type="submit"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm"
-                >
-                  Add Stop
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>Add Stop</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default ExtraStopModal;

@@ -22,11 +22,14 @@ import PianoLocationForm from './pages/PianoLocationForm';
 import MotorBikeLocationForm from './pages/MotorBikeLocationForm';
 import PaymentFailed from './pages/PaymentFailed';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Navbar from './components/NavBar';
+import Footer from './components/Footer';
 
 
 function App() {
   return (
     <BookingProvider>
+    <Navbar/>
       <Router>
         <div className="app-container">
           <Routes>
@@ -48,6 +51,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+      <Footer/>
     </BookingProvider>
   );
 }

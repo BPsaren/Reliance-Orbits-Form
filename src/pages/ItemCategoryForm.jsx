@@ -253,11 +253,14 @@ const ItemCategoryForm = (props) => {
 
     const totalItems = Object.values(localItems).reduce((sum, quantity) => sum + quantity, 0);
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <Header title="What are you moving?" />
-            <div className="max-w-7xl mx-auto px-4 py-4">
-                <div className="flex items-center mr-4 mb-2">
+return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        {/* <Header title="What are you moving?" /> */}
+        
+        <div className="max-w-7xl mx-auto px-4 py-6">
+            {/* Inventory Checkbox */}
+            {/* <div className="mb-4">
+                <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-white/20">
                     <input
                         type="checkbox"
                         id="useInventory"
@@ -265,15 +268,18 @@ const ItemCategoryForm = (props) => {
                         onChange={() => setUseInventory(!useInventory)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="useInventory" className="ml-2 text-sm text-gray-600">
+                    <label htmlFor="useInventory" className="ml-3 text-sm font-medium text-gray-700">
                         Prefer to use our 2 Bed House inventory list?
                     </label>
                 </div>
+            </div> */}
 
-                <div className="flex flex-col md:flex-row gap-8">
-                    <div className="flex-1">
-                        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <div className="grid grid-cols-7">
+            <div className="flex flex-col lg:flex-row gap-6">
+                <div className="flex-1">
+                    <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+                        {/* Category Tabs */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4">
+                            <div className="grid grid-cols-7 gap-1">
                                 {categories.map((category) => (
                                     <button
                                         type="button" 
@@ -282,84 +288,83 @@ const ItemCategoryForm = (props) => {
                                             setActiveCategory(category.id);
                                             setSearchText('');
                                         }}
-                                        className={`flex flex-col items-center justify-center py-4 ${activeCategory === category.id ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:bg-gray-50'
-                                            } border-r border-gray-200`}
+                                        className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg transition-all duration-200 ${
+                                            activeCategory === category.id 
+                                                ? 'bg-white text-blue-600 shadow-md transform scale-105' 
+                                                : 'text-blue-100 hover:bg-white/20 hover:text-white'
+                                        }`}
                                     >
-                                        <span className="text-xl mb-1">{category.icon}</span>
-                                        <span className="text-xs">{category.label}</span>
+                                        <span className="text-lg mb-1">{category.icon}</span>
+                                        <span className="text-xs font-medium text-center leading-tight">{category.label}</span>
                                     </button>
                                 ))}
                             </div>
+                        </div>
 
-                            <div className="p-6">
+                        <div className="p-6">
+                            {/* Category Items */}
+                            <div className="mb-6">
                                 {renderCategoryItems()}
+                            </div>
 
-                                <div className="mt-6">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                                        <input
-                                            type="text"
-                                            placeholder="Search for more items here"
-                                            value={searchText}
-                                            onChange={(e) => setSearchText(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                                    <div className="flex">
-                                        <div className="flex-shrink-0 mr-3">
-                                            <AlertTriangle className="h-6 w-6 text-yellow-600" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-800">
-                                                If you'd like us to provide materials and pack your items for you, you can book your move with a
-                                                <span className="font-semibold"> Packing Service</span> included on the following page!
-                                            </p>
-                                        </div>
-                                    </div>
+                            {/* Search Section */}
+                            <div className="mb-6">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search for more items here"
+                                        value={searchText}
+                                        onChange={(e) => setSearchText(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                                    />
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                                <button
-                                    type='button'
-                                    onClick={() => navigate("/home-loc")}
-                                    className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center"
-                                >
-                                    <ChevronLeft className="h-5 w-5 mr-1" />
-                                    Back
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="p-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center justify-between"
-                                >
-                                    Get Prices
-                                    <ChevronRight className="h-5 w-5 ml-1" />
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div className="w-full md:w-96">
-                        <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 mb-6">
-                            <div className="flex items-start">
-                                <Shield className="h-5 w-5 text-blue-500 mr-2 mt-1" />
-                                <div>
-                                    <h3 className="text-lg font-medium text-blue-500">Complimentary insurance</h3>
-                                    <p className="text-sm text-gray-700">
-                                        Experience peaceful moving with our free Basic Compensation Cover, offering £50,000 security against fire and theft.
-                                    </p>
+                            {/* Packing Service Notice */}
+                            <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl">
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0 mr-3">
+                                        <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-800 leading-relaxed">
+                                            If you'd like us to provide materials and pack your items for you, you can book your move with a
+                                            <span className="font-semibold text-amber-700"> Packing Service</span> included on the following page!
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <OrderSummary />
-                    </div>
+
+                        {/* Action Buttons */}
+                        <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t-2 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <button
+                                type='button'
+                                onClick={() => navigate("/home-loc")}
+                                className="flex items-center space-x-2 px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200 font-medium group"
+                            >
+                                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                                <span>Back</span>
+                            </button>
+                            <button
+                                type="submit"
+                                className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            >
+                                <span>Get Prices</span>
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div className="w-full lg:w-96">
+                    <OrderSummary />
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default ItemCategoryForm;

@@ -287,353 +287,474 @@ const AdditionalServices = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <Header title="Additional Services and Special Requirements" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* <Header title="Additional Services and Special Requirements" /> */}
 
-
-      <div className="max-w-7xl mx-auto px-4 py-8 md:flex md:gap-8">
-        <div className="md:w-2/3">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6">
-            {/* Display error message if there is an error */}
-            {error && (
-              <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
-                <strong className="font-bold">Error: </strong>
-                <span className="block sm:inline">{error}</span>
-              </div>
-            )}
-
-            {/* Collection & Delivery Section */}
-            <div className="border rounded-lg p-6 mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Collection & delivery</h3>
-                <span className="text-sm text-gray-500">
-                  {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
-                </span>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+                <h2 className="text-2xl font-bold flex items-center">
+                  <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                  </svg>
+                  Additional Services
+                </h2>
+                <p className="text-blue-100 mt-1">Customize your move with extra services and special requirements</p>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4">
-                <div>
-                  <div className="font-medium">Between {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}</div>
-                  <div className="text-sm text-gray-600">{deliveryTime} delivery</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleTimeSlotChange}
-                  className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
-                >
-                  Change your time slot
-                </button>
-              </div>
-
-              <div className="text-sm text-gray-600">
-                Live driver tracking and your time slots will be sent the day before your move
-              </div>
-            </div>
-
-            {/* Assembly Options */}
-            <div className="border rounded-lg p-6 mb-8">
-              <div className="mb-3">
-                <h3 className="text-lg font-semibold">Dismantling & reassembly</h3>
-              </div>
-
-              {/* <div className="text-gray-600 mb-4">
-                Dismantling and assembly can be arranged per item. Just tell us how many items require this service and we'll do the rest!
-              </div> */}
-
-              <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="font-semibold text-lg">£20</div>
-                  <div className="text-gray-600">per item, to dismantle</div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div className="font-semibold text-lg">£30</div>
-                  <div className="text-gray-600">per item, to assemble</div>
-                </div>
-              </div>
-
-              {showAssemblyOptions ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span>Items to dismantle: £20 per item</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setItemsToDismantle(Math.max(0, itemsToDismantle - 1));
-                        }}
-                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-                      >
-                        -
-                      </button>
-                      <span>{itemsToDismantle}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setItemsToDismantle(itemsToDismantle + 1);
-                        }}
-                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span>Items to assemble: £30 per item</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setItemsToAssemble(Math.max(0, itemsToAssemble - 1));
-                        }}
-                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-                      >
-                        -
-                      </button>
-                      <span>{itemsToAssemble}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setItemsToAssemble(itemsToAssemble + 1);
-                        }}
-                        className="px-3 py-1 border rounded-md hover:bg-gray-100"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowAssemblyOptions(false)}
-                      className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAddServices}
-                      className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                      Confirm
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowLearnMoreModal(true)}
-                    className="px-4 py-2 text-sm text-blue-600 font-medium border border-blue-600 rounded-md hover:bg-blue-50"
-                  >
-                    Learn more
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAssemblyOptions(true)}
-                    className="px-4 py-2 text-sm text-white font-medium bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    Add to your move
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Special Requirements */}
-            <div className="mb-8">
-              <div className="mb-3">
-                <h3 className="text-lg font-semibold">Any special requirements or notes?</h3>
-              </div>
-
-              <textarea
-                placeholder="E.g. Parking available opposite property, sofa comes apart, slightly awkward entrance etc. The more information, the better! Please note: you will receive tracking prior to arrival"
-                value={additionalServices.specialRequirements}
-                onChange={(e) => setAdditionalServices({
-                  ...additionalServices,
-                  specialRequirements: e.target.value
-                })}
-                className="w-full p-3 border rounded-md h-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Form Actions */}
-            <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={() => navigate('/date')}
-                className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
-                disabled={isSubmitting}
-              >
-                Back
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`px-6 py-3 bg-blue-600 text-white rounded-md font-medium flex items-center justify-center min-w-[120px] ${isSubmitting ? 'opacity-80 cursor-not-allowed' : 'hover:bg-blue-700'
-                  }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <div className="p-6">
+                {/* Display error message if there is an error */}
+                {error && (
+                  <div className="bg-red-50/80 backdrop-blur-sm border-2 border-red-300 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center" role="alert">
+                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    Processing...
-                  </>
-                ) : (
-                  'Next Step'
+                    <div>
+                      <strong className="font-bold">Error: </strong>
+                      <span>{error}</span>
+                    </div>
+                  </div>
                 )}
-              </button>
-            </div>
-          </form>
-        </div>
 
-        <div className="md:w-1/3">
-          <OrderSummary />
+                {/* Collection & Delivery Section */}
+                <div className="bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-6 mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <h3 className="text-lg font-semibold text-gray-800">Collection & Delivery</h3>
+                    </div>
+                    <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
+                    </span>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl mb-4 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-gray-800 flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Between {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1 flex items-center">
+                          <svg className="w-4 h-4 mr-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                          {deliveryTime} delivery
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleTimeSlotChange}
+                        className="px-4 py-2 text-sm text-blue-600 font-medium border-2 border-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200"
+                      >
+                        Change Time Slot
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-gray-600 bg-amber-50 p-3 rounded-lg border border-amber-200 flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Live driver tracking and your time slots will be sent the day before your move
+                  </div>
+                </div>
+
+                {/* Assembly Options */}
+                <div className="bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-6 mb-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <h3 className="text-lg font-semibold text-gray-800">Dismantling & Reassembly</h3>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl mb-4 border border-purple-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="font-semibold text-lg text-purple-700">£20</span>
+                        </div>
+                        <div className="text-gray-600 text-sm">per item, to dismantle</div>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                          </svg>
+                          <span className="font-semibold text-lg text-purple-700">£30</span>
+                        </div>
+                        <div className="text-gray-600 text-sm">per item, to assemble</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {showAssemblyOptions ? (
+                    <div className="space-y-4 bg-gray-50/50 p-4 rounded-xl border border-gray-200">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                        <span className="font-medium text-gray-700">Items to dismantle: £20 per item</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setItemsToDismantle(Math.max(0, itemsToDismantle - 1));
+                            }}
+                            className="w-8 h-8 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                            </svg>
+                          </button>
+                          <span className="w-8 text-center font-semibold">{itemsToDismantle}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setItemsToDismantle(itemsToDismantle + 1);
+                            }}
+                            className="w-8 h-8 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                        <span className="font-medium text-gray-700">Items to assemble: £30 per item</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setItemsToAssemble(Math.max(0, itemsToAssemble - 1));
+                            }}
+                            className="w-8 h-8 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                            </svg>
+                          </button>
+                          <span className="w-8 text-center font-semibold">{itemsToAssemble}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setItemsToAssemble(itemsToAssemble + 1);
+                            }}
+                            className="w-8 h-8 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAssemblyOptions(false)}
+                          className="px-6 py-2 text-sm text-gray-600 font-medium border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleAddServices}
+                          className="px-6 py-2 text-sm text-white font-medium bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg"
+                        >
+                          Confirm Services
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowLearnMoreModal(true)}
+                        className="px-6 py-3 text-sm text-blue-600 font-medium border-2 border-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200"
+                      >
+                        Learn More
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowAssemblyOptions(true)}
+                        className="px-6 py-3 text-sm text-white font-medium bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 shadow-lg"
+                      >
+                        Add to Your Move
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Special Requirements */}
+                <div className="bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-6 mb-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <h3 className="text-lg font-semibold text-gray-800">Special Requirements or Notes</h3>
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      placeholder="E.g. Parking available opposite property, sofa comes apart, slightly awkward entrance etc. The more information, the better! Please note: you will receive tracking prior to arrival"
+                      value={additionalServices.specialRequirements}
+                      onChange={(e) => setAdditionalServices({
+                        ...additionalServices,
+                        specialRequirements: e.target.value
+                      })}
+                      className="w-full p-4 border-2 border-gray-200 rounded-xl h-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm resize-none"
+                    />
+                    <div className="absolute bottom-3 right-3 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/date')}
+                    className="flex items-center space-x-2 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                    disabled={isSubmitting}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                    </svg>
+                    <span>Back</span>
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl font-medium shadow-lg transition-all duration-200 min-w-[150px] justify-center ${
+                      isSubmitting 
+                        ? 'opacity-80 cursor-not-allowed' 
+                        : 'hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl transform hover:-translate-y-0.5'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Next Step</span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div className="lg:w-1/3">
+            <OrderSummary />
+          </div>
         </div>
       </div>
 
+
       {/* Time Slot Modal */}
-      {showTimeSlotModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Choose Time Slot</h3>
-                <button
-                  onClick={() => setShowTimeSlotModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+{showTimeSlotModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 max-w-lg w-full overflow-hidden">
+      {/* Header with gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-bold flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Choose Time Slot
+            </h3>
+            <p className="text-blue-100 text-sm">Select your preferred time</p>
+          </div>
+          <button
+            onClick={() => setShowTimeSlotModal(false)}
+            className="text-blue-200 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-              <div className="mb-6">
-                <div className="mb-4 text-center">
-                  <div className="text-lg font-medium text-gray-700">
-                    {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
-                  </div>
-                </div>
+      <div className="p-4">
+        <div className="mb-4">
+          <div className="mb-3 text-center">
+            <div className="text-base font-medium text-gray-800 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-2 rounded-lg border border-blue-100">
+              {selectedDate.date ? formatDisplayDate(selectedDate.date) : 'No date selected'}
+            </div>
+          </div>
 
-                <div className="mb-6">
-                  <div className="flex justify-between mb-4">
-                    <div className="font-medium">
-                      Collection: {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}
-                    </div>
-                    <div className="font-medium">
-                      Delivery: {deliveryTime}
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Start: {formatTimeWithMinutes(collectionTime.start)}</span>
-                        <span className="text-sm text-gray-600">End: {formatTimeWithMinutes(collectionTime.end)}</span>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center">
-                          <label className="mr-4 text-sm text-gray-500">Start time</label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="24"
-                            step="0.5"
-                            value={collectionTime.start}
-                            onChange={(e) => handleCollectionTimeChange(e, 'start')}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
-                          />
-                        </div>
-                        <div className="flex items-center">
-                          <label className="mr-4 text-sm text-gray-500">End time</label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="24"
-                            step="0.5"
-                            value={collectionTime.end}
-                            onChange={(e) => handleCollectionTimeChange(e, 'end')}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 ease-in-out"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <span>12am</span>
-                        <div className="w-8 h-[2px] bg-blue-500"></div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-[2px] bg-blue-500"></div>
-                        <span>12pm</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between">
-                  <button
-                    type="button"
-                    onClick={handleResetTimeSlots}
-                    className="text-blue-600 text-sm font-medium flex items-center"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Reset to default
-                  </button>
+          <div className="mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="text-xs font-medium text-green-800 mb-1">Collection</div>
+                <div className="text-green-700 font-semibold text-sm">
+                  {formatTimeWithMinutes(collectionTime.start)} - {formatTimeWithMinutes(collectionTime.end)}
                 </div>
               </div>
-
-              <div className="text-sm text-gray-600 mb-6">
-                Live driver tracking and your time slots will be sent the day before your move
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="text-xs font-medium text-red-800 mb-1">Delivery</div>
+                <div className="text-red-700 font-semibold text-sm">
+                  {deliveryTime}
+                </div>
               </div>
+            </div>
 
-              <div className="flex justify-end">
-                <button
-                  onClick={handleConfirmTimeSlot}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Confirm Time Slot
-                </button>
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-xs font-medium text-gray-700">Start: {formatTimeWithMinutes(collectionTime.start)}</span>
+                  <span className="text-xs font-medium text-gray-700">End: {formatTimeWithMinutes(collectionTime.end)}</span>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Start time</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="24"
+                      step="0.5"
+                      value={collectionTime.start}
+                      onChange={(e) => handleCollectionTimeChange(e, 'start')}
+                      className="w-full h-3 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(collectionTime.start / 24) * 100}%, #e5e7eb ${(collectionTime.start / 24) * 100}%, #e5e7eb 100%)`
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">End time</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="24"
+                      step="0.5"
+                      value={collectionTime.end}
+                      onChange={(e) => handleCollectionTimeChange(e, 'end')}
+                      className="w-full h-3 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(collectionTime.end / 24) * 100}%, #e5e7eb ${(collectionTime.end / 24) * 100}%, #e5e7eb 100%)`
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-600 px-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">12am</span>
+                  <div className="w-8 h-[3px] bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-[3px] bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
+                  <span className="font-medium">12pm</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Learn More Modal */}
-      {showLearnMoreModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Dismantle & Assemble</h3>
+          <div className="flex justify-center mb-4">
+            <button
+              type="button"
+              onClick={handleResetTimeSlots}
+              className="flex items-center space-x-2 px-3 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium group text-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 group-hover:rotate-180 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Reset to default</span>
+            </button>
+          </div>
+        </div>
+
+        {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-xs text-blue-800">
+              Live driver tracking and your time slots will be sent the day before your move
+            </div>
+          </div>
+        </div> */}
+
+        <div className="flex justify-end">
+          <button
+            onClick={handleConfirmTimeSlot}
+            className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
+          >
+            <span>Confirm Time Slot</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{showLearnMoreModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full border border-white/20 overflow-hidden">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
+              <div className="relative flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">Dismantle & Assemble</h3>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowLearnMoreModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white/30 transition-all duration-200"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
+            </div>
 
-              <div className="mb-6">
-                <p className="text-gray-700 text-center text-lg leading-relaxed">
-                  We can take apart your large items at pickup and reassemble back at delivery
+            <div className="p-4">
+              {/* Main description */}
+              <div className="text-center mb-4">
+                <p className="text-gray-700 leading-relaxed">
+                  We can take apart your large items at pickup and reassemble them back at delivery
                 </p>
               </div>
 
-              <div className="bg-gray-50 p-4 rounded-md mb-6">
+              {/* Service pricing */}
+              <div className="bg-gray-50 p-4 rounded-xl mb-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-700">Dismantling service</span>
@@ -646,10 +767,12 @@ const AdditionalServices = () => {
                 </div>
               </div>
 
-              <div className="text-sm text-gray-600 mb-6">
+              {/* Additional info */}
+              <div className="text-sm text-gray-600 mb-4">
                 Our professional movers will carefully dismantle your furniture at the pickup location and reassemble it at your new home, saving you time and ensuring everything is properly set up.
               </div>
 
+              {/* Action buttons */}
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowLearnMoreModal(false)}

@@ -40,8 +40,6 @@ const LocationForm = () => {
   //for extraStopmodal
   const [isExtraStopModalOpen, setIsExtraStopModalOpen] = useState(false);
 
-
-
   const navigate = useNavigate();
 
   // Check if a string contains a UK postal code pattern
@@ -55,9 +53,6 @@ const LocationForm = () => {
   const containsUK = (str) => {
     return str.trim().endsWith("UK") || str.trim().endsWith("UK,");
   };
-
-
-
 
   // Autocomplete for pickup
   useEffect(() => {
@@ -286,154 +281,219 @@ const LocationForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header title="Where are you moving from and to?" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 ">
+      {/* <Header title="Where are you moving from and to?" /> */}
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1">
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md overflow-hidden">
-              {/* Pickup Section */}
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold mb-4">Pickup Details</h2>
-
-                {/* Pickup Address */}
-                <div className="mb-4">
-                  <label className="block mb-1">Location</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={pickupQuery}
-                      onChange={handlePickupInputChange}
-                      onKeyDown={handlePickupKeyDown}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                      placeholder="Enter pickup address"
-                    />
-                    {pickupSuggestions.length > 0 && !pickupSelecting && (
-                      <ul className="absolute z-10 bg-white border mt-1 rounded-md w-full shadow max-h-60 overflow-y-auto">
-                        {pickupSuggestions.map((s, idx) => (
-                          <li
-                            key={idx}
-                            className={`px-4 py-2 cursor-pointer ${idx === focusedPickupIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-                            onClick={() => handlePickupSuggestionSelect(s)}
-                          >
-                            {s.description}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {pickupError && <p className="text-red-600 text-sm mt-1">{pickupError}</p>}
-                </div>
-
-                {/* Pickup Floor */}
-                <div className="mb-4">
-                  <label className="block mb-1">Floor</label>
-                  <select
-                    value={pickup.floor}
-                    onChange={(e) => setPickup({ ...pickup, floor: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  >
-                    <option>Ground floor</option>
-                    <option>1st floor</option>
-                    <option>2nd floor</option>
-                    <option>3rd floor</option>
-                    <option>4th floor</option>
-                    <option>5th floor +</option>
-                  </select>
-                </div>
-
-                {/* Pickup Lift */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="pickupLift"
-                    checked={pickup.liftAvailable}
-                    onChange={(e) => setPickup({ ...pickup, liftAvailable: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <label htmlFor="pickupLift" className="ml-2">Lift Available</label>
-                </div>
+            <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+                <h2 className="text-2xl font-bold flex items-center">
+                  <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Moving Locations
+                </h2>
+                <p className="text-blue-100 mt-1">Tell us where you're moving from and to</p>
               </div>
 
-              {/* Delivery Section */}
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold mb-4">Delivery Details</h2>
+              <div className="p-6">
+                {/* Two Column Layout for Pickup and Delivery */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Pickup Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <h3 className="text-lg font-semibold text-gray-800">Pickup Location</h3>
+                    </div>
 
-                {/* Delivery Address */}
-                <div className="mb-4">
-                  <label className="block mb-1">Location</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={deliveryQuery}
-                      onChange={handleDeliveryInputChange}
-                      onKeyDown={handleDeliveryKeyDown}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                      placeholder="Enter delivery address"
-                    />
-                    {deliverySuggestions.length > 0 && !deliverySelecting && (
-                      <ul className="absolute z-10 bg-white border mt-1 rounded-md w-full shadow max-h-60 overflow-y-auto">
-                        {deliverySuggestions.map((s, idx) => (
-                          <li
-                            key={idx}
-                            className={`px-4 py-2 cursor-pointer ${idx === focusedDeliveryIndex ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-                            onClick={() => handleDeliverySuggestionSelect(s)}
-                          >
-                            {s.description}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    {/* Pickup Address */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={pickupQuery}
+                          onChange={handlePickupInputChange}
+                          onKeyDown={handlePickupKeyDown}
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                          placeholder="Enter pickup address"
+                        />
+                        <div className="absolute right-3 top-3 text-gray-400">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                        </div>
+                        {pickupSuggestions.length > 0 && !pickupSelecting && (
+                          <ul className="absolute z-20 bg-white border-2 border-gray-200 mt-1 rounded-xl w-full shadow-lg max-h-60 overflow-y-auto">
+                            {pickupSuggestions.map((s, idx) => (
+                              <li
+                                key={idx}
+                                className={`px-4 py-3 cursor-pointer transition-colors ${
+                                  idx === focusedPickupIndex ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'
+                                }`}
+                                onClick={() => handlePickupSuggestionSelect(s)}
+                              >
+                                <div className="flex items-center">
+                                  <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  </svg>
+                                  <span className="text-sm">{s.description}</span>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      {pickupError && <p className="text-red-500 text-sm flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {pickupError}
+                      </p>}
+                    </div>
+
+                    {/* Pickup Floor and Lift in one row */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                        <select
+                          value={pickup.floor}
+                          onChange={(e) => setPickup({ ...pickup, floor: e.target.value })}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        >
+                          <option>Ground floor</option>
+                          <option>1st floor</option>
+                          <option>2nd floor</option>
+                          <option>3rd floor</option>
+                          <option>4th floor</option>
+                          <option>5th floor +</option>
+                        </select>
+                      </div>
+                      <div className="flex items-end">
+                        <label className="flex items-center space-x-2 cursor-pointer bg-gray-50 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors w-full justify-center">
+                          <input
+                            type="checkbox"
+                            checked={pickup.liftAvailable}
+                            onChange={(e) => setPickup({ ...pickup, liftAvailable: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="text-sm font-medium text-gray-700">Lift Available</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                  {deliveryError && <p className="text-red-600 text-sm mt-1">{deliveryError}</p>}
+
+                  {/* Delivery Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <h3 className="text-lg font-semibold text-gray-800">Delivery Location</h3>
+                    </div>
+
+                    {/* Delivery Address */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={deliveryQuery}
+                          onChange={handleDeliveryInputChange}
+                          onKeyDown={handleDeliveryKeyDown}
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                          placeholder="Enter delivery address"
+                        />
+                        <div className="absolute right-3 top-3 text-gray-400">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                        </div>
+                        {deliverySuggestions.length > 0 && !deliverySelecting && (
+                          <ul className="absolute z-20 bg-white border-2 border-gray-200 mt-1 rounded-xl w-full shadow-lg max-h-60 overflow-y-auto">
+                            {deliverySuggestions.map((s, idx) => (
+                              <li
+                                key={idx}
+                                className={`px-4 py-3 cursor-pointer transition-colors ${
+                                  idx === focusedDeliveryIndex ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'
+                                }`}
+                                onClick={() => handleDeliverySuggestionSelect(s)}
+                              >
+                                <div className="flex items-center">
+                                  <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  </svg>
+                                  <span className="text-sm">{s.description}</span>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      {deliveryError && <p className="text-red-500 text-sm flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {deliveryError}
+                      </p>}
+                    </div>
+
+                    {/* Delivery Floor and Lift in one row */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                        <select
+                          value={delivery.floor}
+                          onChange={(e) => setDelivery({ ...delivery, floor: e.target.value })}
+                          className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        >
+                          <option>Ground floor</option>
+                          <option>1st floor</option>
+                          <option>2nd floor</option>
+                          <option>3rd floor</option>
+                          <option>4th floor</option>
+                          <option>5th floor +</option>
+                        </select>
+                      </div>
+                      <div className="flex items-end">
+                        <label className="flex items-center space-x-2 cursor-pointer bg-gray-50 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors w-full justify-center">
+                          <input
+                            type="checkbox"
+                            checked={delivery.liftAvailable}
+                            onChange={(e) => setDelivery({ ...delivery, liftAvailable: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="text-sm font-medium text-gray-700">Lift Available</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Delivery Floor */}
-                <div className="mb-4">
-                  <label className="block mb-1">Floor</label>
-                  <select
-                    value={delivery.floor}
-                    onChange={(e) => setDelivery({ ...delivery, floor: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => setIsExtraStopModalOpen(true)}
+                    className="flex items-center space-x-2 px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200 font-medium group"
                   >
-                    <option>Ground floor</option>
-                    <option>1st floor</option>
-                    <option>2nd floor</option>
-                    <option>3rd floor</option>
-                    <option>4th floor</option>
-                    <option>5th floor +</option>
-                  </select>
+                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span>Add Extra Stop</span>
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    <span>Continue</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
                 </div>
-
-                {/* Delivery Lift */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="deliveryLift"
-                    checked={delivery.liftAvailable}
-                    onChange={(e) => setDelivery({ ...delivery, liftAvailable: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <label htmlFor="deliveryLift" className="ml-2">Lift Available</label>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="p-6 flex justify-between items-center">
-                <button
-                  type="button"
-                  onClick={() => setIsExtraStopModalOpen(true)}
-                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50"
-                >
-                  Add an extra stop
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Next Step
-                </button>
               </div>
             </form>
           </div>
@@ -441,6 +501,7 @@ const LocationForm = () => {
           <OrderSummary />
         </div>
       </div>
+      
       <ExtraStopModal
         isOpen={isExtraStopModalOpen}
         onClose={() => setIsExtraStopModalOpen(false)}
