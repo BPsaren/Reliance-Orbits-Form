@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBooking } from '../context/BookingContext';
-import Navbar from './NavBar';
+
 
 const Header = ({ title }) => {
   const { quoteRef } = useBooking();
