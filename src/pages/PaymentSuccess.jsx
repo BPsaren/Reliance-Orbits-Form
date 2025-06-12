@@ -28,7 +28,8 @@ const PaymentSuccess = () => {
         itemsToAssemble, itemsToDismantle,
         setItemsToAssemble, setItemsToDismantle,
         itemsList, setItemsList,
-        quantities, setQuantities
+        quantities, setQuantities,
+        setQuoteDetails,quoteDetails
     } = useBooking();
 
     // let called = false;
@@ -77,6 +78,11 @@ const PaymentSuccess = () => {
                     distance: order.distance || '',
                     duration: order.duration || '',
                     route: order.route || 'default route'
+                });
+
+                setQuoteDetails(
+                    {...quoteDetails,
+                    email:order.email
                 });
 
                 const pickupData = {
