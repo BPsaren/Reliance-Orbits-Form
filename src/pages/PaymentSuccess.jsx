@@ -7,7 +7,7 @@ const PaymentSuccess = () => {
 
     const [searchParams] = useSearchParams();   
     const sessionId = searchParams.get('session_id');
-
+    window.alert(sessionId);
     // const [local, setLocal] = useState('');
 
     const navigate = useNavigate();
@@ -204,10 +204,10 @@ const PaymentSuccess = () => {
                 // Update the booking reference with the actual value from the server
                 setBookingRef(finalBookingRef);
 
-                navigate('/confirmation');
+                // navigate('/confirmation');
             } catch (err) {
                 console.error('Failed to fetch Stripe session or send booking:', err);
-                navigate('/payment-failed');
+                // navigate('/payment-failed');
             }
         };
 

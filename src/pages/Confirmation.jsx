@@ -4,11 +4,11 @@ import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import RouteMap from '../components/RouteMap';
 
-const QuoteConfirmation = () => {
+const Confirmation = () => {
   const navigate = useNavigate();
   const {
     quoteRef,
-    bookingRef,
+    // bookingRef,
     quoteDetails,
     pickup,
     delivery,
@@ -72,14 +72,14 @@ const QuoteConfirmation = () => {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 text-center mb-8 shadow">
           <div className="bg-green-500 text-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-5 text-3xl font-bold shadow-lg">✓</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-3">Thank you for your booking!</h2>
-          <p className="text-gray-700">We have sent a confirmation email to <span className="font-medium">{quoteDetails?.email || "your email"}</span></p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-3">Thank you for your Quotation!</h2>
+          <p className="text-gray-700">We have sent a Quote confirmation email to <span className="font-medium">{quoteDetails?.email || "your email"}</span></p>
         </div>
 
         <div className="bg-white rounded-xl shadow overflow-hidden mb-8">
           <div className="border-b border-gray-200 p-6 bg-blue-50">
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Your Booking Reference</h3>
-            <div className="text-3xl font-bold text-blue-600 tracking-wide">{bookingRef || "Processing..."}</div>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Your Quotation Reference</h3>
+            <div className="text-3xl font-bold text-blue-600 tracking-wide">{quoteRef || "Processing..."}</div>
           </div>
 
           <div className="p-6 border-b border-gray-200">
@@ -415,4 +415,4 @@ const QuoteConfirmation = () => {
   );
 };
 
-export default QuoteConfirmation;
+export default Confirmation;

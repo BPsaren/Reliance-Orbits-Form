@@ -41,6 +41,8 @@ const UK_CITIES = [
 const BookingDetails = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [emailError, setEmailError] = useState(null);
   const [submitError, setSubmitError] = useState(null);
   const [phoneErrors, setPhoneErrors] = useState({
     customer: '',
@@ -49,6 +51,7 @@ const BookingDetails = () => {
   });
 
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [isBookingCreating, setIsBookingCreating] = useState(false);
 
   // State for auto-fetch functionality
   const [isPickupFetching, setIsPickupFetching] = useState(false);
@@ -295,22 +298,44 @@ const BookingDetails = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleQuoteSubmit = async () => {
+    setIsSuccess(true);
+    setSubmitError(null);
+    setEmailError(null);
 
+    try {
+      if (!quoteRef) {
+        setSubmitError('No quotation reference found. Please try booking again.');
+        return;
+      }
+
+      const quoteEmailResponse = await axios.get(`https://orbit-0pxd.onrender.com/quote/mail/${quoteRef}`);
+      console.log("Quote email response:", quoteEmailResponse.data);
+
+      // setShowBookingModal(false);
+      navigate('/quote-confirmation');
+
+    } catch (emailError) {
+      console.error('Error sending quote email:', emailError);
+      setEmailError('Failed to send quote email. Please try again.');
+    } finally {
+      setIsSuccess(false);
+    }
+  };
+
+  const handleBookingCreation = async () => {
     if (!validateAllPhones()) {
       setSubmitError('Please correct the phone number errors');
-      return;
+      return false;
     }
-
+    setIsBookingCreating(true);
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
       const validatedStops = validateExtraStops(extraStops);
-      const validatedItems = validateItems(items);
-      // window.localStorage.setItem
-      const metaDataBody = {
+
+      const quoteData = {
         username: customerDetails.name || 'NA',
         email: customerDetails.email || 'NA',
         phoneNumber: customerDetails.phone || 'NA',
@@ -321,7 +346,6 @@ const BookingDetails = () => {
         pickupDate: selectedDate.date || 'NA',
         pickupTime: selectedDate.pickupTime || '08:00:00',
         pickupAddress: {
-          flatNo: pickup.flatNo,
           postcode: pickup.postcode,
           addressLine1: pickup.addressLine1,
           addressLine2: pickup.addressLine2,
@@ -333,7 +357,6 @@ const BookingDetails = () => {
         dropDate: selectedDate.date || 'NA',
         dropTime: selectedDate.dropTime || '18:00:00',
         dropAddress: {
-          flatNo: delivery.flatNo,
           postcode: delivery.postcode,
           addressLine1: delivery.addressLine1,
           addressLine2: delivery.addressLine2,
@@ -346,7 +369,7 @@ const BookingDetails = () => {
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle || 0,
         itemsToAssemble: itemsToAssemble || 0,
-        ExtraStopsArray: validatedStops,
+        stoppage: validatedStops,
         pickupLocation: {
           location: pickup.location || "N/A",
           floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
@@ -367,20 +390,49 @@ const BookingDetails = () => {
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
           piano: piano.type,
-          specialRequirements: additionalServices.specialRequirements,
+          specialRequirements: additionalServices.specialRequirements
         },
-        quotationRef: quoteRef || 'NA',
-        itemsArray: items,
       };
 
-      console.log("Metadata Data Body being sent:", JSON.stringify(metaDataBody, null, 2));
-      saveData();
+      console.log("Booking Data being sent:", JSON.stringify(quoteData, null, 2));
 
+      const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote/create', quoteData);
+      const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
+      console.log("quotation reference: ", quotationRef);
 
+      if (!quotationRef) {
+        throw new Error("Quotation reference not received from server");
+      }
 
+      setQuoteRef(quotationRef);
+      return true;
 
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      if (error.response) {
+        setSubmitError(`Server error: ${error.response.data?.message || error.response.statusText || 'Unknown server error'}`);
+      } else if (error.request) {
+        setSubmitError('Network error: No response received from server. Please check your internet connection and try again.');
+      } else {
+        setSubmitError(`Error: ${error.message || 'An unknown error occurred'}`);
+      }
+      return false;
+    } finally {
+      setIsSubmitting(false);
+      setIsBookingCreating(false);
+    }
+  };
 
-      const sessionRes = await axios.post('https://payment-gateway-reliance.onrender.com/create-checkout-session', metaDataBody);
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const sessionRes = await axios.post('https://orbit-0pxd.onrender.com/create-checkout-session', {
+        quotationRef: quoteRef || 'NA',
+      });
 
       const stripe = await stripePromise;
       await stripe.redirectToCheckout({ sessionId: sessionRes.data.sessionId });
@@ -393,6 +445,7 @@ const BookingDetails = () => {
 
     } finally {
       setIsSubmitting(false);
+      // setShowBookingModal(false);
     }
   };
 
@@ -799,18 +852,32 @@ const BookingDetails = () => {
                   {/* Book Now Button */}
                   <button
                     type="button"
-                    onClick={() => setShowBookingModal(true)}
-                    className="flex items-center space-x-2 px-8 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl transform hover:-translate-y-0.5 text-white"
-                    disabled={isSubmitting}
+                    onClick={async () => {
+                      const success = await handleBookingCreation();
+                      if (success) {
+                        setShowBookingModal(true);
+                      }
+                    }}
+                    className="flex items-center space-x-2 px-8 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl transform hover:-translate-y-0.5 text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    disabled={isBookingCreating || isSubmitting}
                   >
-                    <span>Book Now</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v14a2 2 0 002 2z" />
-                    </svg>
+                    {isBookingCreating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Book Now</span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v14a2 2 0 002 2z" />
+                        </svg>
+                      </>
+                    )}
                   </button>
                 </div>
 
-                
+
 
                 {/* Privacy Notice */}
                 <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
@@ -827,86 +894,106 @@ const BookingDetails = () => {
         </div>
       </div>
       {/* Booking Modal */}
-                {showBookingModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-                      {/* Modal Header */}
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-xl font-bold flex items-center">
-                            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Complete Your Booking
-                          </h3>
-                          <button
-                            onClick={() => setShowBookingModal(false)}
-                            className="text-white hover:text-gray-200 transition-colors"
-                          >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                        <p className="text-blue-100 mt-2">Choose how you'd like to proceed</p>
-                      </div>
+      {showBookingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold flex items-center">
+                  <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Complete Your Booking
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowBookingModal(false);
+                    setEmailError(null); // ADD THIS LINE
+                  }}
+                  className="text-white hover:text-gray-200 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-blue-100 mt-2">Choose how you'd like to proceed</p>
+            </div>
 
-                      {/* Modal Content */}
-                      <div className="p-6 space-y-4">
-                        <div className="text-center mb-6">
-                          <div className="text-2xl font-bold text-gray-800 mb-2">£{totalPrice}</div>
-                          <p className="text-gray-600">Total booking amount</p>
-                        </div>
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              <div className="text-center mb-6">
+                <div className="text-2xl font-bold text-gray-800 mb-2">£{totalPrice}</div>
+                <p className="text-gray-600">Total booking amount</p>
+              </div>
 
-                        {/* Send Quotation Button */}
-                        <button
-                          type="button"
-                          className="w-full flex items-center justify-center space-x-2 px-6 py-4 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200 font-medium"
-                          onClick={() => {
-                            // Add send quotation functionality here later
-                            console.log('Send quotation clicked');
-                          }}
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v14a2 2 0 002 2z" />
-                          </svg>
-                          <span>Send Quotation</span>
-                        </button>
+              {emailError && (
+                <div className="p-3 bg-yellow-50 text-yellow-700 rounded-xl border border-yellow-200 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {emailError}
+                </div>
+              )}
 
-                        {/* Pay Now Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            
-                            handleSubmit(e);
-                            // setShowBookingModal(false);
-                          }}
-                          className={`w-full flex items-center justify-center space-x-2 px-6 py-4 rounded-xl font-medium shadow-lg transition-all duration-200 ${isSubmitting
-                            ? 'bg-blue-400 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl'
-                            } text-white`}
-                          disabled={isSubmitting}
-                        >
-                          <span>{isSubmitting ? 'Processing Payment...' : 'Pay Now'}</span>
-                          {!isSubmitting && (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                          )}
-                        </button>
+              {/* Send Quotation Button */}
+              <button
+                type="button"
+                className={`w-full flex items-center justify-center space-x-2 px-6 py-4 rounded-xl font-medium shadow-lg transition-all duration-200 ${isSuccess
+                  ? 'bg-blue-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl'
+                  } text-white`}
+                disabled={isSuccess}
+                onClick={(e) => {
+                  // Add send quotation functionality here later
+                  console.log('Send quotation clicked');
+                  handleQuoteSubmit(e);
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v14a2 2 0 002 2z" />
+                </svg>
+                <span>{isSuccess ? 'Sending Quotation...' : 'Send Quote'}</span>
+              </button>
 
-                        {/* Cancel Button */}
-                        <button
-                          type="button"
-                          onClick={() => setShowBookingModal(false)}
-                          className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+              {/* Pay Now Button */}
+              <button
+                type="button"
+                onClick={(e) => {
+
+                  handlePaymentSubmit(e);
+                  // setShowBookingModal(false);
+                }}
+                className={`w-full flex items-center justify-center space-x-2 px-6 py-4 rounded-xl font-medium shadow-lg transition-all duration-200 ${isSubmitting
+                  ? 'bg-blue-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:shadow-xl'
+                  } text-white`}
+                disabled={isSubmitting}
+              >
+                <span>{isSubmitting ? 'Processing Payment...' : 'Pay Now'}</span>
+                {!isSubmitting && (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
                 )}
+              </button>
+
+              {/* Cancel Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBookingModal(false);
+                  setEmailError(null); // ADD THIS LINE
+                }}
+                className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -144,105 +144,105 @@ const AdditionalServices = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
-    setIsSubmitting(true); // Start loading animation
+    // setError(''); // Clear any previous errors
+    // setIsSubmitting(true); // Start loading animation
 
-    try {
+    // try {
 
-      const validatedStops = validateExtraStops(extraStops);
+    //   const validatedStops = validateExtraStops(extraStops);
 
-      // Create quoteData - no need to convert times again
-      const quoteData = {
-        username: customerDetails.name || 'NA',
-        email: quoteDetails.email || 'NA',
-        phoneNumber: customerDetails.phone || 'NA',
-        price: totalPrice || 0,
-        distance: parseInt(journey.distance) || 0,
-        route: "default route",
-        duration: journey.duration || "N/A",
-        pickupDate: selectedDate.date || 'NA',
-        pickupTime: selectedDate.pickupTime || '08:00:00', // Already in correct format
-        pickupAddress: {
-          postcode: pickup.postcode,
-          addressLine1: pickup.addressLine1,
-          addressLine2: pickup.addressLine2,
-          city: pickup.city,
-          country: pickup.country,
-          contactName: pickup.contactName,
-          contactPhone: pickup.contactPhone,
-        },
-        dropDate: selectedDate.date || 'NA',
-        dropTime: selectedDate.dropTime || '18:00:00', // Already in correct format
-        dropAddress: {
-          postcode: delivery.postcode,
-          addressLine1: delivery.addressLine1,
-          addressLine2: delivery.addressLine2,
-          city: delivery.city,
-          country: delivery.country,
-          contactName: delivery.contactName,
-          contactPhone: delivery.contactPhone,
-        },
-        vanType: van.type || "N/A",
-        worker: selectedDate.numberOfMovers || 1,
-        itemsToDismantle: itemsToDismantle || 0,
-        itemsToAssemble: itemsToAssemble || 0,
-        stoppage: validatedStops,
-        pickupLocation: {
-          location: pickup.location || "N/A",
-          floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
-          lift: pickup.liftAvailable,
-          propertyType: pickup.propertyType || "standard"
-        },
-        dropLocation: {
-          location: delivery.location || "N/A",
-          floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
-          lift: delivery.liftAvailable,
-          propertyType: delivery.propertyType || "standard"
-        },
-        details: {
-          items: {
-            name: items.map(item => item.name) || [],
-            quantity: items.map(item => item.quantity) || [],
-          },
-          isBusinessCustomer: customerDetails.isBusinessCustomer,
-          motorBike: motorBike.type,
-          piano: piano.type,
-          specialRequirements: additionalServices.specialRequirements
-        },
-      };
+    //   // Create quoteData - no need to convert times again
+    //   const quoteData = {
+    //     username: customerDetails.name || 'NA',
+    //     email: quoteDetails.email || 'NA',
+    //     phoneNumber: customerDetails.phone || 'NA',
+    //     price: totalPrice || 0,
+    //     distance: parseInt(journey.distance) || 0,
+    //     route: "default route",
+    //     duration: journey.duration || "N/A",
+    //     pickupDate: selectedDate.date || 'NA',
+    //     pickupTime: selectedDate.pickupTime || '08:00:00', // Already in correct format
+    //     pickupAddress: {
+    //       postcode: pickup.postcode,
+    //       addressLine1: pickup.addressLine1,
+    //       addressLine2: pickup.addressLine2,
+    //       city: pickup.city,
+    //       country: pickup.country,
+    //       contactName: pickup.contactName,
+    //       contactPhone: pickup.contactPhone,
+    //     },
+    //     dropDate: selectedDate.date || 'NA',
+    //     dropTime: selectedDate.dropTime || '18:00:00', // Already in correct format
+    //     dropAddress: {
+    //       postcode: delivery.postcode,
+    //       addressLine1: delivery.addressLine1,
+    //       addressLine2: delivery.addressLine2,
+    //       city: delivery.city,
+    //       country: delivery.country,
+    //       contactName: delivery.contactName,
+    //       contactPhone: delivery.contactPhone,
+    //     },
+    //     vanType: van.type || "N/A",
+    //     worker: selectedDate.numberOfMovers || 1,
+    //     itemsToDismantle: itemsToDismantle || 0,
+    //     itemsToAssemble: itemsToAssemble || 0,
+    //     stoppage: validatedStops,
+    //     pickupLocation: {
+    //       location: pickup.location || "N/A",
+    //       floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+    //       lift: pickup.liftAvailable,
+    //       propertyType: pickup.propertyType || "standard"
+    //     },
+    //     dropLocation: {
+    //       location: delivery.location || "N/A",
+    //       floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+    //       lift: delivery.liftAvailable,
+    //       propertyType: delivery.propertyType || "standard"
+    //     },
+    //     details: {
+    //       items: {
+    //         name: items.map(item => item.name) || [],
+    //         quantity: items.map(item => item.quantity) || [],
+    //       },
+    //       isBusinessCustomer: customerDetails.isBusinessCustomer,
+    //       motorBike: motorBike.type,
+    //       piano: piano.type,
+    //       specialRequirements: additionalServices.specialRequirements
+    //     },
+    //   };
 
-      console.log("Quotation Data being sent:", JSON.stringify(quoteData, null, 2));
+    //   console.log("Quotation Data being sent:", JSON.stringify(quoteData, null, 2));
 
-      // 🔁 First: POST to /quote and get quotationRef
-      const quoteResponse = await axios.post('https://api.reliancemove.com/quote', quoteData);
-      const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
-      console.log("quotation reference: ", quotationRef);
+    //   // 🔁 First: POST to /quote and get quotationRef
+    //   const quoteResponse = await axios.post('https://api.reliancemove.com/quote', quoteData);
+    //   const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
+    //   console.log("quotation reference: ", quotationRef);
 
-      if (!quotationRef) {
-        throw new Error("Quotation reference not received from server");
-      }
+    //   if (!quotationRef) {
+    //     throw new Error("Quotation reference not received from server");
+    //   }
 
-      setQuoteRef(quotationRef);
+    //   setQuoteRef(quotationRef);
       navigate('/booking-details');
-    } catch (error) {
-      console.error('Error submitting booking:', error);
+    // } catch (error) {
+    //   console.error('Error submitting booking:', error);
 
-      // Set appropriate error message based on the error
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        setError(`Server error: ${error.response.data?.message || error.response.statusText || 'Unknown server error'}`);
-        console.error('Error response data:', error.response.data);
-      } else if (error.request) {
-        // The request was made but no response was received
-        setError('Network error: No response received from server. Please check your internet connection and try again.');
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        setError(`Error: ${error.message || 'An unknown error occurred'}`);
-      }
-    } finally {
-      setIsSubmitting(false); // Stop loading animation regardless of outcome
-    }
+    //   // Set appropriate error message based on the error
+    //   if (error.response) {
+    //     // The request was made and the server responded with a status code
+    //     // that falls out of the range of 2xx
+    //     setError(`Server error: ${error.response.data?.message || error.response.statusText || 'Unknown server error'}`);
+    //     console.error('Error response data:', error.response.data);
+    //   } else if (error.request) {
+    //     // The request was made but no response was received
+    //     setError('Network error: No response received from server. Please check your internet connection and try again.');
+    //   } else {
+    //     // Something happened in setting up the request that triggered an Error
+    //     setError(`Error: ${error.message || 'An unknown error occurred'}`);
+    //   }
+    // } finally {
+    //   setIsSubmitting(false); // Stop loading animation regardless of outcome
+    // }
   };
 
   const handleAddServices = () => {

@@ -25,6 +25,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 
 import Footer from './components/Footer';
 import Nav from './Nav';
+import Confirmation from './pages/Confirmation';
 
 
 
@@ -47,6 +48,7 @@ function App() {
             <Route path="/additional-services" element={<AdditionalServices />} />
             <Route path="/booking-details" element={<BookingDetails />} />
             <Route path="/confirmation" element={<QuoteConfirmation />} />
+            <Route path="/quote-confirmation" element={<Confirmation />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/other-removals" element={<OtherRemovals />} />
