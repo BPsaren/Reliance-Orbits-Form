@@ -64,7 +64,7 @@ const PaymentSuccess = () => {
 
                 // Set individual fields from metadata
                 setQuoteRef(order.quotationRef);
-
+                setBookingRef(order.bookingRef);
                 const customerData = {
                     name: order.username || '',
                     email: order.email || '',
