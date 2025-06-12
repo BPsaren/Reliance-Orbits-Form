@@ -57,6 +57,8 @@ export const BookingProvider = ({ children }) => {
     const dateString = `${day} ${month}`;
 
     const [items, setItems] = useState([]);
+    const [itemsList, setItemsList] = useState([]);
+    const [quantities,setQuantities] = useState([]);
     const [selectedDate, setSelectedDate] = useState({
         date: '1 Apr',
         pickupTime: '08:00:00',
@@ -185,7 +187,10 @@ export const BookingProvider = ({ children }) => {
             addExtraStop,
             updateExtraStop,
             removeExtraStop,
-            quoteDetails, setQuoteDetails
+            quoteDetails, setQuoteDetails,
+            itemsList, setItemsList,
+            quantities,setQuantities
+
         }}>
             {children}
         </BookingContext.Provider>

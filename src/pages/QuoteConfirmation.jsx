@@ -21,7 +21,9 @@ const QuoteConfirmation = () => {
     totalPrice,
     van,
     itemsToAssemble,
-    itemsToDismantle
+    itemsToDismantle,
+    itemsList,
+    quantities
   } = useBooking();
 
 
@@ -217,14 +219,14 @@ const QuoteConfirmation = () => {
 
             {/* Items Section */}
             <h4 className="font-medium text-gray-700 mb-3">Items Summary</h4>
-            {items && items.length > 0 ? (
+            {itemsList && itemsList.length > 0 ? (
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="divide-y divide-gray-100">
-                  {items.map((item, index) => (
+                  {itemsList.map((item, index) => (
                     <div key={index} className="flex justify-between items-center p-3 hover:bg-gray-50">
-                      <div className="font-medium text-gray-700">{item.name || `Item ${index + 1}`}</div>
+                      <div className="font-medium text-gray-700">{item || `Item ${index + 1}`}</div>
                       <div className="bg-blue-100 px-3 py-1 rounded-full text-blue-700 text-sm font-medium">
-                        ×{item.quantity || 1}
+                        ×{quantities[index] || 1}
                       </div>
                     </div>
                   ))}

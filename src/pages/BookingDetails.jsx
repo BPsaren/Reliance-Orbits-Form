@@ -365,7 +365,7 @@ const BookingDetails = () => {
           contactName: delivery.contactName,
           contactPhone: delivery.contactPhone,
         },
-        vanType: van.type || "N/A",
+        vanType: van.type || "Small",
         worker: selectedDate.numberOfMovers || 1,
         itemsToDismantle: itemsToDismantle || 0,
         itemsToAssemble: itemsToAssemble || 0,
@@ -390,7 +390,9 @@ const BookingDetails = () => {
           isBusinessCustomer: customerDetails.isBusinessCustomer,
           motorBike: motorBike.type,
           piano: piano.type,
-          specialRequirements: additionalServices.specialRequirements
+          specialRequirements: additionalServices.specialRequirements,
+          pickupFlatNo:pickup.flatNo,
+          dropFlatno:delivery.flatNo
         },
       };
 
