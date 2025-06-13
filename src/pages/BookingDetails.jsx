@@ -346,7 +346,7 @@ const BookingDetails = () => {
 
       const quoteData = {
         username: customerDetails.name || 'NA',
-        email: customerDetails.email || 'NA',
+        email: quoteDetails.email || 'NA',
         phoneNumber: customerDetails.phone || 'NA',
         price: totalPrice || 0,
         distance: parseInt(journey.distance) || 0,
