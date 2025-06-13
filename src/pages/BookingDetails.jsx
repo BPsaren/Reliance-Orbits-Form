@@ -592,7 +592,9 @@ const BookingDetails = () => {
                         placeholder="Contact Name at Pickup"
                         className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                         value={pickup.contactName || ''}
-                        onChange={(e) => handlePickupChange('contactName', e.target.value)}
+                        onChange={(e) => {
+                          setCustomerDetails({...customerDetails, name:e.target.value});
+                          handlePickupChange('contactName', e.target.value)}}
                         required
                       />
                       <div className="relative">
@@ -601,7 +603,9 @@ const BookingDetails = () => {
                           placeholder="Pickup Contact Number (UK mobile)"
                           className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/50 backdrop-blur-sm ${phoneErrors.pickup ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
                           value={pickup.contactPhone || ''}
-                          onChange={(e) => handlePickupChange('contactPhone', e.target.value)}
+                          onChange={(e) => {
+                            setCustomerDetails({...customerDetails, phone:e.target.value});
+                            handlePickupChange('contactPhone', e.target.value)}}
                           required
                         />
                         {phoneErrors.pickup && (
@@ -737,11 +741,11 @@ const BookingDetails = () => {
                       <input
                         type="text"
                         id="name"
-                        value={pickup.name}
+                        value={customerDetails.name}
                         onChange={(e) => {
                           const newName = e.target.value;
-                          setPickup({ ...pickup, contactName: newName });
-                          setCustomerDetails({ ...customerDetails, phone: newPhone });
+                          // setPickup({ ...pickup, contactName: newName });
+                          setCustomerDetails({ ...customerDetails, name: newName });
                         }}
                         className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/70"
                         placeholder="Enter your full name"
@@ -772,10 +776,10 @@ const BookingDetails = () => {
                       <input
                         type="tel"
                         id="phone"
-                        value={pickup.contactPhone}
+                        value={customerDetails.phone}
                         onChange={(e) => {
                           const newPhone = e.target.value;
-                          setPickup({ ...pickup, contactPhone: newPhone });
+                          // setPickup({ ...pickup, contactPhone: newPhone });
                           setCustomerDetails({ ...customerDetails, phone: newPhone });
                         }}
                         className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/70 ${phoneErrors.customer ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
