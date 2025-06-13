@@ -80,6 +80,7 @@ const BookingDetails = () => {
     itemsToDismantle,
     bookingRef, setBookingRef,
     additionalServices,
+    quoteDetails, setQuoteDetails
   } = useBooking();
 
   // Validate UK mobile number
@@ -323,11 +324,19 @@ const BookingDetails = () => {
     }
   };
 
+
+
   const handleBookingCreation = async () => {
     if (!validateAllPhones()) {
       setSubmitError('Please correct the phone number errors');
       return false;
     }
+
+    if (quoteRef) {
+      console.log('Quote reference already exists:', quoteRef);
+      return true;
+    }
+
     setIsBookingCreating(true);
     setIsSubmitting(true);
     setSubmitError(null);
@@ -391,12 +400,14 @@ const BookingDetails = () => {
           motorBike: motorBike.type,
           piano: piano.type,
           specialRequirements: additionalServices.specialRequirements,
-          pickupFlatNo:pickup.flatNo,
-          dropFlatno:delivery.flatNo
+          pickupFlatNo: pickup.flatNo,
+          dropFlatno: delivery.flatNo
         },
       };
 
       console.log("Booking Data being sent:", JSON.stringify(quoteData, null, 2));
+
+
 
       const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote/create', quoteData);
       const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
@@ -407,6 +418,8 @@ const BookingDetails = () => {
       }
 
       setQuoteRef(quotationRef);
+      console.log("quotation reference (of context): ", quoteRef);
+
       return true;
 
     } catch (error) {
@@ -431,7 +444,18 @@ const BookingDetails = () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    if (!quoteRef) {
+      setSubmitError('No quotation reference found. Please try booking again.');
+      return;
+    }
+
+
+
     try {
+      const quoteEmailResponse = await axios.get(`https://orbit-0pxd.onrender.com/quote/mail/${quoteRef}`);
+      console.log("Quote email response:", quoteEmailResponse.data);
+
+
       const sessionRes = await axios.post('https://orbit-0pxd.onrender.com/create-checkout-session', {
         quotationRef: quoteRef || 'NA',
       });
@@ -713,8 +737,12 @@ const BookingDetails = () => {
                       <input
                         type="text"
                         id="name"
-                        value={customerDetails.name}
-                        onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
+                        value={pickup.name}
+                        onChange={(e) => {
+                          const newName = e.target.value;
+                          setPickup({ ...pickup, contactName: newName });
+                          setCustomerDetails({ ...customerDetails, phone: newPhone });
+                        }}
                         className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/70"
                         placeholder="Enter your full name"
                         required
@@ -726,8 +754,12 @@ const BookingDetails = () => {
                       <input
                         type="email"
                         id="email"
-                        value={customerDetails.email}
-                        onChange={(e) => setCustomerDetails({ ...customerDetails, email: e.target.value })}
+                        value={quoteDetails.email}
+                        onChange={(e) => {
+                          const newEmail = e.target.value;
+                          setQuoteDetails({ ...quoteDetails, email: newEmail });
+                          setCustomerDetails({ ...customerDetails, email: newEmail });
+                        }}
                         className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/70"
                         placeholder="Enter your email address"
                         required
@@ -740,8 +772,12 @@ const BookingDetails = () => {
                       <input
                         type="tel"
                         id="phone"
-                        value={customerDetails.phone}
-                        onChange={(e) => setCustomerDetails({ ...customerDetails, phone: e.target.value })}
+                        value={pickup.contactPhone}
+                        onChange={(e) => {
+                          const newPhone = e.target.value;
+                          setPickup({ ...pickup, contactPhone: newPhone });
+                          setCustomerDetails({ ...customerDetails, phone: newPhone });
+                        }}
                         className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/70 ${phoneErrors.customer ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
                         placeholder="Enter your UK mobile number"
                         required

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, Mail, Phone, Send, Facebook, Instagram, Linkedin, Twitter, Dribbble } from 'lucide-react';
+import logo from '../assets/RELIANCWHIE.png';
 
 export default function RelianceFooter() {
   const [email, setEmail] = useState('');
@@ -18,13 +19,14 @@ export default function RelianceFooter() {
           {/* Company Info Section */}
           <div className="space-y-6">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
+            <img src={logo} height='200px' width='200px'/>
+            {/* <div className="flex items-center space-x-2">
               <span className="text-2xl font-bold text-white">RELIANCE</span>
               <div className="relative">
                 <div className="w-8 h-6 bg-red-600 rounded-sm transform rotate-12"></div>
                 <span className="absolute -bottom-1 left-0 text-xs text-white font-semibold">MOVE</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Address */}
             <div className="flex items-start space-x-3">
