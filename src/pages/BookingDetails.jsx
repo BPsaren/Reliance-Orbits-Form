@@ -332,10 +332,10 @@ const BookingDetails = () => {
       return false;
     }
 
-    if (quoteRef) {
-      console.log('Quote reference already exists:', quoteRef);
-      return true;
-    }
+    // if (quoteRef) {
+    //   console.log('Quote reference already exists:', quoteRef);
+    //   return true;
+    // }
 
     setIsBookingCreating(true);
     setIsSubmitting(true);
@@ -344,83 +344,164 @@ const BookingDetails = () => {
     try {
       const validatedStops = validateExtraStops(extraStops);
 
-      const quoteData = {
-        username: customerDetails.name || 'NA',
-        email: quoteDetails.email || 'NA',
-        phoneNumber: customerDetails.phone || 'NA',
-        price: totalPrice || 0,
-        distance: parseInt(journey.distance) || 0,
-        route: "default route",
-        duration: journey.duration || "N/A",
-        pickupDate: selectedDate.date || 'NA',
-        pickupTime: selectedDate.pickupTime || '08:00:00',
-        pickupAddress: {
-          postcode: pickup.postcode,
-          addressLine1: pickup.addressLine1,
-          addressLine2: pickup.addressLine2,
-          city: pickup.city,
-          country: pickup.country,
-          contactName: pickup.contactName,
-          contactPhone: pickup.contactPhone,
-        },
-        dropDate: selectedDate.date || 'NA',
-        dropTime: selectedDate.dropTime || '18:00:00',
-        dropAddress: {
-          postcode: delivery.postcode,
-          addressLine1: delivery.addressLine1,
-          addressLine2: delivery.addressLine2,
-          city: delivery.city,
-          country: delivery.country,
-          contactName: delivery.contactName,
-          contactPhone: delivery.contactPhone,
-        },
-        vanType: van.type || "Small",
-        worker: selectedDate.numberOfMovers || 1,
-        itemsToDismantle: itemsToDismantle || 0,
-        itemsToAssemble: itemsToAssemble || 0,
-        stoppage: validatedStops,
-        pickupLocation: {
-          location: pickup.location || "N/A",
-          floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
-          lift: pickup.liftAvailable,
-          propertyType: pickup.propertyType || "standard"
-        },
-        dropLocation: {
-          location: delivery.location || "N/A",
-          floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
-          lift: delivery.liftAvailable,
-          propertyType: delivery.propertyType || "standard"
-        },
-        details: {
-          items: {
-            name: items.map(item => item.name) || [],
-            quantity: items.map(item => item.quantity) || [],
+      let quotationRef;
+
+      if (quoteRef) {
+        // Update existing quote
+        console.log('Updating existing quote:', quoteRef);
+
+        const updateData = {
+          quotationRef: quoteRef,
+          worker: selectedDate.numberOfMovers || 1,
+          // Add any other fields you want to update
+          username: customerDetails.name || 'NA',
+          email: quoteDetails.email || 'NA',
+          phoneNumber: customerDetails.phone || 'NA',
+          // ... rest of your existing quoteData object
+          price: totalPrice || 0,
+          distance: parseInt(journey.distance) || 0,
+          route: "default route",
+          duration: journey.duration || "N/A",
+          pickupDate: selectedDate.date || 'NA',
+          pickupTime: selectedDate.pickupTime || '08:00:00',
+          pickupAddress: {
+            postcode: pickup.postcode,
+            addressLine1: pickup.addressLine1,
+            addressLine2: pickup.addressLine2,
+            city: pickup.city,
+            country: pickup.country,
+            contactName: pickup.contactName,
+            contactPhone: pickup.contactPhone,
           },
-          isBusinessCustomer: customerDetails.isBusinessCustomer,
-          motorBike: motorBike.type,
-          piano: piano.type,
-          specialRequirements: additionalServices.specialRequirements,
-          pickupFlatNo: pickup.flatNo,
-          dropFlatno: delivery.flatNo
-        },
-      };
+          dropDate: selectedDate.date || 'NA',
+          dropTime: selectedDate.dropTime || '18:00:00',
+          dropAddress: {
+            postcode: delivery.postcode,
+            addressLine1: delivery.addressLine1,
+            addressLine2: delivery.addressLine2,
+            city: delivery.city,
+            country: delivery.country,
+            contactName: delivery.contactName,
+            contactPhone: delivery.contactPhone,
+          },
+          vanType: van.type || "Small",
+          worker: selectedDate.numberOfMovers || 1,
+          itemsToDismantle: itemsToDismantle || 0,
+          itemsToAssemble: itemsToAssemble || 0,
+          stoppage: validatedStops,
+          pickupLocation: {
+            location: pickup.location || "N/A",
+            floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+            lift: pickup.liftAvailable,
+            propertyType: pickup.propertyType || "standard"
+          },
+          dropLocation: {
+            location: delivery.location || "N/A",
+            floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+            lift: delivery.liftAvailable,
+            propertyType: delivery.propertyType || "standard"
+          },
+          details: {
+            items: {
+              name: items.map(item => item.name) || [],
+              quantity: items.map(item => item.quantity) || [],
+            },
+            isBusinessCustomer: customerDetails.isBusinessCustomer,
+            motorBike: motorBike.type,
+            piano: piano.type,
+            specialRequirements: additionalServices.specialRequirements,
+            pickupFlatNo: pickup.flatNo,
+            dropFlatno: delivery.flatNo
+          },
+        };
 
-      console.log("Booking Data being sent:", JSON.stringify(quoteData, null, 2));
+        console.log("Booking Data (updated) being sent:", JSON.stringify(updateData, null, 2));
 
+        const updateResponse = await axios.put('https://orbit-0pxd.onrender.com/quote/update', updateData);
+        quotationRef = quoteRef; // Use existing reference
+        console.log("Quote updated successfully: ", updateResponse);
 
+      } else {
+        // Create new quote
+        console.log('Creating new quote');
 
-      const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote/create', quoteData);
-      const quotationRef = quoteResponse.data?.newQuote?.quotationRef;
-      console.log("quotation reference: ", quotationRef);
+        const quoteData = {
+          username: customerDetails.name || 'NA',
+          email: quoteDetails.email || 'NA',
+          phoneNumber: customerDetails.phone || 'NA',
+          // ... rest of your existing quoteData object
+          price: totalPrice || 0,
+          distance: parseInt(journey.distance) || 0,
+          route: "default route",
+          duration: journey.duration || "N/A",
+          pickupDate: selectedDate.date || 'NA',
+          pickupTime: selectedDate.pickupTime || '08:00:00',
+          pickupAddress: {
+            postcode: pickup.postcode,
+            addressLine1: pickup.addressLine1,
+            addressLine2: pickup.addressLine2,
+            city: pickup.city,
+            country: pickup.country,
+            contactName: pickup.contactName,
+            contactPhone: pickup.contactPhone,
+          },
+          dropDate: selectedDate.date || 'NA',
+          dropTime: selectedDate.dropTime || '18:00:00',
+          dropAddress: {
+            postcode: delivery.postcode,
+            addressLine1: delivery.addressLine1,
+            addressLine2: delivery.addressLine2,
+            city: delivery.city,
+            country: delivery.country,
+            contactName: delivery.contactName,
+            contactPhone: delivery.contactPhone,
+          },
+          vanType: van.type || "Small",
+          worker: selectedDate.numberOfMovers || 1,
+          itemsToDismantle: itemsToDismantle || 0,
+          itemsToAssemble: itemsToAssemble || 0,
+          stoppage: validatedStops,
+          pickupLocation: {
+            location: pickup.location || "N/A",
+            floor: typeof pickup.floor === 'string' ? parseInt(pickup.floor) : pickup.floor,
+            lift: pickup.liftAvailable,
+            propertyType: pickup.propertyType || "standard"
+          },
+          dropLocation: {
+            location: delivery.location || "N/A",
+            floor: typeof delivery.floor === 'string' ? parseInt(delivery.floor) : delivery.floor,
+            lift: delivery.liftAvailable,
+            propertyType: delivery.propertyType || "standard"
+          },
+          details: {
+            items: {
+              name: items.map(item => item.name) || [],
+              quantity: items.map(item => item.quantity) || [],
+            },
+            isBusinessCustomer: customerDetails.isBusinessCustomer,
+            motorBike: motorBike.type,
+            piano: piano.type,
+            specialRequirements: additionalServices.specialRequirements,
+            pickupFlatNo: pickup.flatNo,
+            dropFlatno: delivery.flatNo
+          },
+        };
 
-      if (!quotationRef) {
-        throw new Error("Quotation reference not received from server");
+        console.log("Booking Data being sent:", JSON.stringify(quoteData, null, 2));
+
+        const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote/create', quoteData);
+        quotationRef = quoteResponse.data?.newQuote?.quotationRef;
+
+        if (!quotationRef) {
+          throw new Error("Quotation reference not received from server");
+        }
+
+        setQuoteRef(quotationRef);
+        console.log("New quotation reference created:", quotationRef);
       }
 
-      setQuoteRef(quotationRef);
-      console.log("quotation reference (of context): ", quoteRef);
-
       return true;
+
 
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -593,8 +674,9 @@ const BookingDetails = () => {
                         className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                         value={pickup.contactName || ''}
                         onChange={(e) => {
-                          setCustomerDetails({...customerDetails, name:e.target.value});
-                          handlePickupChange('contactName', e.target.value)}}
+                          setCustomerDetails({ ...customerDetails, name: e.target.value });
+                          handlePickupChange('contactName', e.target.value)
+                        }}
                         required
                       />
                       <div className="relative">
@@ -604,8 +686,9 @@ const BookingDetails = () => {
                           className={`w-full px-3 py-2 text-sm border-2 rounded-lg focus:ring-2 transition-all duration-200 bg-white/50 backdrop-blur-sm ${phoneErrors.pickup ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
                           value={pickup.contactPhone || ''}
                           onChange={(e) => {
-                            setCustomerDetails({...customerDetails, phone:e.target.value});
-                            handlePickupChange('contactPhone', e.target.value)}}
+                            setCustomerDetails({ ...customerDetails, phone: e.target.value });
+                            handlePickupChange('contactPhone', e.target.value)
+                          }}
                           required
                         />
                         {phoneErrors.pickup && (

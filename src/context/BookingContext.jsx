@@ -60,7 +60,7 @@ export const BookingProvider = ({ children }) => {
     const [itemsList, setItemsList] = useState([]);
     const [quantities,setQuantities] = useState([]);
     const [selectedDate, setSelectedDate] = useState({
-        date: '1 Apr',
+        date: dateString,
         pickupTime: '08:00:00',
         dropTime: '18:00:00',
         price: 179,
