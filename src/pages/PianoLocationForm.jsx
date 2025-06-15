@@ -6,6 +6,8 @@ import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
 import ExtraStopModal from '../components/ExtraStopModal';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const PianoLocationForm = () => {
   const navigate = useNavigate();
   const {
@@ -144,7 +146,7 @@ const PianoLocationForm = () => {
     if (pickupTypingTimeout) clearTimeout(pickupTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://api.reliancemove.com/autocomplete", { place: pickupQuery })
+      axios.post(`${baseUrl}/autocomplete`, { place: pickupQuery })
         .then(res => {
           setPickupSuggestions(res.data.predictions || []);
           setFocusedPickupIndex(-1);
@@ -165,7 +167,7 @@ const PianoLocationForm = () => {
     if (deliveryTypingTimeout) clearTimeout(deliveryTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://api.reliancemove.com/autocomplete", { place: deliveryQuery })
+      axios.post(`${baseUrl}/autocomplete`, { place: deliveryQuery })
         .then(res => {
           setDeliverySuggestions(res.data.predictions || []);
           setFocusedDeliveryIndex(-1);
@@ -210,7 +212,7 @@ const PianoLocationForm = () => {
 
   // Helper functions
   async function getPostalCode(place_id) {
-    const response = await axios.get(`https://api.reliancemove.com/postalcode/${place_id}`);
+    const response = await axios.get(`${baseUrl}/postalcode/${place_id}`);
     return response;
   }
 

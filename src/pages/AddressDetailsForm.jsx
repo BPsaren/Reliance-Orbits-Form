@@ -6,6 +6,10 @@ import OrderSummary from '../components/OrderSummary';
 import axios from "axios";
 import './CalendarStyles.css'; // Custom styles for the calendar component
 import ExtraStopModal from '../components/ExtraStopModal';
+
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
   const { pickup, setPickup, delivery, setDelivery, extraStops, setExtraStops } = useBooking();
@@ -223,7 +227,7 @@ const AddressDetailsForm = () => {
     if (pickupTypingTimeout) clearTimeout(pickupTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://api.reliancemove.com/autocomplete", {
+      axios.post(`${baseUrl}/autocomplete`, {
         place: pickupQuery
       })
         .then(res => {
@@ -253,7 +257,7 @@ const AddressDetailsForm = () => {
     if (deliveryTypingTimeout) clearTimeout(deliveryTypingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://api.reliancemove.com/autocomplete", {
+      axios.post(`${baseUrl}/autocomplete`, {
         place: deliveryQuery
       })
         .then(res => {
@@ -314,7 +318,7 @@ const AddressDetailsForm = () => {
   }, [deliveryPlaceId]);
 
   async function getPostalCode(place_id) {
-    const response = await axios.get("https://api.reliancemove.com/postalcode/" + place_id);
+    const response = await axios.get(`${baseUrl}/postalcode/` + place_id);
     return response;
   }
 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useBooking } from '../context/BookingContext';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
   const [address, setAddress] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -56,7 +58,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     if (typingTimeout) clearTimeout(typingTimeout);
 
     const timeout = setTimeout(() => {
-      axios.post("https://api.reliancemove.com/autocomplete", { place: address })
+      axios.post(`${baseUrl}/autocomplete`, { place: address })
         .then(res => {
           setSuggestions(res.data.predictions || []);
           setFocusedIndex(-1);
@@ -74,7 +76,7 @@ const ExtraStopModal = ({ isOpen, onClose, onAddStop }) => {
     
     const getPostalCode = async () => {
       try {
-        const response = await axios.get(`https://api.reliancemove.com/postalcode/${placeId}`);
+        const response = await axios.get(`${baseUrl}/postalcode/${placeId}`);
         const formattedAddress = formatAddressWithPostcode(address, response.data.long_name);
         
         setSelecting(true);

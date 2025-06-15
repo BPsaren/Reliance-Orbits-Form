@@ -6,6 +6,8 @@ import OrderSummary from '../components/OrderSummary';
 import axios from 'axios';
 import AdditionalServices from './AdditionalServices';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 import { loadStripe } from '@stripe/stripe-js';
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -140,7 +142,7 @@ const BookingDetails = () => {
       const timer = setTimeout(async () => {
         setIsPickupFetching(true);
         try {
-          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", {
+          const response = await axios.post(`${baseUrl}/autocomplete`, {
             place: postcode
           });
 
@@ -183,7 +185,7 @@ const BookingDetails = () => {
       const timer = setTimeout(async () => {
         setIsDeliveryFetching(true);
         try {
-          const response = await axios.post("https://orbit-0pxd.onrender.com/autocomplete", {
+          const response = await axios.post(`${baseUrl}/autocomplete`, {
             place: postcode
           });
 
@@ -310,7 +312,7 @@ const BookingDetails = () => {
         return;
       }
 
-      const quoteEmailResponse = await axios.get(`https://orbit-0pxd.onrender.com/quote/mail/${quoteRef}`);
+      const quoteEmailResponse = await axios.get(`${baseUrl}/quote/mail/${quoteRef}`);
       console.log("Quote email response:", quoteEmailResponse.data);
 
       // setShowBookingModal(false);
@@ -352,7 +354,7 @@ const BookingDetails = () => {
 
         const updateData = {
           quotationRef: quoteRef,
-          worker: selectedDate.numberOfMovers || 1,
+          // worker: selectedDate.numberOfMovers || 1,
           // Add any other fields you want to update
           username: customerDetails.name || 'NA',
           email: quoteDetails.email || 'NA',
@@ -417,7 +419,7 @@ const BookingDetails = () => {
 
         console.log("Booking Data (updated) being sent:", JSON.stringify(updateData, null, 2));
 
-        const updateResponse = await axios.put('https://orbit-0pxd.onrender.com/quote/update', updateData);
+        const updateResponse = await axios.put(`${baseUrl}/quote/update`, updateData);
         quotationRef = quoteRef; // Use existing reference
         console.log("Quote updated successfully: ", updateResponse);
 
@@ -489,7 +491,7 @@ const BookingDetails = () => {
 
         console.log("Booking Data being sent:", JSON.stringify(quoteData, null, 2));
 
-        const quoteResponse = await axios.post('https://orbit-0pxd.onrender.com/quote/create', quoteData);
+        const quoteResponse = await axios.post(`${baseUrl}/quote/create`, quoteData);
         quotationRef = quoteResponse.data?.newQuote?.quotationRef;
 
         if (!quotationRef) {

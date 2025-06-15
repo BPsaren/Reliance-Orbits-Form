@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useBooking } from '../context/BookingContext';
 import RouteMap from './RouteMap';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const OrderSummary = () => {
   const [calculatedPrice, setCalculatedPrice] = useState(null);
   const {
@@ -63,7 +65,7 @@ const OrderSummary = () => {
           stoppage:extraStops.map(item => ({ address: item.address }))
         };
 
-        const res = await axios.post('https://api.reliancemove.com/price', payload);
+        const res = await axios.post(`${baseUrl}/price`, payload);
         setTotalPrice(res.data.price);
         console.log(payload);
       } catch (err) {
@@ -77,7 +79,7 @@ const OrderSummary = () => {
   useEffect(() => {
     const fetchDistance = async () => {
       try {
-        const res = await axios.post('https://api.reliancemove.com/distance', {
+        const res = await axios.post(`${baseUrl}/distance`, {
           origin: pickup.location,
           destination: delivery.location
         });

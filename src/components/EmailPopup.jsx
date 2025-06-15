@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useBooking } from '../context/BookingContext';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const EmailPopup = ({ onContinue }) => {
     const [email, setEmail] = useState('');
     const [checkedItems, setCheckedItems] = useState({
@@ -27,7 +29,7 @@ const EmailPopup = ({ onContinue }) => {
 
     const validateEmail = async (emailToValidate) => {
         try {
-            const response = await fetch('https://api.reliancemove.com/user/create', {
+            const response = await fetch(`${baseUrl}/user/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useBooking } from '../context/BookingContext';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const PaymentSuccess = () => {
 
     const [searchParams] = useSearchParams();
@@ -59,7 +61,7 @@ const PaymentSuccess = () => {
 
         const fetchSession = async () => {
             try {
-                const res = await axios.get(`https://orbit-0pxd.onrender.com/order/get/${sessionId}`);
+                const res = await axios.get(`${baseUrl}/order/get/${sessionId}`);
 
                 const order = res.data.order;
 
