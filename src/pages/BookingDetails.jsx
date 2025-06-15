@@ -312,7 +312,7 @@ const BookingDetails = () => {
         return;
       }
 
-      const quoteEmailResponse = await axios.get(`${baseUrl}/quote/mail/${quoteRef}`);
+      const quoteEmailResponse = await axios.get(`https://orbit-0pxd.onrender.com/quote/mail/${quoteRef}`);
       console.log("Quote email response:", quoteEmailResponse.data);
 
       // setShowBookingModal(false);
@@ -419,7 +419,7 @@ const BookingDetails = () => {
 
         console.log("Booking Data (updated) being sent:", JSON.stringify(updateData, null, 2));
 
-        const updateResponse = await axios.put(`${baseUrl}/quote/update`, updateData);
+        const updateResponse = await axios.put(`https://orbit-0pxd.onrender.com/quote/update`, updateData);
         quotationRef = quoteRef; // Use existing reference
         console.log("Quote updated successfully: ", updateResponse);
 
@@ -491,7 +491,7 @@ const BookingDetails = () => {
 
         console.log("Booking Data being sent:", JSON.stringify(quoteData, null, 2));
 
-        const quoteResponse = await axios.post(`${baseUrl}/quote/create`, quoteData);
+        const quoteResponse = await axios.post(`https://orbit-0pxd.onrender.com/quote/create`, quoteData);
         quotationRef = quoteResponse.data?.newQuote?.quotationRef;
 
         if (!quotationRef) {
