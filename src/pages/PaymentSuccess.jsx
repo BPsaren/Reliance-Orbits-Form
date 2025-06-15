@@ -61,7 +61,7 @@ const PaymentSuccess = () => {
 
         const fetchSession = async () => {
             try {
-                const res = await axios.get(`https://orbit-0pxd.onrender.com/order/get/${sessionId}`);
+                const res = await axios.get(`${baseUrl}/order/get/${sessionId}`);
 
                 const order = res.data.order;
 
