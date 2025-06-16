@@ -7,7 +7,7 @@ import { loadStripe } from '@stripe/stripe-js';
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const PaymentPage = () => {
-    
+
     const [quotation, setQuotation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,18 +19,18 @@ const PaymentPage = () => {
 
     useEffect(() => {
         // Get quotation reference from URL parameters
-        
+
         const quotationNo = searchParams.get('quotationRef');
         console.log(searchParams);
         // const quotationNo = urlParams.get('quotationRef') ; // Default for demo
-        console.log("quotation: ",quotationNo);
+        console.log("quotation: ", quotationNo);
 
         fetchQuotation(quotationNo);
     }, []);
 
     const fetchQuotation = async (quotationNo) => {
         try {
-            console.log("quotationNo fetched: ",quotationNo);
+            console.log("quotationNo fetched: ", quotationNo);
             setLoading(true);
             const response = await axios.get(`${baseUrl}/quote/get/${quotationNo}`);
 
@@ -55,7 +55,7 @@ const PaymentPage = () => {
         }
     };
 
-    const handlePayment = async(e) => {
+    const handlePayment = async (e) => {
         // Implement payment logic here
         e.preventDefault();
         setSubmitError(null);
@@ -63,7 +63,7 @@ const PaymentPage = () => {
 
 
         try {
-            
+
 
             const sessionRes = await axios.post(`${baseUrl}/create-checkout-session`, quotation);
 
@@ -76,8 +76,6 @@ const PaymentPage = () => {
             console.error('Error response data:', error.response.data);
             navigate('/payment-failed'); // redirect on error
 
-        } finally {
-;
         }
     };
 
@@ -256,9 +254,9 @@ const PaymentPage = () => {
                             <button
                                 onClick={(e) => {
 
-                  handlePayment(e);
-                  
-                }}
+                                    handlePayment(e);
+
+                                }}
                                 className="bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-4 px-12 rounded-xl hover:from-green-700 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto text-lg"
                             >
                                 <CreditCard className="w-6 h-6 mr-3" />

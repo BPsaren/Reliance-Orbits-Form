@@ -1,8 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import Header from '../components/Header';
 import RouteMap from '../components/RouteMap';
+import { CreditCard } from 'lucide-react';
+
+import axios from 'axios';
+
+import { loadStripe } from '@stripe/stripe-js';
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Confirmation = () => {
   const navigate = useNavigate();
@@ -24,6 +30,10 @@ const Confirmation = () => {
     itemsToDismantle
   } = useBooking();
 
+  const [submitError, setSubmitError] = useState(null);
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
 
   const formatAddress = (address) => {
     const parts = [];
@@ -34,6 +44,32 @@ const Confirmation = () => {
     if (address.postcode) parts.push(address.postcode);
     if (address.country) parts.push(address.country);
     return parts.filter(Boolean).join(', ');
+  };
+
+  const handlePayment = async (e) => {
+    // Implement payment logic here
+    e.preventDefault();
+    setSubmitError(null);
+
+
+
+    try {
+
+
+      const sessionRes = await axios.post(`${baseUrl}/create-checkout-session`, {
+        quotationRef: quoteRef || 'NA',
+      });
+
+      const stripe = await stripePromise;
+      await stripe.redirectToCheckout({ sessionId: sessionRes.data.sessionId });
+
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      setSubmitError('Failed to submit booking. Please try again. (Check all fields are selected or not)');
+      console.error('Error response data:', error.response.data);
+      navigate('/payment-failed'); // redirect on error
+
+    }
   };
 
   const renderAddressCard = (location, address, color, letter) => (
@@ -409,6 +445,21 @@ const Confirmation = () => {
             </svg>
             Book Another
           </button>
+
+
+          <button
+            onClick={(e) => {
+
+              handlePayment(e);
+
+            }}
+            className="bg-green-500 text-white font-medium py-4 px-6 rounded-lg shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition flex items-center justify-center"
+          >
+            <CreditCard className="w-6 h-6 mr-3" />
+            Pay Now
+          </button>
+
+
         </div>
       </div>
     </div>

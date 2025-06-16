@@ -12,6 +12,10 @@ import {
     ChevronRight,
     ChevronDown,
     Truck,
+    CarFront,
+    TruckIcon,
+    LucideTruck,
+    PhoneCall,
 } from "lucide-react";
 import logo from './assets/REA.png';
 import { useNavigate } from 'react-router-dom';
@@ -40,16 +44,24 @@ const Nav = () => {
     return (
         <>
             {/* Top contact bar */}
-            <div className="bg-gray-800 text-white py-2 px-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <div className="bg-gray-800 text-white py-4 px-4">
+                <div className="max-w-7xl mx-auto flex justify-around items-center">
                     <div className="flex items-center space-x-6">
                         <div className="flex items-center space-x-2">
-                            <MapPin className="text-red-500 w-4 h-4" />
-                            <span className="text-sm hidden sm:inline">Location</span>
+                            {/* <Truck className="text-red-500 w-4 h-5" /> */}
+                            <span className="text-sm hidden sm:inline hover:text-red-500 transition-colors">Best Movers in UK</span>
                         </div>
+
+                    </div>
+                    <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
-                            <Mail className="text-red-500 w-4 h-4" />
-                            <span className="text-sm">info@reliancemove.com</span>
+                            {/* <Mail className="text-red-500 w-4 h-4" /> */}
+                            <span className="text-sm hover:text-red-500 transition-colors">Call us now</span>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                            <PhoneCall className="text-red-500 w-4 h-4" />
+                            <span className="text-sm hover:text-red-500 transition-colors"><a href="tel:020-3051-6033">020-3051-6033</a></span>
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -77,9 +89,10 @@ const Nav = () => {
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex justify-between items-center h-24">
                         {/* Logo */}
+
                         <a
-                        href="https://reliancemove.com">
-                        <img src={logo} height='200px' width='200px' />
+                            href="https://reliancemove.com">
+                            <img src={logo} height='200px' width='200px' />
                         </a>
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center space-x-8">
@@ -162,12 +175,12 @@ const Nav = () => {
                         {/* Contact Us Button */}
                         <div className="hidden md:flex">
                             <div className="flex">
-                                <button className="bg-red-500 hover:bg-red-600 text-white px-6 py-4 font-semibold transition-colors"
-                                onClick={() => window.location.href = 'https://reliancemove.com/contact-us/'}>
+                                <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-4 font-semibold transition-colors"
+                                    onClick={() => window.location.href = 'https://reliancemove.com/contact-us/'}>
                                     CONTACT US
                                 </button>
                                 <button className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 transition-colors"
-                                onClick={() => window.location.href = 'https://reliancemove.com/contact-us/'}>
+                                    onClick={() => window.location.href = 'https://reliancemove.com/contact-us/'}>
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>

@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);       // jump to page top
+  }, [pathname]);
+
+  return null;                   // render nothing
+}
+
+
 import './App.css';
 
 // Import Pages
@@ -35,8 +49,10 @@ import PaymentPage from './pages/PaymentPage';
 function App() {
   return (
     <BookingProvider>
+
       
       <Router>
+      <ScrollToTop />
         <div className="app-container">
       <Nav/>
           <Routes>
