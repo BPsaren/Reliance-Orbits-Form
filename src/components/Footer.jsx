@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { MapPin, Mail, Phone, Send, Facebook, Instagram, Linkedin, Twitter, Dribbble } from 'lucide-react';
 import logo from '../assets/RELIANCWHIE.png';
+import { useNavigate } from 'react-router-dom';
 
-export default function RelianceFooter() {
+const RelianceFooter = () => {
+  const navigate = useNavigate();
+
+
   const [email, setEmail] = useState('');
+
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
@@ -19,7 +24,10 @@ export default function RelianceFooter() {
           {/* Company Info Section */}
           <div className="space-y-6">
             {/* Logo */}
-            <img src={logo} height='200px' width='200px'/>
+            <a
+              href='https://reliancemove.com'>
+              <img src={logo} height='200px' width='200px' />
+            </a>
             {/* <div className="flex items-center space-x-2">
               <span className="text-2xl font-bold text-white">RELIANCE</span>
               <div className="relative">
@@ -67,16 +75,37 @@ export default function RelianceFooter() {
               <div className="w-12 h-0.5 bg-red-600 mb-6"></div>
             </div>
             <nav className="space-y-4">
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a href="#" className="block text-gray-300 hover:text-white transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/furniture-loc');
+                  closeServicesDropdown();
+
+                }}
+              >
                 Furniture Removals
               </a>
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a href="#" className="block text-gray-300 hover:text-white transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/piano-loc');
+                  closeServicesDropdown();
+
+                }}
+              >
                 Piano Removals
               </a>
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a href="#" className="block text-gray-300 hover:text-white transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/home-loc');
+                  closeServicesDropdown();
+
+                }}
+              >
                 Home Removals
               </a>
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a className="block text-gray-300 hover:text-white transition-colors">
                 Other Removals
               </a>
             </nav>
@@ -89,13 +118,13 @@ export default function RelianceFooter() {
               <div className="w-12 h-0.5 bg-red-600 mb-6"></div>
             </div>
             <nav className="space-y-4">
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a href="https://reliancemove.com/about-us/" className="block text-gray-300 hover:text-white transition-colors">
                 About Us
               </a>
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a href="https://reliancemove.com/privacy-policy-2/" className="block text-gray-300 hover:text-white transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="block text-gray-300 hover:text-white transition-colors">
+              <a href="https://reliancemove.com/terms-condition/" className="block text-gray-300 hover:text-white transition-colors">
                 Terms & Conditions
               </a>
             </nav>
@@ -107,7 +136,7 @@ export default function RelianceFooter() {
               <h3 className="text-xl font-bold text-white mb-4">Newsletter</h3>
               <div className="w-12 h-0.5 bg-red-600 mb-6"></div>
             </div>
-            
+
             <p className="text-gray-300 text-sm leading-relaxed">
               Subscribe our newsletter to Get the latest news, tips and special offers.
             </p>
@@ -131,19 +160,24 @@ export default function RelianceFooter() {
 
             {/* Social Media Icons */}
             <div className="flex space-x-4 pt-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a className="text-gray-400 hover:text-red-600 transition-colors"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Facebook size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a className="text-gray-400 hover:text-red-600 transition-colors"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Dribbble size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a className="text-gray-400 hover:text-red-600 transition-colors"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Instagram size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a className="text-gray-400 hover:text-red-600 transition-colors"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Twitter size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a className="text-gray-400 hover:text-red-600 transition-colors"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Linkedin size={24} />
               </a>
             </div>
@@ -152,14 +186,14 @@ export default function RelianceFooter() {
 
         {/* Back to Top Button */}
         <div className="flex justify-end mt-12">
-          <button 
+          <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="bg-red-600 hover:bg-red-700 p-3 transition-colors group"
           >
-            <svg 
-              className="w-6 h-6 text-white transform group-hover:-translate-y-1 transition-transform" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-6 h-6 text-white transform group-hover:-translate-y-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -169,11 +203,13 @@ export default function RelianceFooter() {
 
       </div>
       {/* Copyright Section */}
-        <div className="border-t border-gray-700 mt-8 pt-4">
-          <div className=" text-gray-400 text-sm flex justify-center items-end">
-            <p>Copyright © 2025 | All Rights are Reserved | Design & Developed by ORBITS Business Solutions Ltd.</p>
-          </div>
+      <div className="border-t border-gray-700 mt-8 pt-4">
+        <div className=" text-gray-400 text-sm flex justify-center items-end">
+          <p>Copyright © 2025 | All Rights are Reserved | Design & Developed by ORBITS Business Solutions Ltd.</p>
         </div>
+      </div>
     </footer>
   );
 }
+
+export default RelianceFooter;

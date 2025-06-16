@@ -14,8 +14,10 @@ import {
     Truck,
 } from "lucide-react";
 import logo from './assets/REA.png';
+import { useNavigate } from 'react-router-dom';
 
 const Nav = () => {
+    const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
 
@@ -75,31 +77,33 @@ const Nav = () => {
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex justify-between items-center h-24">
                         {/* Logo */}
-                        <img src={logo} height='200px' width='200px'/>
-
+                        <a
+                        href="https://reliancemove.com">
+                        <img src={logo} height='200px' width='200px' />
+                        </a>
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center space-x-8">
-                            <a
-                                href="#"
-                                className="text-gray-700 hover:text-blue-900 font-medium transition-colors"
-                                onClick={(e) => e.preventDefault()}
+                            <button
+
+                                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
+                                onClick={() => window.location.href = 'https://reliancemove.com'}
                             >
                                 HOME
-                            </a>
+                            </button>
                             <div className="relative">
                                 <button
-                                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-900 font-medium transition-colors"
+                                    className="flex items-center space-x-1 text-gray-700 hover:text-red-600 font-medium transition-colors"
                                     onClick={toggleServicesDropdown}
-                                    onMouseEnter={() => setIsServicesDropdownOpen(true)}
-                                    onMouseLeave={() => setIsServicesDropdownOpen(false)}
+                                // onMouseEnter={() => setIsServicesDropdownOpen(true)}
+                                // onMouseLeave={() => setIsServicesDropdownOpen(false)}
                                 >
                                     <span>SERVICES</span>
                                     <ChevronDown className={`w-4 h-4 transition-transform ${isServicesDropdownOpen ? 'rotate-180' : ''}`} />
                                 </button>
-                                
+
                                 {/* Services Dropdown */}
                                 {isServicesDropdownOpen && (
-                                    <div 
+                                    <div
                                         className="absolute top-full left-0 mt-2 w-56 bg-white shadow-lg border border-gray-200 rounded-lg z-50"
                                         onMouseEnter={() => setIsServicesDropdownOpen(true)}
                                         onMouseLeave={() => setIsServicesDropdownOpen(false)}
@@ -110,6 +114,7 @@ const Nav = () => {
                                                 className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 transition-colors"
                                                 onClick={(e) => {
                                                     e.preventDefault();
+                                                    navigate('/home-loc');
                                                     closeServicesDropdown();
                                                 }}
                                             >
@@ -120,7 +125,9 @@ const Nav = () => {
                                                 className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 transition-colors"
                                                 onClick={(e) => {
                                                     e.preventDefault();
+                                                    navigate('/furniture-loc');
                                                     closeServicesDropdown();
+
                                                 }}
                                             >
                                                 FURNITURE REMOVALS
@@ -130,6 +137,7 @@ const Nav = () => {
                                                 className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 transition-colors"
                                                 onClick={(e) => {
                                                     e.preventDefault();
+                                                    navigate('/piano-loc');
                                                     closeServicesDropdown();
                                                 }}
                                             >
@@ -154,10 +162,12 @@ const Nav = () => {
                         {/* Contact Us Button */}
                         <div className="hidden md:flex">
                             <div className="flex">
-                                <button className="bg-red-500 hover:bg-red-600 text-white px-6 py-4 font-semibold transition-colors">
+                                <button className="bg-red-500 hover:bg-red-600 text-white px-6 py-4 font-semibold transition-colors"
+                                onClick={() => window.location.href = 'https://reliancemove.com/contact-us/'}>
                                     CONTACT US
                                 </button>
-                                <button className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 transition-colors">
+                                <button className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 transition-colors"
+                                onClick={() => window.location.href = 'https://reliancemove.com/contact-us/'}>
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
@@ -181,19 +191,16 @@ const Nav = () => {
                 {isMobileMenuOpen && (
                     <div className="md:hidden bg-white border-t border-gray-200">
                         <div className="px-4 py-2 space-y-2">
-                            <a
-                                href="#"
-                                className="block py-2 text-gray-700 hover:text-blue-900 font-medium transition-colors"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    closeMobileMenu();
-                                }}
+                            <button
+                                // href="#"
+                                className="block py-2 text-gray-700 hover:text-red-600 font-medium transition-colors"
+                                onClick={() => window.location.href = 'https://reliancemove.com'}
                             >
                                 HOME
-                            </a>
+                            </button>
                             <div>
                                 <button
-                                    className="flex items-center justify-between w-full py-2 text-gray-700 hover:text-blue-900 font-medium transition-colors"
+                                    className="flex items-center justify-between w-full py-2 text-gray-700 hover:text-red-600 font-medium transition-colors"
                                     onClick={toggleServicesDropdown}
                                 >
                                     <span>SERVICES</span>
@@ -206,6 +213,7 @@ const Nav = () => {
                                             className="block py-2 text-sm text-gray-600 hover:text-blue-900 transition-colors"
                                             onClick={(e) => {
                                                 e.preventDefault();
+                                                navigate('/home-loc');
                                                 closeMobileMenu();
                                             }}
                                         >
@@ -216,6 +224,7 @@ const Nav = () => {
                                             className="block py-2 text-sm text-gray-600 hover:text-blue-900 transition-colors"
                                             onClick={(e) => {
                                                 e.preventDefault();
+                                                navigate('/furniture-loc');
                                                 closeMobileMenu();
                                             }}
                                         >
@@ -226,6 +235,7 @@ const Nav = () => {
                                             className="block py-2 text-sm text-gray-600 hover:text-blue-900 transition-colors"
                                             onClick={(e) => {
                                                 e.preventDefault();
+                                                navigate('/piano-loc');
                                                 closeMobileMenu();
                                             }}
                                         >
@@ -244,8 +254,8 @@ const Nav = () => {
                                     </div>
                                 )}
                             </div>
-                            
-                            
+
+
                             <div className="pt-2">
                                 <button
                                     className="w-full bg-red-500 hover:bg-red-600 text-white px-6 py-3 font-semibold transition-colors"

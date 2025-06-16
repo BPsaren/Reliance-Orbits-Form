@@ -23,9 +23,11 @@ import MotorBikeLocationForm from './pages/MotorBikeLocationForm';
 import PaymentFailed from './pages/PaymentFailed';
 import PaymentSuccess from './pages/PaymentSuccess';
 
-import Footer from './components/Footer';
+// import Footer from './components/Footer';
 import Nav from './Nav';
 import Confirmation from './pages/Confirmation';
+import RelianceFooter from './components/Footer';
+import PaymentPage from './pages/PaymentPage';
 
 
 
@@ -50,14 +52,16 @@ function App() {
             <Route path="/confirmation" element={<QuoteConfirmation />} />
             <Route path="/quote-confirmation" element={<Confirmation />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
+            <Route path="/payment" element={<PaymentPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/other-removals" element={<OtherRemovals />} />
             <Route path="/motorbike-removals" element={<MotorBikeLocationForm prepath='/motorbike-removals' />} />
 
           </Routes>
         </div>
+        <RelianceFooter />
       </Router>
-      <Footer />
+      
     </BookingProvider>
   );
 }

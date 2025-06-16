@@ -12,13 +12,13 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 const AddressDetailsForm = () => {
   const navigate = useNavigate();
-  const { pickup, setPickup, delivery, setDelivery, extraStops, setExtraStops } = useBooking();
+  const { pickup, setPickup, delivery, setDelivery, extraStops, setExtraStops, selectedDate, setSelectedDate } = useBooking();
 
   // State for date selection
   const [hasSelectedDate, setHasSelectedDate] = useState(true);
   const [pickupDate, setPickupDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [localSelectedDate, setLocalSelectedDate] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
@@ -79,8 +79,21 @@ const AddressDetailsForm = () => {
    */
   const handleDateChange = (date) => {
     if (!isPastDate(date)) {
-      setSelectedDate(date);
+      // Update local state for UI display
+      setLocalSelectedDate(date);
       setPickupDate(date);
+
+      // Format the date to match your booking context format
+      const day = date.getDate();
+      const month = date.toLocaleString('default', { month: 'short' });
+      const formattedDateString = `${day} ${month}`;
+
+      // Update the booking context selectedDate
+      setSelectedDate(prev => ({
+        ...prev,
+        date: formattedDateString
+      }));
+
       setShowCalendar(false);
     }
   };
@@ -131,10 +144,10 @@ const AddressDetailsForm = () => {
         date: dayDate,
         isCurrentMonth: true,
         isDisabled: isPast,
-        isSelected: selectedDate &&
-          selectedDate.getDate() === i &&
-          selectedDate.getMonth() === currentMonth &&
-          selectedDate.getFullYear() === currentYear,
+        isSelected: localSelectedDate &&
+          localSelectedDate.getDate() === i &&
+          localSelectedDate.getMonth() === currentMonth &&
+          localSelectedDate.getFullYear() === currentYear,
         isToday: dayDate.toDateString() === new Date().toDateString()
       });
     }
@@ -149,9 +162,9 @@ const AddressDetailsForm = () => {
         isCurrentMonth: false,
         isDisabled: false,
         isSelected: selectedDate &&
-          selectedDate.getDate() === i &&
-          selectedDate.getMonth() === currentMonth + 1 &&
-          selectedDate.getFullYear() === currentYear
+          localSelectedDate.getDate() === i &&
+          localSelectedDate.getMonth() === currentMonth + 1 &&
+          localSelectedDate.getFullYear() === currentYear
       });
     }
 
@@ -723,84 +736,84 @@ const AddressDetailsForm = () => {
                 </div>
 
                 {/* Estimated Move Date Section */}
-{/* Estimated Move Date Section - Compact Version */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-100">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <h3 className="text-base font-semibold text-gray-800">Move Date</h3>
+                {/* Estimated Move Date Section - Compact Version */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <h3 className="text-base font-semibold text-gray-800">Move Date</h3>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-3">
-                  {/* Inline Date Selection */}
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        id="hasDate"
-                        name="dateOption"
-                        checked={hasSelectedDate}
-                        onChange={() => setHasSelectedDate(true)}
-                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm font-medium text-gray-700">I have a date</span>
-                    </label>
-                    
-                    {hasSelectedDate && (
-                      <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            readOnly
-                            value={formatDate(pickupDate)}
-                            onClick={() => {
-                              setSelectedDate(pickupDate);
-                              setShowCalendar(true);
-                            }}
-                            className="w-40 px-3 py-2 text-sm border border-gray-200 rounded-lg cursor-pointer bg-white hover:border-blue-300 transition-colors"
-                            placeholder="Select date"
-                          />
-                          <span 
-                            className="absolute right-2 top-2 text-gray-400 cursor-pointer hover:text-blue-500 transition-colors"
-                            onClick={() => {
-                              setSelectedDate(pickupDate);
-                              setShowCalendar(true);
-                            }}
-                          >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <div className="space-y-3">
+                    {/* Inline Date Selection */}
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="radio"
+                          id="hasDate"
+                          name="dateOption"
+                          checked={hasSelectedDate}
+                          onChange={() => setHasSelectedDate(true)}
+                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-700">I have a date</span>
+                      </label>
+
+                      {hasSelectedDate && (
+                        <div className="flex items-center space-x-3">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              readOnly
+                              value={formatDate(pickupDate)}
+                              onClick={() => {
+                                setLocalSelectedDate(pickupDate);
+                                setShowCalendar(true);
+                              }}
+                              className="w-40 px-3 py-2 text-sm border border-gray-200 rounded-lg cursor-pointer bg-white hover:border-blue-300 transition-colors"
+                              placeholder="Select date"
+                            />
+                            <span
+                              className="absolute right-2 top-2 text-gray-400 cursor-pointer hover:text-blue-500 transition-colors"
+                              onClick={() => {
+                                setSelectedDate(pickupDate);
+                                setShowCalendar(true);
+                              }}
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </span>
+                          </div>
+                          <div className="flex items-center text-green-600 bg-green-50 px-2 py-1 rounded-md">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
-                          </span>
+                            <span className="text-xs font-medium">Available</span>
+                          </div>
                         </div>
-                        <div className="flex items-center text-green-600 bg-green-50 px-2 py-1 rounded-md">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                          <span className="text-xs font-medium">Available</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
 
-                  {/* No Date Option */}
-                  <div className="flex items-center">
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        id="noDate"
-                        name="dateOption"
-                        checked={!hasSelectedDate}
-                        onChange={() => setHasSelectedDate(false)}
-                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm font-medium text-gray-700">Planning to move later</span>
-                    </label>
+                    {/* No Date Option */}
+                    <div className="flex items-center">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="radio"
+                          id="noDate"
+                          name="dateOption"
+                          checked={!hasSelectedDate}
+                          onChange={() => setHasSelectedDate(false)}
+                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-700">Planning to move later</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </div>
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200">
