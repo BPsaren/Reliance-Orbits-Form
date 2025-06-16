@@ -1,25 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Truck, Calendar, MapPin, User, Phone, Package, CreditCard, Loader2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
+import { loadStripe } from '@stripe/stripe-js';
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const PaymentPage = () => {
+    
     const [quotation, setQuotation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [submitError, setSubmitError] = useState(null);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         // Get quotation reference from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const quotationNo = urlParams.get('quotationRef') ; // Default for demo
+        
+        const quotationNo = searchParams.get('quotationRef');
+        console.log(searchParams);
+        // const quotationNo = urlParams.get('quotationRef') ; // Default for demo
+        console.log("quotation: ",quotationNo);
 
         fetchQuotation(quotationNo);
     }, []);
 
     const fetchQuotation = async (quotationNo) => {
         try {
+            console.log("quotationNo fetched: ",quotationNo);
             setLoading(true);
             const response = await axios.get(`${baseUrl}/quote/get/${quotationNo}`);
 
@@ -52,13 +63,9 @@ const PaymentPage = () => {
 
 
         try {
-            const quoteEmailResponse = await axios.get(`${baseUrl}/quote/mail/${quotation}`);
-            console.log("Quote email response:", quoteEmailResponse.data);
+            
 
-
-            const sessionRes = await axios.post(`${baseUrl}/create-checkout-session`, {
-                quotationRef: quoteRef || 'NA',
-            });
+            const sessionRes = await axios.post(`${baseUrl}/create-checkout-session`, quotation);
 
             const stripe = await stripePromise;
             await stripe.redirectToCheckout({ sessionId: sessionRes.data.sessionId });
