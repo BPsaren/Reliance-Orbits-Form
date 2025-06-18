@@ -779,7 +779,7 @@ const AddressDetailsForm = () => {
                             <span
                               className="absolute right-2 top-2 text-gray-400 cursor-pointer hover:text-blue-500 transition-colors"
                               onClick={() => {
-                                setSelectedDate(pickupDate);
+                                setLocalSelectedDate(pickupDate);
                                 setShowCalendar(true);
                               }}
                             >

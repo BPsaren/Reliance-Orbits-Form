@@ -47,12 +47,12 @@ const RelianceFooter = () => {
             </div>
 
             {/* Email */}
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <Mail className="text-red-600 flex-shrink-0" size={20} />
               <a href="mailto:info@reliancemove.com" className="text-gray-300 hover:text-white transition-colors">
                 info@reliancemove.com
               </a>
-            </div>
+            </div> */}
 
             {/* Phone */}
             <div className="space-y-2">
