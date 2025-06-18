@@ -131,18 +131,18 @@ const RelianceFooter = () => {
           </div>
 
           {/* Newsletter Section */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex-col items-end">
             <div>
-              <h3 className="text-xl font-bold text-white mb-4">Newsletter</h3>
+              <h3 className="text-xl font-bold text-white mb-4">Socials</h3>
               <div className="w-12 h-0.5 bg-red-600 mb-6"></div>
             </div>
 
-            <p className="text-gray-300 text-sm leading-relaxed">
+            {/* <p className="text-gray-300 text-sm leading-relaxed">
               Subscribe our newsletter to Get the latest news, tips and special offers.
-            </p>
+            </p> */}
 
             {/* Newsletter Form */}
-            <div className="flex">
+            {/* <div className="flex">
               <input
                 type="email"
                 value={email}
@@ -156,28 +156,28 @@ const RelianceFooter = () => {
               >
                 <Send size={20} />
               </button>
-            </div>
+            </div> */}
 
             {/* Social Media Icons */}
             <div className="flex space-x-4 pt-4">
               <a className="text-gray-400 hover:text-red-600 transition-colors"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Facebook size={24} />
               </a>
               <a className="text-gray-400 hover:text-red-600 transition-colors"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Dribbble size={24} />
               </a>
               <a className="text-gray-400 hover:text-red-600 transition-colors"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Instagram size={24} />
               </a>
               <a className="text-gray-400 hover:text-red-600 transition-colors"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Twitter size={24} />
               </a>
               <a className="text-gray-400 hover:text-red-600 transition-colors"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <Linkedin size={24} />
               </a>
             </div>
@@ -205,7 +205,7 @@ const RelianceFooter = () => {
       {/* Copyright Section */}
       <div className="border-t border-gray-700 mt-8 pt-4">
         <div className=" text-gray-400 text-sm flex justify-center items-end">
-          <p>Copyright © 2025 | All Rights are Reserved | Design & Developed by ORBITS Business Solutions Ltd.</p>
+          <p>Copyright © {new Date().getFullYear()} | All Rights are Reserved | Reliance Movers LTD</p>
         </div>
       </div>
     </footer>

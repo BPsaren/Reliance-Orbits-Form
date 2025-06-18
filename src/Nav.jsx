@@ -49,7 +49,7 @@ const Nav = () => {
                     <div className="flex items-center space-x-6">
                         <div className="flex items-center space-x-2">
                             {/* <Truck className="text-red-500 w-4 h-5" /> */}
-                            <span className="text-sm hidden sm:inline hover:text-red-500 transition-colors">Best Movers in UK</span>
+                            <span className="text-sm hidden sm:inline hover:text-red-500 transition-colors font-bold">Best Movers in UK</span>
                         </div>
 
                     </div>
@@ -65,9 +65,9 @@ const Nav = () => {
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <button className="text-white hover:text-red-500 transition-colors">
+                        {/* <button className="text-white hover:text-red-500 transition-colors ">
                             <Search className="w-4 h-4" />
-                        </button>
+                        </button> */}
                         <button className="text-white hover:text-red-500 transition-colors">
                             <Facebook className="w-4 h-4" />
                         </button>

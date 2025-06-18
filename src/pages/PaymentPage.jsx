@@ -136,7 +136,7 @@ const PaymentPage = () => {
                                 <div className="mt-4 flex justify-center items-center space-x-4 text-sm text-green-600">
                                     <span className="flex items-center">
                                         <MapPin className="w-4 h-4 mr-1" />
-                                        {Math.round(quotation?.distance / 1000)} km
+                                        {quotation?.distance} miles
                                     </span>
                                     <span className="flex items-center">
                                         <Package className="w-4 h-4 mr-1" />
@@ -243,7 +243,7 @@ const PaymentPage = () => {
                                 </div>
                                 <div className="text-center">
                                     <MapPin className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                                    <p className="font-medium">{Math.round(quotation?.distance / 1000)} km</p>
+                                    <p className="font-medium">{quotation?.distance} miles</p>
                                     <p className="text-sm text-gray-600">Distance</p>
                                 </div>
                             </div>
