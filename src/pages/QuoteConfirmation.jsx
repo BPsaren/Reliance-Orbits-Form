@@ -190,7 +190,7 @@ const QuoteConfirmation = () => {
                 <div className="bg-purple-100 rounded-full p-3 text-purple-600 text-xl">👥</div>
                 <div className="ml-3">
                   <div className="text-sm font-medium text-gray-500">Service Level</div>
-                  <div className="font-medium text-gray-800">{selectedDate?.numberOfMovers || 1} Person Removal</div>
+                  <div className="font-medium text-gray-800">{selectedDate?.numberOfMovers} Person Removal</div>
                 </div>
               </div>
             </div>
