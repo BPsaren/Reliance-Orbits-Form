@@ -65,7 +65,7 @@ const OrderSummary = () => {
           stoppage:extraStops.map(item => ({ address: item.address }))
         };
 
-        const res = await axios.post(`${baseUrl}/price`, payload);
+        const res = await axios.post(`https://orbit-0pxd.onrender.com/price`, payload);
         setTotalPrice(res.data.price);
         console.log(payload);
       } catch (err) {
